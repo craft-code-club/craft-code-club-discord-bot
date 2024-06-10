@@ -12,7 +12,6 @@ if DISCORD_API_TOKEN is None or DISCORD_API_TOKEN == '':
     print('[BOT][STARTUP] DISCORD_API_TOKEN is not set in .env file or environment variables. Exiting...')
     exit(1)
 
-
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
