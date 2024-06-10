@@ -3,14 +3,11 @@ name: 'Build and Push Docker Image to GitHub Container Registry'
 on:
   workflow_dispatch: # To can dispatch manually
 
-  pull_request:
-    types: [opened, reopened, edited, synchronize]
+  push: # First pipeline to run when deploy a new version
     branches:
       - main
-
-  push:
-    branches:
-      - main
+    paths:
+      - "src/**" # Only run when exists changes in source code
 
 env:
   REGISTRY: ghcr.io
