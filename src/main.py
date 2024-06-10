@@ -3,8 +3,14 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 
+print('[BOT][STARTUP] Starting bot...')
+
 load_dotenv() # Load .env file
 DISCORD_API_TOKEN = os.environ.get('DISCORD_API_TOKEN')
+
+if DISCORD_API_TOKEN is None or DISCORD_API_TOKEN == '':
+    print('[BOT][STARTUP] DISCORD_API_TOKEN is not set in .env file or environment variables. Exiting...')
+    exit(1)
 
 
 intents = discord.Intents.default()
