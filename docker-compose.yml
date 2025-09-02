@@ -1,0 +1,11 @@
+services:
+  c3-discord-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: c3/discord-bot
+    container_name: c3-discord-bot
+    environment:
+      DISCORD_API_TOKEN: ${DISCORD_API_TOKEN}
+      DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID}
+      DISCORD_PUBLIC_KEY: ${DISCORD_PUBLIC_KEY}

@@ -33,7 +33,7 @@ class DiscordBot(commands.Bot):
     async def setup_hook(self):
         await self.load_extensions("Commands")
         await self.load_extensions("Events")
-        await self.load_extensions("Tasks")
+        #await self.load_extensions("Tasks")
 
 
     async def load_extensions(self, context):
