@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.2...v1.0.3) (2025-09-03)
+
+
+### Bug Fixes
+
+* change release event type from created to published ([b555f90](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/b555f90ffc0443208695811c16e6c475cad3b332))
+
 ## [1.0.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.1...v1.0.2) (2025-09-03)
 
 
