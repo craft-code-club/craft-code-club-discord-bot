@@ -1,15 +1,15 @@
 # Contributing
 
-We would love for you to contribute to this project and help make it even better than it is today!  
+We would love for you to contribute to this project and help make it even better than it is today!
 As a contributor, here are the guidelines we would like you to follow. This helps everyone accept your Pull Requests with maximum awesomeness:
 
-- [Code of Conduct](#code-of-conduct)
-- [General Steps](#general-steps)
-- [Commits and Pull Requests](#commits-and-pull-requests)
-  - [Conventional Commits](#conventional-commits)
-    - [Common types you can use](#common-types)
-- [Coding Standards](#coding-standards)
-- [Tests](#tests)
+- [ Code of Conduct](#-code-of-conduct)
+- [ General Steps](#-general-steps)
+- [ Commits and Pull Requests](#-commits-and-pull-requests)
+  - [ Conventional Commits](#-conventional-commits)
+    - [ Common types you can use (based on the Angular convention):](#-common-types-you-can-use-based-on-the-angular-convention)
+- [ Coding Standards](#-coding-standards)
+- [ Tests](#-tests)
 
 
 ## <a name="code-of-conduct"></a> Code of Conduct
