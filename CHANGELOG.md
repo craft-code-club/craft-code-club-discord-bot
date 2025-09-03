@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.1...v1.0.2) (2025-09-03)
+
+
+### Bug Fixes
+
+* update publish workflow to resolve image tag correctly ([861e63b](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/861e63b6fd06c42c6b7401120ca93303bfee553f))
+
 ## [1.0.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.0...v1.0.1) (2025-09-03)
 
 
