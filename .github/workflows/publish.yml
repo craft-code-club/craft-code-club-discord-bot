@@ -5,12 +5,7 @@ on:
   workflow_dispatch:
 
   release:
-    types: [published]
-
-
-concurrency:
-  group: ci-${{ github.repository }}
-  cancel-in-progress: true
+    types: [created]
 
 
 env:
