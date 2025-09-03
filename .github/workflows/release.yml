@@ -12,13 +12,9 @@ on:
 
 
 jobs:
-
   release-version:
     name: "Release new version"
     runs-on: 'ubuntu-latest'
-    permissions:
-      contents: write      # Push tags/commits and GitHub Releases
-      pull-requests: write # Comment/update PRs (if applicable)
 
     steps:
     - name: "Checkout"
@@ -36,6 +32,7 @@ jobs:
           @semantic-release/changelog
           @semantic-release/git
       env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: "New version"
