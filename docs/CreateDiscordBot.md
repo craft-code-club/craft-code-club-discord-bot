@@ -42,3 +42,23 @@
    3. Click on `Authorize` to add the bot to the server
 
 ![Add Bot to Server](../media/05-add-bot-to-server.png)
+
+
+
+## Update Bot Permissions
+
+   1. Go to the `OAuth2`;
+   2. Select `bot` in the `scopes` section;
+   3. Select the permissions you want to give to the bot and copy the URL generated
+
+## Permissions
+
+* `Manager Roles`;
+* `Manager Channels`;
+
+* `Send Messages`;
+
+* `Manage Messages`;
+
+* `Embed Links`;
+* `Attach Files`;
