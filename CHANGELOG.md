@@ -1,3 +1,11 @@
+## [1.0.5](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.4...v1.0.5) (2025-09-03)
+
+
+### Bug Fixes
+
+* remove unnecessary permissions from release job ([c426d57](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/c426d570886efe78a55402bd9b66ba6cbfcb98e6))
+* test ([43bdc01](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/43bdc019feae8958314cbb2aa0f9818ae0dc4be0))
+
 ## [1.0.4](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.3...v1.0.4) (2025-09-03)
 
 
