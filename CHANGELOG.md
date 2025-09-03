@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.5...v1.1.0) (2025-09-03)
+
+
+### Features
+
+* **messages:** implement message loading functionality for rules and welcome messages ([5931713](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/59317132ef5ef856dbc4cbd37f08bbfa9fcd6cb8))
+
 ## [1.0.5](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.4...v1.0.5) (2025-09-03)
 
 
