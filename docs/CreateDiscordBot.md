@@ -53,8 +53,8 @@
 
 ## Permissions
 
-* `Manager Roles`;
-* `Manager Channels`;
+* `Manage Roles`;
+* `Manage Channels`;
 
 * `Send Messages`;
 
