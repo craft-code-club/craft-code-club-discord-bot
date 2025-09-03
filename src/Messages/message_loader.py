@@ -1,7 +1,4 @@
 import os
-from typing import Optional
-
-
 class MessageLoader:
 
     def __init__(self):
