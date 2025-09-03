@@ -54,6 +54,11 @@ Thumbs.db
 docs/
 media/
 README.md
+LICENSE
+SECURITY.md
+CHANGELOG.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
 
 # Docker files
 Dockerfile
@@ -78,3 +83,6 @@ htmlcov/
 *.tmp
 *.temp
 .cache/
+
+# CI/CD
+.releaserc
