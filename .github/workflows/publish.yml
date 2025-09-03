@@ -6,7 +6,6 @@ on:
 
   release:
     types: [created]
-    tags: ["v*.*.*"]
 
 
 concurrency:
@@ -27,20 +26,24 @@ jobs:
     - name: 'Checkout'
       uses: actions/checkout@v5.0.0
 
-    - name: 'Get tag'
+    - name: 'Resolve image tag'
       id: tag
-      uses: dawidd6/action-get-tag@v1
+      run: echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+
+    - name: 'Show image tag'
+      run: |
+        echo "Image tag: ${{ steps.tag.outputs.version }}"
 
     - name: 'Set up Docker Buildx'
       uses: docker/setup-buildx-action@v3
 
     - name: Build Docker
       run: |
-        docker build -f ./Dockerfile . -t ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
+        docker build -f ./Dockerfile . -t ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
 
     - name: 'Save Docker Image'
       run: |
-        docker save -o ${{ env.IMAGE_NAME }}.tar ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
+        docker save -o ${{ env.IMAGE_NAME }}.tar ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -63,9 +66,13 @@ jobs:
       with:
         name: ${{ env.IMAGE_NAME }}
 
-    - name: 'Get tag'
+    - name: 'Resolve image tag'
       id: tag
-      uses: dawidd6/action-get-tag@v1
+      run: echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+
+    - name: 'Show image tag'
+      run: |
+        echo "Image tag: ${{ steps.tag.outputs.version }}"
 
     - name: 'Set up Docker Buildx'
       uses: docker/setup-buildx-action@v3
@@ -82,8 +89,8 @@ jobs:
 
     - name: 'Add Docker Image Tags'
       run: |
-        docker tag ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }} ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
-        docker tag ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }} ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}:latest
+        docker tag ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }} ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
+        docker tag ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }} ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}:latest
 
     - name: 'Push Docker Image to GitHub Container Registry'
       run: |
