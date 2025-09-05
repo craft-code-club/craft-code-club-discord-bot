@@ -106,7 +106,7 @@ class LeetCodeDailyTask(commands.Cog):
 
         # Get topic tags
         topics = question.get('topicTags', [])
-        topic_names = [tag.get('name', '') for tag in topics[:5]] # Limit to 5 topics
+        topic_names = [tag.get('name', '') for tag in topics[:5]]  # Limit to 5 topics
         topics_str = ', '.join(topic_names) if topic_names else 'N/A'
 
         # Determine difficulty emoji and color
