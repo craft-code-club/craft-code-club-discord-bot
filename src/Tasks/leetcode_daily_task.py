@@ -3,6 +3,9 @@ import aiohttp
 from datetime import datetime, time
 from discord.ext import tasks, commands
 import discord
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class LeetCodeDailyTask(commands.Cog):
@@ -18,24 +21,24 @@ class LeetCodeDailyTask(commands.Cog):
     async def daily_leetcode_task(self):
         """Send the LeetCode problem of the day at 3 AM"""
         try:
-            print('[BOT][TASK][LEETCODE] Fetching LeetCode problem of the day...')
+            logger.info('[BOT][TASK][LEETCODE] Fetching LeetCode problem of the day...')
 
             problem_data = await self.fetch_daily_problem()
             if problem_data:
                 message = self.format_problem_message(problem_data)
                 await self.send_to_channel(message)
-                print('[BOT][TASK][LEETCODE] Successfully sent daily LeetCode problem!')
+                logger.info('[BOT][TASK][LEETCODE] Successfully sent daily LeetCode problem!')
             else:
-                print('[BOT][TASK][LEETCODE] Failed to fetch daily problem')
+                logger.error('[BOT][TASK][LEETCODE] Failed to fetch daily problem')
 
         except Exception as e:
-            print(f'[BOT][TASK][LEETCODE] Error in daily task: {type(e).__name__}: {e}')
+            logger.exception(f'[BOT][TASK][LEETCODE] Error in daily task: {type(e).__name__}: {e}')
 
     @daily_leetcode_task.before_loop
     async def before_daily_task(self):
         """Wait until the bot is ready before starting the task"""
         await self.bot.wait_until_ready()
-        print('[BOT][TASK][LEETCODE] Daily LeetCode task is ready!')
+        logger.info('[BOT][TASK][LEETCODE] Daily LeetCode task is ready!')
 
     async def fetch_daily_problem(self):
         """Fetch the daily coding challenge from LeetCode"""
@@ -86,11 +89,11 @@ class LeetCodeDailyTask(commands.Cog):
                         data = await response.json()
                         return data.get('data', {}).get('activeDailyCodingChallengeQuestion')
                     else:
-                        print(f'[BOT][TASK][LEETCODE] HTTP Error: {response.status}')
+                        logger.error(f'[BOT][TASK][LEETCODE] HTTP Error: {response.status}')
                         return None
 
         except Exception as e:
-            print(f'[BOT][TASK][LEETCODE] Error fetching problem: {type(e).__name__}: {e}')
+            logger.exception(f'[BOT][TASK][LEETCODE] Error fetching problem: {type(e).__name__}: {e}')
             return None
 
     def format_problem_message(self, problem_data):
@@ -165,18 +168,18 @@ class LeetCodeDailyTask(commands.Cog):
     async def send_to_channel(self, embed):
         """Send the message to the configured channel"""
         if self.leetcode_channel_id == 0:
-            print('[BOT][TASK][LEETCODE] LEETCODE_CHANNEL_ID not configured')
+            logger.error('[BOT][TASK][LEETCODE] LEETCODE_CHANNEL_ID not configured')
             return
 
         try:
             channel = self.bot.get_channel(self.leetcode_channel_id)
             if channel:
                 await channel.send(embed=embed)
-                print(f'[BOT][TASK][LEETCODE] Sent to channel: {channel.name}')
+                logger.info(f'[BOT][TASK][LEETCODE] Sent to channel: {channel.name}')
             else:
-                print(f'[BOT][TASK][LEETCODE] Channel not found: {self.leetcode_channel_id}')
+                logger.error(f'[BOT][TASK][LEETCODE] Channel not found: {self.leetcode_channel_id}')
         except Exception as e:
-            print(f'[BOT][TASK][LEETCODE] Error sending message: {type(e).__name__}: {e}')
+            logger.exception(f'[BOT][TASK][LEETCODE] Error sending message: {type(e).__name__}: {e}')
 
     @commands.command(name='leetcode')
     async def manual_leetcode(self, ctx):
@@ -193,7 +196,7 @@ class LeetCodeDailyTask(commands.Cog):
 
         except Exception as e:
             await ctx.send(f"❌ An error occurred: {str(e)}")
-            print(f'[BOT][COMMAND][LEETCODE] Error: {type(e).__name__}: {e}')
+            logger.exception(f'[BOT][COMMAND][LEETCODE] Error: {type(e).__name__}: {e}')
 
 
 async def setup(bot):

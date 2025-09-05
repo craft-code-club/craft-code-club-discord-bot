@@ -1,16 +1,20 @@
 import os
 from dotenv import load_dotenv
 import discord
+import logging
 from discord.ext import commands
 
-print('[BOT][STARTUP] Starting bot...')
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info('[BOT][STARTUP] Starting bot...')
 
 load_dotenv() # Load .env file
 DISCORD_API_TOKEN = os.environ.get('DISCORD_API_TOKEN')
 
 
 if DISCORD_API_TOKEN is None or DISCORD_API_TOKEN == '':
-    print('[BOT][STARTUP] DISCORD_API_TOKEN is not set in .env file or environment variables. Exiting...')
+    logger.info('[BOT][STARTUP] DISCORD_API_TOKEN is not set in .env file or environment variables. Exiting...')
     exit(1)
 
 
@@ -37,29 +41,29 @@ class DiscordBot(commands.Bot):
 
 
     async def load_extensions(self, context):
-        print(f'[BOT][STARTUP][LOAD][{context}] Loading extensions...')
+        logger.info(f'[BOT][STARTUP][LOAD][{context}] Loading extensions...')
 
         for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/{context}"):
 
             if file == "register_commands.py":
-                print(f'[BOT][STARTUP][LOAD][{context}] Ignoring file "{file}"...')
+                logger.info(f'[BOT][STARTUP][LOAD][{context}] Ignoring file "{file}"...')
                 continue
 
             if file.endswith(".py"):
                 extension = file[:-3]
                 try:
-                    print(f'[BOT][STARTUP][LOAD][{context}] Loading "{extension}"...')
+                    logger.info(f'[BOT][STARTUP][LOAD][{context}] Loading "{extension}"...')
                     await self.load_extension(f"{context}.{extension}")
-                    print(f'[BOT][STARTUP][LOAD][{context}] Loaded "{extension}"!')
+                    logger.info(f'[BOT][STARTUP][LOAD][{context}] Loaded "{extension}"!')
                 except Exception as e:
                     exception = f"{type(e).__name__}: {e}"
-                    print(f'[BOT][STARTUP][LOAD][{context}] Failed to load extension {extension}\n{exception}')
+                    logger.info(f'[BOT][STARTUP][LOAD][{context}] Failed to load extension {extension}\n{exception}')
 
-        print(f'[BOT][STARTUP][LOAD][{context}] Loaded extensions!')
+        logger.info(f'[BOT][STARTUP][LOAD][{context}] Loaded extensions!')
 
 
     async def on_ready(self):
-        print(f'[BOT][STARTUP] Logged in as {self.user} ({self.user.id})')
+        logger.info(f'[BOT][STARTUP] Logged in as {self.user} ({self.user.id})')
 
 
     # Error handling
@@ -68,7 +72,7 @@ class DiscordBot(commands.Bot):
             await context.send('Command not found.')
 
         else:
-            print(f'[BOT][ERROR][GLOBAL]: {type(error)} - {error}')
+            logger.error(f'[BOT][GLOBAL]: {type(error)} - {error}')
             raise error
 
 

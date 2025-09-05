@@ -1,4 +1,5 @@
 import os
+
 class MessageLoader:
 
     def __init__(self):
