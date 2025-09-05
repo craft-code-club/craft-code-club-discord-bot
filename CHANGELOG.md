@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.1.0...v1.2.0) (2025-09-05)
+
+
+### Features
+
+* add daily LeetCode problem posting feature ([a388dc6](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a388dc64e7fd9965f5a6815c5b48010266b44ba4))
+
 # [1.1.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.0.5...v1.1.0) (2025-09-03)
 
 
