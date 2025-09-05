@@ -1,3 +1,12 @@
+## [1.2.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.2.0...v1.2.1) (2025-09-05)
+
+
+### Bug Fixes
+
+* **leetcodedaily:** improve logging and message ([8a6b17a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/8a6b17a91bfd004aba4bc764955fcb14724172df))
+* **leetcodedaily:** improve logging for LeetCode command response ([536d872](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/536d8723d912b201726b5a78f7342397e92713c5))
+* **welcome_event:** change log level for DM disabled warning to warning ([3549adc](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/3549adc01b73603e7b4e8d491424a7fa45fcd280))
+
 # [1.2.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.1.0...v1.2.0) (2025-09-05)
 
 
