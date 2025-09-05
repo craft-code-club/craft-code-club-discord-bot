@@ -185,17 +185,20 @@ class LeetCodeDailyTask(commands.Cog):
     async def manual_leetcode(self, ctx):
         """Manually trigger the LeetCode problem of the day"""
         try:
-            await ctx.send("🔍 Fetching today's LeetCode problem...")
+            logger.info(f'[BOT][COMMAND][LEETCODE] User "{ctx.author.name}" requested the LeetCode problem of the day')
 
             problem_data = await self.fetch_daily_problem()
             if problem_data:
                 embed = self.format_problem_message(problem_data)
                 await ctx.send(embed=embed)
             else:
-                await ctx.send("❌ Failed to fetch today's LeetCode problem. Please try again later.")
+                logger.error(f'[BOT][COMMAND][LEETCODE] Failed to fetch problem data')
+
+            await ctx.message.delete()
+
+            logger.info(f'[BOT][COMMAND][LEETCODE] Sent LeetCode problem to user "{ctx.author.name}" and deleted the command message.')
 
         except Exception as e:
-            await ctx.send(f"❌ An error occurred: {str(e)}")
             logger.exception(f'[BOT][COMMAND][LEETCODE] Error: {type(e).__name__}: {e}')
 
 
