@@ -38,4 +38,4 @@ class WelcomeEvent(commands.Cog):
         try:
             await member.send(load_message('events-welcome-dm.md').replace('##[username]##', member.name))
         except discord.errors.Forbidden: # If the user has DMs disabled
-            logger.exception(f'[BOT][EVENT][WELCOME]: The user "{member.name}" has DMs disabled')
+            logger.warning(f'[BOT][EVENT][WELCOME]: The user "{member.name}" has DMs disabled')
