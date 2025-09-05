@@ -191,12 +191,11 @@ class LeetCodeDailyTask(commands.Cog):
             if problem_data:
                 embed = self.format_problem_message(problem_data)
                 await ctx.send(embed=embed)
+                logger.info(f'[BOT][COMMAND][LEETCODE] Sent LeetCode problem to user "{ctx.author.name}" and deleted the command message.')
             else:
                 logger.error(f'[BOT][COMMAND][LEETCODE] Failed to fetch problem data')
 
             await ctx.message.delete()
-
-            logger.info(f'[BOT][COMMAND][LEETCODE] Sent LeetCode problem to user "{ctx.author.name}" and deleted the command message.')
 
         except Exception as e:
             logger.exception(f'[BOT][COMMAND][LEETCODE] Error: {type(e).__name__}: {e}')
