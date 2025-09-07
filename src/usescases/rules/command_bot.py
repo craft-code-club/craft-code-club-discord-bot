@@ -1,15 +1,15 @@
 from discord.ext import commands
-from Messages.message_loader import load_message
+from Utils.message_loader import load_message
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 async def setup(bot):
-    await bot.add_cog(RulesCommand(bot))
+    await bot.add_cog(RulesCommandBot(bot))
 
 
-class RulesCommand(commands.Cog):
+class RulesCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -17,7 +17,7 @@ class RulesCommand(commands.Cog):
     async def rules(self, ctx):
         logger.debug(f'[BOT][COMMAND][RULES] User "{ctx.author.name}" requested the rules')
 
-        rules_message = load_message('command-rules.md')
+        rules_message = load_message('rules_message.md')
         await ctx.author.send(rules_message)
         logger.info(f'[BOT][COMMAND][RULES] Sent rules to user "{ctx.author.name}"')
 
