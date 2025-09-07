@@ -19,10 +19,10 @@ class RulesCommand(commands.Cog):
 
         rules_message = load_message('command-rules.md')
         await ctx.author.send(rules_message)
+        logger.info(f'[BOT][COMMAND][RULES] Sent rules to user "{ctx.author.name}"')
 
         try:
             await ctx.message.delete()
+            logger.debug(f'[BOT][COMMAND][RULES] Message deleted successfully')
         except Exception:
             logger.exception(f'[BOT][COMMAND][RULES] Failed to delete command message')
-
-        logger.info(f'[BOT][COMMAND][RULES] Sent rules to user "{ctx.author.name}" and deleted the command message.')
