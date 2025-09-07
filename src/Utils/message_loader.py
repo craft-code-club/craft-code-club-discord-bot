@@ -16,7 +16,7 @@ def load_message(filename: str) -> str:
     except FileNotFoundError:
         raise FileNotFoundError(f"Message file '{filename}' not found.")
     except UnicodeDecodeError:
-        raise UnicodeDecodeError(f"Error reading '{filename}': Invalid file encoding. Please ensure the file is saved in UTF-8.")
+        raise Exception(f"Error reading '{filename}': Invalid file encoding. Please ensure the file is saved in UTF-8.")
     except PermissionError:
         raise PermissionError(f"Error reading '{filename}': Permission denied.")
     except Exception as e:
