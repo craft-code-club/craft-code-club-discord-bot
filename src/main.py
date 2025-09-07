@@ -1,22 +1,25 @@
 import os
 from dotenv import load_dotenv
 import discord
-import logging
 from discord.ext import commands
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-logger.info('[BOT][STARTUP] Starting bot...')
+import logging
+from Utils.logger import setup_logging
 
 load_dotenv() # Load .env file
+
+
+# Setup logging
+setup_logging()
+logging.getLogger(__name__)
+
+
+logging.debug('[BOT][STARTUP] Starting bot...')
+
+
 DISCORD_API_TOKEN = os.environ.get('DISCORD_API_TOKEN')
-
-
 if DISCORD_API_TOKEN is None or DISCORD_API_TOKEN == '':
-    logger.info('[BOT][STARTUP] DISCORD_API_TOKEN is not set in .env file or environment variables. Exiting...')
+    logging.error('[BOT][STARTUP] DISCORD_API_TOKEN is not set in .env file or environment variables. Exiting...')
     exit(1)
-
 
 
 intents = discord.Intents.default()
@@ -35,35 +38,37 @@ class DiscordBot(commands.Bot):
 
     # Initial setup
     async def setup_hook(self):
-        await self.load_extensions("Commands")
-        await self.load_extensions("Events")
-        await self.load_extensions("Tasks")
+        await self.load_extensions("UsesCases", "Commands")
+        await self.load_extensions("UsesCases", "Events")
+        await self.load_extensions("UsesCases", "Tasks")
 
 
-    async def load_extensions(self, context):
-        logger.info(f'[BOT][STARTUP][LOAD][{context}] Loading extensions...')
+    async def load_extensions(self, *folders):
+        relative_path = folders[0] if len(folders) == 1 else "/".join(folders)
 
-        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/{context}"):
+        logging.debug(f'[BOT][STARTUP][EXTENSIONS] Loading "{relative_path}"...')
 
-            if file == "register_commands.py":
-                logger.info(f'[BOT][STARTUP][LOAD][{context}] Ignoring file "{file}"...')
-                continue
+        path = f"{os.path.realpath(os.path.dirname(__file__))}/{relative_path}"
 
+        if not os.path.exists(path):
+            logging.warning(f'[BOT][STARTUP][EXTENSIONS] Path "{path}" does not exist. Skipping...')
+            return
+
+        for file in os.listdir(path):
             if file.endswith(".py"):
-                extension = file[:-3]
+                bot_extension = f"{relative_path.replace('/', '.')}.{file[:-3]}"
                 try:
-                    logger.info(f'[BOT][STARTUP][LOAD][{context}] Loading "{extension}"...')
-                    await self.load_extension(f"{context}.{extension}")
-                    logger.info(f'[BOT][STARTUP][LOAD][{context}] Loaded "{extension}"!')
-                except Exception as e:
-                    exception = f"{type(e).__name__}: {e}"
-                    logger.info(f'[BOT][STARTUP][LOAD][{context}] Failed to load extension {extension}\n{exception}')
+                    logging.debug(f'[BOT][STARTUP][EXTENSIONS] Loading "{bot_extension}"...')
+                    await self.load_extension(bot_extension)
+                    logging.info(f'[BOT][STARTUP][EXTENSIONS] Loaded "{bot_extension}"!')
+                except Exception:
+                    logging.exception(f'[BOT][STARTUP][EXTENSIONS] Failed to load "{bot_extension}"')
 
-        logger.info(f'[BOT][STARTUP][LOAD][{context}] Loaded extensions!')
+        logging.info(f'[BOT][STARTUP][EXTENSIONS] Loaded "{relative_path}"!')
 
 
     async def on_ready(self):
-        logger.info(f'[BOT][STARTUP] Logged in as {self.user} ({self.user.id})')
+        logging.info(f'[BOT][STARTUP] Logged in as {self.user} ({self.user.id})')
 
 
     # Error handling
@@ -72,9 +77,8 @@ class DiscordBot(commands.Bot):
             await context.send('Command not found.')
 
         else:
-            logger.error(f'[BOT][GLOBAL]: {type(error)} - {error}')
+            logging.error(f'[BOT][GLOBAL] {type(error)}')
             raise error
-
 
 
 bot = DiscordBot()
