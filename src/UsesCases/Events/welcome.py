@@ -23,16 +23,13 @@ class WelcomeEvent(commands.Cog):
 
         logger.info(f'[BOT][EVENT][WELCOME] "{member.name}" joined the server')
 
-
         try:
             system_channel = member.guild.system_channel
             if system_channel:
-                # system_channel_name = system_channel.name
-                # system_channel_id = system_channel.id
                 channel_message = load_message('events-welcome-channel.md').replace('##[username]##', member.mention)
                 await system_channel.send(channel_message)
-        except Exception as e:
-            logger.exception(f'[BOT][EVENT][WELCOME]: It was not possible to send a welcome message to the system channel: {e}')
+        except Exception:
+            logger.exception(f'[BOT][EVENT][WELCOME]: It was not possible to send a welcome message to the system channel')
 
 
         try:
