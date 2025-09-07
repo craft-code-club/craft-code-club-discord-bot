@@ -21,7 +21,6 @@ class ColoredFormatter(logging.Formatter):
         logging.INFO: Colors.GREEN,
         logging.WARNING: Colors.YELLOW,
         logging.ERROR: Colors.RED,
-        logging.exception: Colors.RED,
         logging.CRITICAL: Colors.BRIGHT_RED + Colors.BOLD,
     }
 
