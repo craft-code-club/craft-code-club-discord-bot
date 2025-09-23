@@ -62,7 +62,6 @@ class CommunityEventsDao:
                     row_key = event_in_db["RowKey"])
 
         # insert into table
-        event_datetime = event.start_datetime.isoformat()
         entity={
             'PartitionKey': event.id,
             'RowKey': event_datetime,
