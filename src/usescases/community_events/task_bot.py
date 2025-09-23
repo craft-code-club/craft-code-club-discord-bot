@@ -36,7 +36,7 @@ class CommunityEventsTaskBot(commands.Cog):
         self.notify_upcoming_events.cancel()
 
 
-    @tasks.loop(hours=1)
+    @tasks.loop(minutes=30) # Every 30 minutes
     async def notify_upcoming_events(self):
         try:
             channel = self.bot.get_channel(self.community_events_channel_id)
