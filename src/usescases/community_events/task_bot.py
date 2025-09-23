@@ -34,7 +34,6 @@ class CommunityEventsTaskBot(commands.Cog):
         self.notify_upcoming_events.cancel()
 
 
-
     @tasks.loop(hours=1)
     async def notify_upcoming_events(self):
         try:
