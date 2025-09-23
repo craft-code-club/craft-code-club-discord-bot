@@ -118,13 +118,13 @@ class CommunityEventsTaskBot(commands.Cog):
 
                     community_events_dao.upsert(event)
 
-                    logger.info(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] upserted event {name} from {url}')
+                    logger.info(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] upserted event "{name}" from "{url}"')
                 except Exception:
-                    logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] Failed to process event {name} from {url}')
+                    logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] Failed to process event "{name}" from "{url}"')
 
             logger.info('[BOT][TASK][COMMUNITY EVENTS][UPDATE] Updated community events finished successfully.')
         except Exception:
-            logger.exception('[BOT][TASK][COMMUNITY EVENTS][UPDATE] Error in update task:')
+            logger.exception('[BOT][TASK][COMMUNITY EVENTS][UPDATE] Error in update task')
 
 
     @notify_upcoming_events.before_loop
@@ -158,11 +158,11 @@ class CommunityEventsTaskBot(commands.Cog):
                 entity_type = discord.EntityType.external,
                 location = event.discord_event_location())
 
-            logger.info(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Created discord event for {event.title}')
+            logger.info(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Created discord event for "{event.title}" with Id {discord_event.id}')
 
             return str(discord_event.id)
         except Exception:
-            logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Failed to create discord event for {event.title}')
+            logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Failed to create discord event for "{event.title}"')
             return None
 
 
