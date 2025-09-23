@@ -1,6 +1,6 @@
 import os
 from azure.data.tables import TableServiceClient
-from discord import datetime
+from datetime import datetime
 
 from usescases.community_events.community_event import CommunityEventSummary
 
