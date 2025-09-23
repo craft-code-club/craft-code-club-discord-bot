@@ -31,6 +31,7 @@ def format_problem_message(problem_data):
         color=get_difficulty_color(difficulty),
         timestamp=datetime.now(timezone.utc))
 
+
     embed.add_field(
         name="Difficulty",
         value=f"{difficulty_emoji} {difficulty}",
@@ -50,6 +51,7 @@ def format_problem_message(problem_data):
         name="🔗 Solve Now",
         value=f"[Click here to solve the problem]({link})",
         inline=False)
+
 
     embed.set_footer(text="Happy coding! 💻")
 
