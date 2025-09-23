@@ -1,5 +1,5 @@
 import discord
-from usescases.community_events.community_event import CommunityEventSummary, ReminderTime
+from usescases.community_events.community_event import CommunityEvent, ReminderTime
 
 class EventMessageFormatter:
     def __init__(self):
@@ -10,7 +10,7 @@ class EventMessageFormatter:
             ReminderTime.A_HOUR: "Evento começando em 1 hora!"
         }
 
-    def format_event_notification(self, event: CommunityEventSummary) -> discord.Embed:
+    def format_event_notification(self, event: CommunityEvent) -> discord.Embed:
         event_description = f"***{self.notification_titles.get(event.reminder_time())}***\n\n{event.description}"
 
         # Create the embed
