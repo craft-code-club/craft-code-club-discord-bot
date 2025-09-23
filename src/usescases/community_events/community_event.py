@@ -16,26 +16,22 @@ class ReminderTime(Enum):
 class CommunityEvent:
     id: str
     title: str
+    github_url: str
     description: str
+
     start_datetime: datetime
-    location: str
-    type: str
+    end_datetime: datetime
+
+    discord_event_id: Optional[str] = None
+
+    location: Optional[str] = None
+    type: Optional[str] = None
+
     registration_link: Optional[str] = None
     recording_link: Optional[str] = None
     post_link: Optional[str] = None
-    github_url: str = None
+
     speakers: Optional[List[str]] = None
-
-
-
-@dataclass
-class CommunityEventSummary:
-    id: str
-    title: str
-    description: str
-    start_datetime: datetime
-    github_url: str
-    registration_link: Optional[str] = None
 
     a_weekly_notify: bool = False
     three_days_notify: bool = False
@@ -44,6 +40,11 @@ class CommunityEventSummary:
 
     def event_details_url(self) -> str:
         return f"https://craftcodeclub.io/events/{self.id}"
+
+    def discord_event_location(self) -> str:
+        if self.registration_link:
+            return self.registration_link
+        return self.event_details_url()
 
     def is_future_event(self) -> bool:
         now = datetime.now(ZoneInfo('America/Sao_Paulo'))
@@ -102,28 +103,13 @@ class CommunityEventSummary:
         if delta_hours <= 1:
             return ReminderTime.A_HOUR
 
-        if delta_days <= 1:
+        if delta_days == 1:
             return ReminderTime.A_DAY
 
-        if delta_days <= 3: # 3 days
+        if delta_days == 3: # 3 days
             return ReminderTime.THREE_DAYS
 
-        if delta_days <= 7: # 1 week
+        if delta_days == 7: # 1 week
             return ReminderTime.A_WEEK
 
         return None
-
-
-    @classmethod
-    def create(cls, event: CommunityEvent) -> "CommunityEventSummary":
-        return cls(
-            id = event.id,
-            title = event.title,
-            description = event.description,
-            start_datetime = event.start_datetime,
-            github_url = event.github_url or None,
-            registration_link = event.registration_link or None,
-            a_weekly_notify = False,
-            three_days_notify = False,
-            a_day_notify = False,
-            a_hour_notify = False)

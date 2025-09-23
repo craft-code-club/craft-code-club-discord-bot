@@ -56,9 +56,16 @@
 * `Manage Roles`;
 * `Manage Channels`;
 
+* `Manage Events`;
+* `Create Events`;
+
 * `Send Messages`;
 
 * `Manage Messages`;
 
 * `Embed Links`;
 * `Attach Files`;
+
+-> Permissions Integer: `17601044473872`
+
+> https://discord.com/oauth2/authorize?client_id=<client_id>&permissions=<permissions_integer>&integration_type=0&scope=bot

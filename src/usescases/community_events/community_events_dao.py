@@ -1,8 +1,9 @@
 import os
+from typing import Optional
 from azure.data.tables import TableServiceClient
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from usescases.community_events.community_event import CommunityEventSummary
+from usescases.community_events.community_event import CommunityEvent
 
 # Table
 #    PartitionKey: id
@@ -23,72 +24,108 @@ class CommunityEventsDao:
         self.table = connection.get_table_client(TABLE_NAME)
 
 
-    def get_upcoming_events(self, now: datetime) -> list[CommunityEventSummary]:
+    def get_upcoming_events(self, now: datetime) -> list[CommunityEvent]:
         now_isoformat = now.isoformat()
         upcoming_events = self.table.query_entities(f"RowKey gt '{now_isoformat}'")
 
-        result: list[CommunityEventSummary] = []
+        result: list[CommunityEvent] = []
         for upcoming_event in upcoming_events:
-
-            event_brazilian_datetime = datetime.fromisoformat(upcoming_event["RowKey"])
-            event = CommunityEventSummary(
-                id = upcoming_event["PartitionKey"],
-                title = upcoming_event["title"],
-                description = upcoming_event["description"],
-                github_url = upcoming_event["github_url"],
-                registration_link = upcoming_event["registration_link"],
-                start_datetime = event_brazilian_datetime,
-
-                a_weekly_notify = upcoming_event["a_weekly_notify"] if "a_weekly_notify" in upcoming_event else False,
-                three_days_notify = upcoming_event["three_days_notify"] if "three_days_notify" in upcoming_event else False,
-                a_day_notify = upcoming_event["a_day_notify"] if "a_day_notify" in upcoming_event else False,
-                a_hour_notify = upcoming_event["a_hour_notify"] if "a_hour_notify" in upcoming_event else False
-            )
-
-            result.append(event)
+            result.append(self.__to_community_event(upcoming_event))
 
         return result
 
 
-    def upsert(self, event: CommunityEventSummary) -> None:
-        event_datetime = event.start_datetime.isoformat()
-        events_in_db = self.table.query_entities(f"PartitionKey eq '{event.id}'")
-        for event_in_db in events_in_db:
-            events_in_db_datetime = event_in_db["RowKey"]
+    def get(self, event_id: str) -> Optional[CommunityEvent]:
+        events = self.table.query_entities(f"PartitionKey eq '{event_id}'")
+        for event in events:
+            return self.__to_community_event(event)
+        return None
 
-            if events_in_db_datetime != event_datetime:
-                self.table.delete_entity(
-                    partition_key = event_in_db["PartitionKey"],
-                    row_key = event_in_db["RowKey"])
+    def delete(self, event_id: str, start_date: datetime) -> None:
+        start_date_isoformat = start_date.isoformat()
+        self.table.delete_entity(
+            partition_key = event_id,
+            row_key = start_date_isoformat)
 
+
+    def upsert(self, event: CommunityEvent) -> None:
         # insert into table
-        entity={
+        entity = {
             'PartitionKey': event.id,
-            'RowKey': event_datetime,
+            'RowKey': event.start_datetime.isoformat(),
+            'end_datetime': event.end_datetime.isoformat(),
+            'discord_event_id': event.discord_event_id,
+
             'title': event.title,
-            'description': event.description,
             'github_url': event.github_url,
-            'registration_link': event.registration_link
+            'description': event.description,
+
+            'location': event.location,
+            'type': event.type,
+
+            'registration_link': event.registration_link,
+            'recording_link': event.recording_link,
+            'post_link': event.post_link
         }
 
         self.table.upsert_entity(entity = entity)
 
 
-    def update(self, event: CommunityEventSummary) -> None:
+    def update(self, event: CommunityEvent) -> None:
         event_datetime = event.start_datetime.isoformat()
-        entity={
+        entity = {
             'PartitionKey': event.id,
             'RowKey': event_datetime,
+            'end_datetime': event.end_datetime.isoformat(),
+            'discord_event_id': event.discord_event_id,
+
             'title': event.title,
-            'description': event.description,
             'github_url': event.github_url,
+            'description': event.description,
+
+            'location': event.location,
+            'type': event.type,
+
             'registration_link': event.registration_link,
+            'recording_link': event.recording_link,
+            'post_link': event.post_link,
+
             'a_weekly_notify': event.a_weekly_notify,
             'three_days_notify': event.three_days_notify,
             'a_day_notify': event.a_day_notify,
             'a_hour_notify': event.a_hour_notify
         }
         self.table.update_entity(entity = entity)
+
+    def __to_community_event(self, event: dict) -> CommunityEvent:
+        start_datetime = datetime.fromisoformat(event["RowKey"])
+
+        # fallback to start_datetime plus 2 hours if end_datetime is not present
+        end_datetime = datetime.fromisoformat(event["end_datetime"]) if "end_datetime" in event else start_datetime + timedelta(hours=2)
+
+        return CommunityEvent(
+            id = event["PartitionKey"],
+            start_datetime = start_datetime,
+            end_datetime = end_datetime,
+
+            title = event["title"],
+            github_url = event["github_url"],
+            description = event["description"],
+
+            discord_event_id = event["discord_event_id"] if "discord_event_id" in event else None,
+
+            location = event["location"] if "location" in event else None,
+            type = event["type"] if "type" in event else None,
+
+            registration_link = event["registration_link"] if "registration_link" in event else None,
+            recording_link = event["recording_link"] if "recording_link" in event else None,
+            post_link = event["post_link"] if "post_link" in event else None,
+
+            a_weekly_notify = event["a_weekly_notify"] if "a_weekly_notify" in event else False,
+            three_days_notify = event["three_days_notify"] if "three_days_notify" in event else False,
+            a_day_notify = event["a_day_notify"] if "a_day_notify" in event else False,
+            a_hour_notify = event["a_hour_notify"] if "a_hour_notify" in event else False
+        )
 
 # Global instance
 community_events_dao = CommunityEventsDao()

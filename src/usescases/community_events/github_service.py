@@ -54,27 +54,34 @@ class GitHubService:
                 event_id = url.split('/')[-1].replace('.md', '')
 
                 event_date = event_data.get('date', '')
-                # Convert date and time to datetime object - Brazilian timezone (UTC-3)
-                event_time_range = event_data.get('time', '')
-                event_time_start = f'{event_time_range.split('-')[0]}:00'
-                event_datetime_str = f"{event_date}T{event_time_start}"
 
-                event_datetime_brazilian = datetime.fromisoformat(event_datetime_str)
-                # Convert to UTC
+                # Brazilian timezone (UTC-3)
+                event_time_range = event_data.get('time', '')
+                event_time_range_parts = event_time_range.split('-')
+
+                start_event_time = f'{event_time_range_parts[0]}:00'
+                end_event_time = f'{event_time_range_parts[1]}:00'
+
+                start_event_time_str = f"{event_date}T{start_event_time}"
+                end_event_time_str = f"{event_date}T{end_event_time}"
+
+                start_event_datetime_brazilian = datetime.fromisoformat(start_event_time_str)
+                end_event_datetime_brazilian = datetime.fromisoformat(end_event_time_str)
 
                 # Create CommunityEvent object
                 event = CommunityEvent(
-                    id=event_id,
-                    title=event_data.get('title', ''),
-                    description=event_data.get('description', ''),
-                    start_datetime=event_datetime_brazilian,
-                    location=event_data.get('location', ''),
-                    type=event_data.get('type', 'online'),
-                    registration_link=event_data.get('registrationLink'),
-                    recording_link=event_data.get('recordingLink'),
-                    post_link=event_data.get('postLink'),
-                    github_url=url,
-                    speakers=event_data.get('speakers', []))
+                    id = event_id,
+                    title = event_data.get('title', ''),
+                    description = event_data.get('description', ''),
+                    start_datetime = start_event_datetime_brazilian,
+                    end_datetime = end_event_datetime_brazilian,
+                    location = event_data.get('location', ''),
+                    type = event_data.get('type', 'online'),
+                    registration_link = event_data.get('registrationLink'),
+                    recording_link = event_data.get('recordingLink'),
+                    post_link = event_data.get('postLink'),
+                    github_url = url,
+                    speakers = event_data.get('speakers', []))
 
                 logger.debug(f'[SERVICES][GITHUB][EVENTS] Parsed event: {event.title} ({event.id})')
 
