@@ -1,3 +1,17 @@
+# [1.3.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.2.2...v1.3.0) (2025-09-23)
+
+
+### Bug Fixes
+
+* import datetime ([6cbfbd6](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/6cbfbd689a790782455e194d1f5cdfa634de05e7))
+* Update src/Utils/logger.py ([e58b8a0](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/e58b8a0f39098ae2d5c0ef395faff4febad971b4))
+* Update src/Utils/message_loader.py ([39eb4ca](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/39eb4ca5961df89e8293af1eb2bff37dde88d3d0))
+
+
+### Features
+
+* **community_events:** add community events management ([5f73f1b](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/5f73f1b1d8a3f7fc864e464c35530a2eeca6498d))
+
 ## [1.2.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.2.1...v1.2.2) (2025-09-23)
 
 
