@@ -61,7 +61,6 @@ class GitHubService:
 
                 event_datetime_brazilian = datetime.fromisoformat(event_datetime_str)
                 # Convert to UTC
-                #event_datetime_utc = event_datetime_brazilian + timedelta(hours=3)
 
                 # Create CommunityEvent object
                 event = CommunityEvent(
