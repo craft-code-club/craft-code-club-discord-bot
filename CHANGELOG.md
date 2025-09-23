@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.3.0...v1.4.0) (2025-09-23)
+
+
+### Features
+
+* **community_events:** add discord event creation ([b11db34](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/b11db34da87d9d347ce31865e428c01cb4447d49))
+
 # [1.3.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.2.2...v1.3.0) (2025-09-23)
 
 
