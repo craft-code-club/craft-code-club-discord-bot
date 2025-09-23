@@ -29,32 +29,27 @@ def format_problem_message(problem_data):
         description=f"**{problem_id}. {title}**",
         url=link,
         color=get_difficulty_color(difficulty),
-        timestamp=datetime.now(timezone.utc)
-    )
+        timestamp=datetime.now(timezone.utc))
 
     embed.add_field(
         name="Difficulty",
         value=f"{difficulty_emoji} {difficulty}",
-        inline=True
-    )
+        inline=True)
 
     embed.add_field(
         name="Acceptance Rate",
         value=f"{acceptance_rate:.1f}%",
-        inline=True
-    )
+        inline=True)
 
     embed.add_field(
         name="Topics",
         value=topics_str,
-        inline=False
-    )
+        inline=False)
 
     embed.add_field(
         name="🔗 Solve Now",
         value=f"[Click here to solve the problem]({link})",
-        inline=False
-    )
+        inline=False)
 
     embed.set_footer(text="Happy coding! 💻")
 

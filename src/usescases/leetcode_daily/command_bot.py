@@ -15,7 +15,7 @@ class LeetcodeDailyCommandBot(commands.Cog):
         self.bot = bot
 
     @commands.command(name='leetcode-daily', help='Obtém o problema diário do LeetCode')
-    async def manual_leetcode(self, ctx):
+    async def leetcode_daily(self, ctx):
         logger.debug(f'[BOT][COMMAND][LEETCODE DAILY] User "{ctx.author.name}" requested the LeetCode problem of the day')
 
         problem_data = await fetch_daily_problem()

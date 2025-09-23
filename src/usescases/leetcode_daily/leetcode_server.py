@@ -44,10 +44,9 @@ async def fetch_daily_problem():
             headers={
                 'Content-Type': 'application/json',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-        ) as response:
-            if response.status != 200:
-                raise Exception(f"Query failed with status code {response.status}")
+            }) as response:
+                if response.status != 200:
+                    raise Exception(f"Query LeetCode failed with status code {response.status}")
 
-            data = await response.json()
-            return data.get('data', {}).get('activeDailyCodingChallengeQuestion')
+                data = await response.json()
+                return data.get('data', {}).get('activeDailyCodingChallengeQuestion')
