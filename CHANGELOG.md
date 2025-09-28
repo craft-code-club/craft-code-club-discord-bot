@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.6.0...v1.6.1) (2025-09-28)
+
+
+### Bug Fixes
+
+* folder utils ([a2485c0](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a2485c0771a42f493b782085dfa8cf1575a5e893))
+
 # [1.6.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.5.0...v1.6.0) (2025-09-28)
 
 
