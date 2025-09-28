@@ -36,12 +36,9 @@ class LeetcodeDailyTaskBot(commands.Cog):
             post = leet_code_formatter.format_to_forum_post(problem_data)
 
             # Create a new thread in the forum
-            thread = await forum.create_thread(
-                name = post["title"],
-                embed = post["embed"],
-                reason = post["reason"])
+            thread = await forum.create_thread(**post)
 
-            logger.info(f'[BOT][TASK][LEETCODE DAILY] Created thread "{post["title"]}" in forum "{forum.name}", MessageId: "{thread.thread.id}"')
+            logger.info(f'[BOT][TASK][LEETCODE DAILY] Created thread "{post["name"]}" in forum "{forum.name}", MessageId: "{thread.thread.id}"')
 
         except Exception:
             logger.exception('[BOT][TASK][LEETCODE DAILY] Error in daily task:')
