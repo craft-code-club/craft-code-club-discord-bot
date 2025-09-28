@@ -10,7 +10,7 @@ class EventMessageFormatter:
             ReminderTime.A_HOUR: "Evento começando em 1 hora!"
         }
 
-    def format_event_notification(self, event: CommunityEvent) -> discord.Embed:
+    def format_to_message(self, event: CommunityEvent) -> discord.Embed:
         event_description = f"***{self.notification_titles.get(event.reminder_time())}***\n\n{event.description}"
 
         # Create the embed
