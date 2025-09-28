@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.4.1...v1.5.0) (2025-09-28)
+
+
+### Features
+
+* **community_events:** add banner field ([7a5fac3](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/7a5fac3158b575346c071a49a7deddc6959f96a0))
+* Leet code problem as forum post ([7c8596c](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/7c8596c0708188252aba876a7448b0a568c613ce))
+
 ## [1.4.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.4.0...v1.4.1) (2025-09-24)
 
 # [1.4.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.3.0...v1.4.0) (2025-09-23)
