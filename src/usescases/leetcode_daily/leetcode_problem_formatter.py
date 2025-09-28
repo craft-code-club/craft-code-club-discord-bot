@@ -1,4 +1,6 @@
 import discord
+import re
+from markdownify import markdownify as md
 
 class LeetCodeProblemFormatter:
 
@@ -7,12 +9,16 @@ class LeetCodeProblemFormatter:
         title = question.get('title', 'Unknown Problem')
         problem_id = question.get('frontendQuestionId', '?')
         thread_title = f"{problem_id}. {title}"
-        tags = [tag.get('name', '') for tag in question.get('topicTags', [])]
+
+        # Format from html to markdown
+        content = question.get('content', '')
+        if content:
+            content = self.__convert_html_to_markdown(content)
 
         return {
-            "title": thread_title,
+            "name": thread_title,
             "embed": self.format_to_message(problem_data),
-            "tags": tags,
+            'content': content,
             "reason": "Daily LeetCode problem"
         }
 
@@ -76,6 +82,27 @@ class LeetCodeProblemFormatter:
             'Hard': 0xff0000     # Red
         }
         return colors.get(difficulty, 0x808080)  # Gray default
+
+    def __convert_html_to_markdown(self, html_content) -> str:
+        if not html_content:
+            return ''
+
+        # replace cases like <sup>1</sup> to ^number
+        html_content = re.sub(r'<sup>(\d+)</sup>', r'^\1', html_content)
+
+        # Convert HTML to markdown with custom settings
+        markdown = md(
+            html_content,
+            heading_style='ATX',  # Use # for headings
+            bullets='-',          # Use - for bullet points
+            strip=['script', 'style', 'img']  # Remove script, style, and img tags
+        )
+
+        # Clean up extra whitespace and newlines
+        markdown = re.sub(r'\n\s*\n\s*\n', '\n\n', markdown)  # Remove excessive newlines
+        markdown = markdown.strip()
+
+        return markdown
 
 
 # Global instance
