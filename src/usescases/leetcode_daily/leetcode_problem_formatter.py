@@ -18,7 +18,7 @@ class LeetCodeProblemFormatter:
         return {
             "name": thread_title,
             "embed": self.format_to_message(problem_data),
-            'content': content,
+            "content": content,
             "reason": "Daily LeetCode problem"
         }
 
