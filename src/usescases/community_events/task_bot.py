@@ -132,7 +132,7 @@ class CommunityEventsTaskBot(commands.Cog):
                 except Exception:
                     logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] Failed to process event "{name}" from "{url}"')
 
-            logger.info('[BOT][TASK][COMMUNITY EVENTS][UPDATE] Updated community events finished successfully.')
+            logger.debug('[BOT][TASK][COMMUNITY EVENTS][UPDATE] Updated community events finished successfully.')
         except Exception:
             logger.exception('[BOT][TASK][COMMUNITY EVENTS][UPDATE] Error in update task')
 
