@@ -42,6 +42,11 @@ class CommunityEvent:
     def event_details_url(self) -> str:
         return f"https://craftcodeclub.io/events/{self.id}"
 
+    def banner_url(self) -> Optional[str]:
+        if self.banner:
+            return f"https://raw.githubusercontent.com/craft-code-club/blog-c3/refs/heads/main/public/events/{self.banner}"
+        return None
+
     def discord_event_location(self) -> str:
         if self.registration_link:
             return self.registration_link
