@@ -77,6 +77,7 @@ class GitHubService:
                     end_datetime = end_event_datetime_brazilian,
                     location = event_data.get('location', ''),
                     type = event_data.get('type', 'online'),
+                    banner = event_data.get('banner', None),
                     registration_link = event_data.get('registrationLink'),
                     recording_link = event_data.get('recordingLink'),
                     post_link = event_data.get('postLink'),

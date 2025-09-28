@@ -1,3 +1,4 @@
+import requests
 import discord
 from usescases.community_events.community_event import CommunityEvent, ReminderTime
 
@@ -22,17 +23,17 @@ class EventMessageFormatter:
 
         embed.add_field(
             name = "🇧🇷",
-            value = f"***{event.brazil_datetime()}***",
+            value = f"*{event.brazil_datetime()}*",
             inline = True)
 
         embed.add_field(
             name = "🇨🇦",
-            value = f"***{event.canada_datetime()}***",
+            value = f"*{event.canada_datetime()}*",
             inline = True)
 
         embed.add_field(
             name = "🇵🇹",
-            value = f"***{event.portugal_datetime()}***",
+            value = f"*{event.portugal_datetime()}*",
             inline = True)
 
         # Add registration link if available
@@ -51,6 +52,16 @@ class EventMessageFormatter:
             name = "Ver detalhes completos",
             url = event.event_details_url(),
             icon_url = "https://craftcodeclub.io/logo.png")
+
+        if event.banner:
+            banner_url = f"https://raw.githubusercontent.com/craft-code-club/blog-c3/refs/heads/main/public/events/{event.banner}"
+            # validate if banner_url exists?
+            try:
+                response = requests.head(banner_url, timeout=5)
+                if response.status_code == 200:
+                    embed.set_image(url = banner_url)
+            except requests.RequestException:
+                pass
 
         return embed
 
