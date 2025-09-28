@@ -1,3 +1,11 @@
+# [1.6.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.5.0...v1.6.0) (2025-09-28)
+
+
+### Features
+
+* **community_events:** add banner image in discord event ([3f4f0c2](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/3f4f0c2d3a6503083130d1554450b1683ab7ca83))
+* **leetcode_daily:** enhance forum post formatting and markdown conversion ([b7ec8ba](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/b7ec8bad9732fd1e31b6dbe58c57626e407d4394))
+
 # [1.5.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.4.1...v1.5.0) (2025-09-28)
 
 
