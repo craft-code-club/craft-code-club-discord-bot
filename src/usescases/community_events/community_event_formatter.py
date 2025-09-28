@@ -55,7 +55,7 @@ class EventMessageFormatter:
 
         if event.banner:
             banner_url = f"https://raw.githubusercontent.com/craft-code-club/blog-c3/refs/heads/main/public/events/{event.banner}"
-            # validate if banner_url exists?
+            # Validate if banner URL exists before setting image
             try:
                 response = requests.head(banner_url, timeout=5)
                 if response.status_code == 200:
