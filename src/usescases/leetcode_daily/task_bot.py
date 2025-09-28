@@ -1,7 +1,7 @@
 import os
 from datetime import time
 from .leetcode_server import fetch_daily_problem
-from .leetcode_problem_formatter import format_problem_message
+from .leetcode_problem_formatter import leet_code_formatter
 from discord.ext import tasks, commands
 import logging
 
@@ -15,10 +15,10 @@ async def setup(bot):
 class LeetcodeDailyTaskBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.leetcode_channel_id = int(os.environ.get('LEETCODE_CHANNEL_ID', '0'))
+        self.leetcode_forum_id = int(os.environ.get('LEETCODE_FORUM_ID', '0'))
 
-        if not self.leetcode_channel_id:
-            logger.warning('[BOT][TASK][LEETCODE] LEETCODE_CHANNEL_ID is not set. Daily task will not run.')
+        if not self.leetcode_forum_id:
+            logger.warning('[BOT][TASK][LEETCODE] LEETCODE_FORUM_ID is not set. Daily task will not run.')
             return
 
         self.daily_leetcode_task.start()
@@ -31,12 +31,17 @@ class LeetcodeDailyTaskBot(commands.Cog):
         logger.debug('[BOT][TASK][LEETCODE DAILY] Fetching LeetCode problem of the day...')
 
         try:
-            channel = self.bot.get_channel(self.leetcode_channel_id)
+            forum = self.bot.get_channel(self.leetcode_forum_id)
             problem_data = await fetch_daily_problem()
-            embed = format_problem_message(problem_data)
+            post = leet_code_formatter.format_to_forum_post(problem_data)
 
-            await channel.send(embed=embed)
-            logger.info(f'[BOT][TASK][LEETCODE DAILY] Sent to channel "{channel.name}"')
+            # Create a new thread in the forum
+            thread = await forum.create_thread(
+                name = post["title"],
+                embed = post["embed"],
+                reason = post["reason"])
+
+            logger.info(f'[BOT][TASK][LEETCODE DAILY] Created thread "{post["title"]}" in forum "{forum.name}", MessageId: "{thread.thread.id}"')
 
         except Exception:
             logger.exception('[BOT][TASK][LEETCODE DAILY] Error in daily task:')

@@ -2,7 +2,7 @@
 
 [<< README.md](../../README.md)
 
-This feature automatically fetches and posts the LeetCode Problem of the Day to a specified Discord channel every day at 15:00 UTC.
+This feature automatically fetches and posts the LeetCode Problem of the Day to a specified Discord forum every day at 15:00 UTC.
 
 ## Features
 
@@ -18,19 +18,19 @@ This feature automatically fetches and posts the LeetCode Problem of the Day to 
 Add the following environment variable to your `.env` file:
 
 ```env
-LEETCODE_CHANNEL_ID=YOUR_CHANNEL_ID_HERE
+LEETCODE_FORUM_ID=YOUR_FORUM_ID_HERE
 ```
 
-To get your channel ID:
+To get your forum ID:
 1. Enable Developer Mode in Discord (User Settings > Advanced > Developer Mode)
-2. Right-click on the channel where you want to receive LeetCode problems
+2. Right-click on the forum where you want to receive LeetCode problems
 3. Click "Copy ID"
-4. Paste this ID as the value for `LEETCODE_CHANNEL_ID`
+4. Paste this ID as the value for `LEETCODE_FORUM_ID`
 
 
 ### 3. Bot Permissions
 
-Ensure your bot has the following permissions in the target channel:
+Ensure your bot has the following permissions in the target forum:
 - Send Messages
 - Embed Links
 - Use External Emojis
