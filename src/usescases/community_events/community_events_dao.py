@@ -62,6 +62,7 @@ class CommunityEventsDao:
 
             'location': event.location,
             'type': event.type,
+            'banner': event.banner,
 
             'registration_link': event.registration_link,
             'recording_link': event.recording_link,
@@ -85,6 +86,7 @@ class CommunityEventsDao:
 
             'location': event.location,
             'type': event.type,
+            'banner': event.banner,
 
             'registration_link': event.registration_link,
             'recording_link': event.recording_link,
@@ -116,6 +118,7 @@ class CommunityEventsDao:
 
             location = event["location"] if "location" in event else None,
             type = event["type"] if "type" in event else None,
+            banner = event["banner"] if "banner" in event else None,
 
             registration_link = event["registration_link"] if "registration_link" in event else None,
             recording_link = event["recording_link"] if "recording_link" in event else None,

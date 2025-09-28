@@ -26,6 +26,7 @@ class CommunityEvent:
 
     location: Optional[str] = None
     type: Optional[str] = None
+    banner: Optional[str] = None
 
     registration_link: Optional[str] = None
     recording_link: Optional[str] = None
