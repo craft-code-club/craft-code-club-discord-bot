@@ -8,8 +8,6 @@ from usescases.community_events.github_service import github_service
 from usescases.community_events.community_event_formatter import event_formatter
 from datetime import datetime
 from zoneinfo import ZoneInfo
-import discord
-
 
 logger = logging.getLogger(__name__)
 
@@ -153,22 +151,9 @@ class CommunityEventsTaskBot(commands.Cog):
 
             guild = channel.guild
 
-            # Convert from São Paulo time to UTC
-            sao_paulo_tz = ZoneInfo('America/Sao_Paulo')
-            utc_tz = ZoneInfo('UTC')
+            event_params = await event_formatter.format_to_discord_event(event)
 
-            # Ensure the datetime objects have timezone info
-            start_time_utc = event.start_datetime.replace(tzinfo=sao_paulo_tz).astimezone(utc_tz)
-            end_time_utc = event.end_datetime.replace(tzinfo=sao_paulo_tz).astimezone(utc_tz)
-
-            discord_event = await guild.create_scheduled_event(
-                name = event.title,
-                description = event.description,
-                start_time = start_time_utc,
-                end_time = end_time_utc,
-                privacy_level = discord.PrivacyLevel.guild_only,
-                entity_type = discord.EntityType.external,
-                location = event.discord_event_location())
+            discord_event = await guild.create_scheduled_event(**event_params)
 
             logger.info(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Created discord event for "{event.title}" with Id "{discord_event.id}"')
 

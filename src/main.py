@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import logging
-from Utils.logger import setup_logging
+from utils.logger import setup_logging
 from services.discord_bot import run_discord_bot
 
 

@@ -1,5 +1,5 @@
 from discord.ext import commands
-from Utils.message_loader import load_message
+from utils.message_loader import load_message
 import logging
 
 logger = logging.getLogger(__name__)
