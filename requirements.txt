@@ -2,4 +2,4 @@ python-dotenv==1.1.1
 discord.py==2.6.3
 aiohttp==3.12.15
 azure-data-tables==12.7.0
-markdownify==0.14.1
+markdownify==1.2.0
