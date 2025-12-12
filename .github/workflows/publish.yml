@@ -41,7 +41,7 @@ jobs:
         docker save -o ${{ env.IMAGE_NAME }}.tar ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ env.IMAGE_NAME }}
         path: ${{ env.IMAGE_NAME }}.tar
