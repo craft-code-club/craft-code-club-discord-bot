@@ -14,17 +14,20 @@ async def setup(bot):
 class NewMemberEventBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.say_hi_channel = os.environ.get('SAY_HI_CHANNEL', '')
+        raw_say_hi_channel_id = os.environ.get('SAY_HI_CHANNEL', '').strip()
+        say_hi_channel_id = int(raw_say_hi_channel_id) if raw_say_hi_channel_id.isdigit() else 0
+        self.say_hi_channel = f'<#{say_hi_channel_id}>' if say_hi_channel_id else ''
 
-        if not self.say_hi_channel:
+        if raw_say_hi_channel_id and not raw_say_hi_channel_id.isdigit():
+            logger.warning('[BOT][EVENT][NEW MEMBER] SAY_HI_CHANNEL must be a Discord channel ID (digits).')
+        elif not self.say_hi_channel:
             logger.warning('[BOT][EVENT][NEW MEMBER] SAY_HI_CHANNEL is not set. Welcome messages will not include a channel.')
-
     def _replace_welcome_placeholders(self, message: str, username: str) -> str:
-        return (
-            message
-            .replace('##[username]##', username)
-            .replace('##[say_hi_channel]##', self.say_hi_channel)
-        )
+        lines = [
+            l.replace('##[username]##', username).replace('##[say_hi_channel]##', self.say_hi_channel)
+            for l in message.splitlines() if self.say_hi_channel or '##[say_hi_channel]##' not in l
+        ]
+        return '\n'.join(lines)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
