@@ -2,7 +2,7 @@ Olá, **##[username]##**! 👋
 
 Bem-vindo(a) à comunidade Craft & Code Club! Estamos muito contentes por ter-te aqui. 🚀
 
-Fica à vontade para te apresentares no canal ##[say_hi_channel]##.
+Fique a vontade para se apresentar no canal ##[say_hi_channel]##.
 
 Aqui, a paixão e o conhecimento encontram-se num amplo espectro que inclui programação, infraestrutura, cloud computing, DevOps, e muito mais. Participamos ativamente em conversas ricas e envolventes sobre temas como system design, arquitetura de software, além de um foco especial em algoritmos e estruturas de dados. Também promovemos debates animados sobre o problema do dia do LeetCode, incentivando a resolução e partilha de soluções.
 
