@@ -1,3 +1,15 @@
+# [1.7.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.6.1...v1.7.0) (2026-06-07)
+
+
+### Bug Fixes
+
+* correct welcome message phrasing for new members ([1829433](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/1829433c18d5a9cee110a78277c06ed96f2a9e90))
+
+
+### Features
+
+* add say hi channel to welcome messages ([a072abb](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a072abbc94aaed9c6bdc887c622ff6af0c2fc035))
+
 ## [1.6.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.6.0...v1.6.1) (2025-09-28)
 
 
