@@ -3,6 +3,7 @@ import logging
 from utils.logger import setup_logging
 from services.discord_bot import run_discord_bot
 
+
 def main():
     load_dotenv()
 
