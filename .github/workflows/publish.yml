@@ -185,7 +185,7 @@ $existingRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAI
 
           if ($existingRevision) {
             Write-Output "Revision with suffix $revisionSuffix already exists. Activating existing revision."
-            Enable-AzContainerAppRevision -ContainerAppName ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }} -Name $existingRevision.Name
+Enable-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" -Name $existingRevision.Name
           } else {
             Write-Output "Creating new revision with suffix $revisionSuffix"
             $containerAppTemplateContainer = $containerApp.TemplateContainer[0]
