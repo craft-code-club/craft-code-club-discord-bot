@@ -253,7 +253,7 @@ Enable-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" 
 
             if ($attempt -ge $maxAttempts) {
               # Check if Container App is running and healthy
-              $containerApp = Get-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+$containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
               if ($containerApp.RunningStatus -ne "Running") {
                 Write-Error "Container App is not running (Status: $($containerApp.RunningStatus)). Deployment failed."
