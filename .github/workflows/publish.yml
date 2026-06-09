@@ -175,7 +175,7 @@ jobs:
       uses: azure/powershell@v3
       with:
         inlineScript: |
-          $containerApp = Get-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+$containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
           # Replace dots with dashes for Azure revision suffix compliance
           $revisionSuffix = "${{ steps.tag.outputs.version }}".Replace(".", "-")
