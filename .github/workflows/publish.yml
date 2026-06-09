@@ -232,7 +232,7 @@ Update-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "
             Write-Output "Health check attempt $attempt of $maxAttempts..."
 
             # Get the SPECIFIC new revision we just created
-            $newRevision = Get-AzContainerAppRevision -ContainerAppName ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }} | Where-Object { $_.Name -like "*-$revisionSuffix" } | Select-Object -First 1
+$newRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" | Where-Object { $_.Name -like "*-$revisionSuffix" } | Select-Object -First 1
 
             if (-not $newRevision) {
               Write-Output "  New revision not found yet..."
