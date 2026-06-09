@@ -208,7 +208,7 @@ $containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -Resour
 
           if ($containerApp.RunningStatus -ne "Running") {
             Write-Output "Container App is not running (Status: $($containerApp.RunningStatus)). Starting it now..."
-            Start-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+Start-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
             Write-Output "Container App started successfully"
           } else {
             Write-Output "Container App is already running"
