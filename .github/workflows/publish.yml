@@ -242,8 +242,8 @@ jobs:
               Write-Output "  Health State: $($newRevision.HealthState)"
               Write-Output "  Running State: $($newRevision.RunningState)"
 
-              if ($newRevision.HealthState -eq "Healthy" -and $newRevision.RunningState -eq "Running") {
-                Write-Output "NEW Container App revision is HEALTHY and RUNNING"
+              if ($newRevision.HealthState -eq "Healthy" -and ($newRevision.RunningState -eq "Running" -or $newRevision.RunningState -eq "RunningAtMaxScale")) {
+                Write-Output "NEW Container App revision is HEALTHY and in an accepted RUNNING state"
                 Write-Output "  Revision: $($newRevision.Name)"
                 Write-Output "  Health State: $($newRevision.HealthState)"
                 Write-Output "  Running State: $($newRevision.RunningState)"
@@ -260,8 +260,8 @@ jobs:
                 exit 1
               }
 
-              if (-not $newRevision -or $newRevision.HealthState -ne "Healthy" -or $newRevision.RunningState -ne "Running") {
-                Write-Error "New revision failed to become healthy and running after $maxAttempts attempts"
+              if (-not $newRevision -or $newRevision.HealthState -ne "Healthy" -or ($newRevision.RunningState -ne "Running" -and $newRevision.RunningState -ne "RunningAtMaxScale")) {
+                Write-Error "New revision failed to become healthy and reach an accepted running state after $maxAttempts attempts"
                 if ($newRevision) {
                   Write-Output "Final status - Health State: $($newRevision.HealthState), Running State: $($newRevision.RunningState)"
                 }
