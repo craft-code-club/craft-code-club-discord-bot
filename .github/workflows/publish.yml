@@ -181,7 +181,7 @@ $containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -Resour
           $revisionSuffix = "${{ steps.tag.outputs.version }}".Replace(".", "-")
 
           # Check if revision already exists
-          $existingRevision = Get-AzContainerAppRevision -ContainerAppName ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }} | Where-Object { $_.Name -like "*-$revisionSuffix" }
+$existingRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" | Where-Object { $_.Name -like "*-$revisionSuffix" }
 
           if ($existingRevision) {
             Write-Output "Revision with suffix $revisionSuffix already exists. Activating existing revision."
