@@ -28,22 +28,22 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v4
 
-    - name: Build Docker image
-      uses: docker/build-push-action@v7
-      with:
-        context: .
-        file: ./Dockerfile
-        push: false
-        load: true
-        tags: ${{ env.IMAGE_NAME }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Build Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          load: true
+          tags: ${{ env.IMAGE_NAME }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-    - name: Verify image was created
-      run: |
-        docker images
-        if ! docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "${{ env.IMAGE_NAME }}"; then
-          echo "Error: Docker image was not created successfully"
-          exit 1
-        fi
-        echo "Docker image verified successfully"
+      - name: Verify image was created
+        run: |
+          docker images
+          if ! docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "${{ env.IMAGE_NAME }}"; then
+            echo "Error: Docker image was not created successfully"
+            exit 1
+          fi
+          echo "Docker image verified successfully"
