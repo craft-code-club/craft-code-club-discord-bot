@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.7.1...v1.7.2) (2026-06-09)
+
+
+### Bug Fixes
+
+* deployment ([9fdaa8d](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/9fdaa8d67d572223b88888871df7745989a42ab5))
+
 ## [1.7.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.7.0...v1.7.1) (2026-06-09)
 
 # [1.7.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.6.1...v1.7.0) (2026-06-07)
