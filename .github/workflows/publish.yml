@@ -175,24 +175,24 @@ jobs:
       uses: azure/powershell@v3
       with:
         inlineScript: |
-$containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          $containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
           # Replace dots with dashes for Azure revision suffix compliance
           $revisionSuffix = "${{ steps.tag.outputs.version }}".Replace(".", "-")
 
           # Check if revision already exists
-$existingRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" | Where-Object { $_.Name -like "*-$revisionSuffix" }
+          $existingRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" | Where-Object { $_.Name -like "*-$revisionSuffix" }
 
           if ($existingRevision) {
             Write-Output "Revision with suffix $revisionSuffix already exists. Activating existing revision."
-Enable-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" -Name $existingRevision.Name
+            Enable-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" -Name $existingRevision.Name
           } else {
             Write-Output "Creating new revision with suffix $revisionSuffix"
             $containerAppTemplateContainer = $containerApp.TemplateContainer[0]
             $containerAppTemplateContainer.Image = "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}"
 
             # Create new revision (Blue-Green: new revision starts alongside old one)
-Update-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" -TemplateContainer $containerAppTemplateContainer -TemplateRevisionSuffix $revisionSuffix
+            Update-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" -TemplateContainer $containerAppTemplateContainer -TemplateRevisionSuffix $revisionSuffix
 
             Write-Output "New revision created successfully"
           }
@@ -204,11 +204,11 @@ Update-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "
       with:
         inlineScript: |
           Write-Output "Checking if Container App is running..."
-$containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          $containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
           if ($containerApp.RunningStatus -ne "Running") {
             Write-Output "Container App is not running (Status: $($containerApp.RunningStatus)). Starting it now..."
-Start-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            Start-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
             Write-Output "Container App started successfully"
           } else {
             Write-Output "Container App is already running"
@@ -232,7 +232,7 @@ Start-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "$
             Write-Output "Health check attempt $attempt of $maxAttempts..."
 
             # Get the SPECIFIC new revision we just created
-$newRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" | Where-Object { $_.Name -like "*-$revisionSuffix" } | Select-Object -First 1
+            $newRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" | Where-Object { $_.Name -like "*-$revisionSuffix" } | Select-Object -First 1
 
             if (-not $newRevision) {
               Write-Output "  New revision not found yet..."
@@ -253,7 +253,7 @@ $newRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_A
 
             if ($attempt -ge $maxAttempts) {
               # Check if Container App is running and healthy
-$containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+              $containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
               if ($containerApp.RunningStatus -ne "Running") {
                 Write-Error "Container App is not running (Status: $($containerApp.RunningStatus)). Deployment failed."
