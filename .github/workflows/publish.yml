@@ -192,7 +192,7 @@ Enable-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" 
             $containerAppTemplateContainer.Image = "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}"
 
             # Create new revision (Blue-Green: new revision starts alongside old one)
-            Update-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }} -TemplateContainer $containerAppTemplateContainer -TemplateRevisionSuffix $revisionSuffix
+Update-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" -TemplateContainer $containerAppTemplateContainer -TemplateRevisionSuffix $revisionSuffix
 
             Write-Output "New revision created successfully"
           }
