@@ -1,3 +1,10 @@
+## [1.7.3](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.7.2...v1.7.3) (2026-06-09)
+
+
+### Bug Fixes
+
+* **publish:** update health check conditions for container app ([a292f3d](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a292f3dfa3188a19676f1e913fa77d2fc90b7e7d))
+
 ## [1.7.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.7.1...v1.7.2) (2026-06-09)
 
 
