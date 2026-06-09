@@ -8,8 +8,15 @@ on:
     types: [created]
 
 
+concurrency:
+  group: ci-${{ github.repository }}
+  cancel-in-progress: true
+
+
 env:
   IMAGE_NAME: 'discord-bot'
+  RESOURCE_GROUP: 'rg-craft-code-club'
+  CONTAINER_APP_NAME: 'ca-c3-discord-bot-prod'
 
 
 jobs:
@@ -23,7 +30,21 @@ jobs:
 
     - name: 'Resolve image tag'
       id: tag
-      run: echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+      run: |
+        if [ "${{ github.event_name }}" == "release" ]; then
+          VERSION="${{ github.event.release.tag_name }}"
+        else
+          VERSION=$(gh release list --repo ${{ github.repository }} --limit 1 --json tagName --jq '.[0].tagName')-${{ github.run_number }}
+        fi
+
+        if [ -z "$VERSION" ] || [ "$VERSION" == "null-${{ github.run_number }}" ]; then
+          echo "Unable to resolve a release-based image tag. Ensure at least one release exists."
+          exit 1
+        fi
+
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ github.token }}
 
     - name: 'Show image tag'
       run: |
@@ -53,6 +74,7 @@ jobs:
     name: 'Publish Docker Image to Docker Hub'
     runs-on: ubuntu-latest
     needs: build
+    timeout-minutes: 15
 
     steps:
 
@@ -63,7 +85,21 @@ jobs:
 
     - name: 'Resolve image tag'
       id: tag
-      run: echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+      run: |
+        if [ "${{ github.event_name }}" == "release" ]; then
+          VERSION="${{ github.event.release.tag_name }}"
+        else
+          VERSION=$(gh release list --repo ${{ github.repository }} --limit 1 --json tagName --jq '.[0].tagName')-${{ github.run_number }}
+        fi
+
+        if [ -z "$VERSION" ] || [ "$VERSION" == "null-${{ github.run_number }}" ]; then
+          echo "Unable to resolve a release-based image tag. Ensure at least one release exists."
+          exit 1
+        fi
+
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ github.token }}
 
     - name: 'Show image tag'
       run: |
@@ -87,6 +123,169 @@ jobs:
         docker tag ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }} ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
         docker tag ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }} ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}:latest
 
-    - name: 'Push Docker Image to GitHub Container Registry'
+    - name: 'Push Docker Image to Docker Hub'
       run: |
         docker push --all-tags ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}
+
+
+  publish-app:
+    name: 'Publish App'
+    runs-on: ubuntu-latest
+    environment: PROD
+    needs: publish
+    timeout-minutes: 20
+
+    steps:
+    - name: 'Resolve image tag'
+      id: tag
+      run: |
+        if [ "${{ github.event_name }}" == "release" ]; then
+          VERSION="${{ github.event.release.tag_name }}"
+        else
+          VERSION=$(gh release list --repo ${{ github.repository }} --limit 1 --json tagName --jq '.[0].tagName')-${{ github.run_number }}
+        fi
+
+        if [ -z "$VERSION" ] || [ "$VERSION" == "null-${{ github.run_number }}" ]; then
+          echo "Unable to resolve a release-based image tag. Ensure at least one release exists."
+          exit 1
+        fi
+
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: 'Show image tag'
+      run: |
+        echo "Deploying image: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}"
+
+    - name: 'Login to Azure'
+      uses: azure/login@v3
+      with:
+        creds: |
+          {
+            "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
+            "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
+            "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
+            "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
+          }
+        enable-AzPSSession: true
+
+    - name: 'Deploy new revision (Blue-Green)'
+      id: containerapp-deploy
+      uses: azure/powershell@v3
+      with:
+        inlineScript: |
+          $containerApp = Get-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+          # Replace dots with dashes for Azure revision suffix compliance
+          $revisionSuffix = "${{ steps.tag.outputs.version }}".Replace(".", "-")
+
+          # Check if revision already exists
+          $existingRevision = Get-AzContainerAppRevision -ContainerAppName ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }} | Where-Object { $_.Name -like "*-$revisionSuffix" }
+
+          if ($existingRevision) {
+            Write-Output "Revision with suffix $revisionSuffix already exists. Activating existing revision."
+            Enable-AzContainerAppRevision -ContainerAppName ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }} -Name $existingRevision.Name
+          } else {
+            Write-Output "Creating new revision with suffix $revisionSuffix"
+            $containerAppTemplateContainer = $containerApp.TemplateContainer[0]
+            $containerAppTemplateContainer.Image = "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}"
+
+            # Create new revision (Blue-Green: new revision starts alongside old one)
+            Update-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }} -TemplateContainer $containerAppTemplateContainer -TemplateRevisionSuffix $revisionSuffix
+
+            Write-Output "New revision created successfully"
+          }
+        azPSVersion: "latest"
+
+    - name: 'Ensure Container App is running'
+      id: containerapp-start
+      uses: azure/powershell@v3
+      with:
+        inlineScript: |
+          Write-Output "Checking if Container App is running..."
+          $containerApp = Get-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+          if ($containerApp.RunningStatus -ne "Running") {
+            Write-Output "Container App is not running (Status: $($containerApp.RunningStatus)). Starting it now..."
+            Start-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            Write-Output "Container App started successfully"
+          } else {
+            Write-Output "Container App is already running"
+          }
+        azPSVersion: "latest"
+
+    - name: 'Wait for new revision to become healthy'
+      id: containerapp-health-check
+      uses: azure/powershell@v3
+      with:
+        inlineScript: |
+          Write-Output "Waiting for NEW revision to become healthy..."
+          $maxAttempts = 30
+          $attempt = 0
+
+          # Get the revision suffix that was just created
+          $revisionSuffix = "${{ steps.tag.outputs.version }}".Replace(".", "-")
+
+          do {
+            $attempt++
+            Write-Output "Health check attempt $attempt of $maxAttempts..."
+
+            # Get the SPECIFIC new revision we just created
+            $newRevision = Get-AzContainerAppRevision -ContainerAppName ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }} | Where-Object { $_.Name -like "*-$revisionSuffix" } | Select-Object -First 1
+
+            if (-not $newRevision) {
+              Write-Output "  New revision not found yet..."
+            } else {
+              Write-Output "  Found revision: $($newRevision.Name)"
+              Write-Output "  Active: $($newRevision.Active)"
+              Write-Output "  Health State: $($newRevision.HealthState)"
+              Write-Output "  Running State: $($newRevision.RunningState)"
+
+              if ($newRevision.HealthState -eq "Healthy" -and $newRevision.RunningState -eq "Running") {
+                Write-Output "NEW Container App revision is HEALTHY and RUNNING"
+                Write-Output "  Revision: $($newRevision.Name)"
+                Write-Output "  Health State: $($newRevision.HealthState)"
+                Write-Output "  Running State: $($newRevision.RunningState)"
+                break
+              }
+            }
+
+            if ($attempt -ge $maxAttempts) {
+              # Check if Container App is running and healthy
+              $containerApp = Get-AzContainerApp -Name ${{ env.CONTAINER_APP_NAME }} -ResourceGroupName ${{ env.RESOURCE_GROUP }} -SubscriptionId ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+              if ($containerApp.RunningStatus -ne "Running") {
+                Write-Error "Container App is not running (Status: $($containerApp.RunningStatus)). Deployment failed."
+                exit 1
+              }
+
+              if (-not $newRevision -or $newRevision.HealthState -ne "Healthy" -or $newRevision.RunningState -ne "Running") {
+                Write-Error "New revision failed to become healthy and running after $maxAttempts attempts"
+                if ($newRevision) {
+                  Write-Output "Final status - Health State: $($newRevision.HealthState), Running State: $($newRevision.RunningState)"
+                }
+                exit 1
+              }
+            }
+
+            Start-Sleep -Seconds 10
+          } while ($true)
+        azPSVersion: "latest"
+
+    - name: 'Verify deployment'
+      run: |
+        az containerapp revision list \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "[].{name:name, active:properties.active, healthState:properties.healthState, createdTime:properties.createdTime}" \
+          --output table
+
+    - name: 'Azure logout'
+      if: always()
+      uses: azure/cli@v3.0.0
+      with:
+        inlineScript: |
+          az logout
+          az cache purge
+          az account clear
