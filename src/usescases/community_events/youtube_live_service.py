@@ -77,7 +77,7 @@ class YouTubeLiveService:
                     },
                     # Visibility and audience settings
                     'status': {
-                        'privacyStatus': 'public',  # Live page is visible to everyone
+                        'privacyStatus': 'public',  # Scheduled live is public as soon as YouTube creates it
                         'selfDeclaredMadeForKids': False,  # Content is not made for kids (affects ads & chat features)
                     },
                     # Stream behavior configuration
