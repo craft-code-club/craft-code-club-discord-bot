@@ -66,8 +66,6 @@ class YouTubeLiveService:
 
             logger.debug(f'[SERVICES][YOUTUBE] Creating scheduled live broadcast for "{event.title}"')
 
-            title = event.get_youtube_title()
-
             broadcast = youtube.liveBroadcasts().insert(
                 part = 'snippet,contentDetails,status',
                 body = {
