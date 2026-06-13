@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Optional
 import aiohttp
 import logging
@@ -5,8 +6,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+@dataclass
+class DownloadedImage:
+    data: bytes
+    content_type: str
+
 class ImageService:
-    async def download_image_bytes(self, image_url: str) -> Optional[bytes]:
+    async def download_image(self, image_url: str) -> Optional[DownloadedImage]:
         if not image_url:
             return None
         try:
@@ -37,13 +44,19 @@ class ImageService:
                         return None
 
                     logger.info(f'[SERVICES][IMAGE] Successfully downloaded image: "{image_url}": {len(image_data)} bytes')
-                    return image_data
+                    return DownloadedImage(data = image_data, content_type = content_type)
 
         except aiohttp.ClientError as e:
             logger.warning(f'[SERVICES][IMAGE] Network error downloading image: {e}')
         except Exception as e:
             logger.warning(f'[SERVICES][IMAGE] Unexpected error downloading image: {e}')
 
+        return None
+
+    async def download_image_bytes(self, image_url: str) -> Optional[bytes]:
+        downloaded_image = await self.download_image(image_url)
+        if downloaded_image:
+            return downloaded_image.data
         return None
 
 # Global instance

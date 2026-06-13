@@ -8,6 +8,7 @@ A Discord bot for the Craft & Code Club community with automated features and in
 - **Rules Command**: Display server rules and guidelines
 - **LeetCode Daily Problem**: Automatically posts LeetCode problem in a specified forum daily
 - **Community Events**: Manage and notify about community events
+- **YouTube Live Scheduling**: Automatically schedules private YouTube lives for eligible community events
 
 ## Steps to create a Discord Bot
 
@@ -15,6 +16,7 @@ A Discord bot for the Craft & Code Club community with automated features and in
 * [Setup Python environment](./docs/PythonEnvironment.md)
 * [Configure Environment Variables](#configure-environment-variables)
 * [Setup LeetCode Daily Task](./docs/features/LeetCodeDailyTask.md)
+* [Setup YouTube Live Scheduling](./docs/features/YouTubeLiveScheduling.md)
 
 
 
