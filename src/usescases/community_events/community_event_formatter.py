@@ -1,8 +1,9 @@
 import discord
 from usescases.community_events.community_event import CommunityEvent, ReminderTime
 from utils.image_service import image_service
-from zoneinfo import ZoneInfo
-import discord
+from datetime import timezone
+
+from utils.timezones import get_brazil_timezone
 
 class EventMessageFormatter:
     def __init__(self):
@@ -13,17 +14,17 @@ class EventMessageFormatter:
             ReminderTime.A_HOUR: "Evento começando em 1 hora!"
         }
 
-    async def format_to_discord_event(self, event: CommunityEvent) -> dict:
+    async def format_to_discord_event(self, event: CommunityEvent) -> dict[str, object]:
         # Convert from São Paulo time to UTC
-        sao_paulo_tz = ZoneInfo('America/Sao_Paulo')
-        utc_tz = ZoneInfo('UTC')
+        sao_paulo_tz = get_brazil_timezone()
+        utc_tz = timezone.utc
 
         # Ensure the datetime objects have timezone info
         start_time_utc = event.start_datetime.replace(tzinfo=sao_paulo_tz).astimezone(utc_tz)
         end_time_utc = event.end_datetime.replace(tzinfo=sao_paulo_tz).astimezone(utc_tz)
 
         # Build event creation parameters
-        event_params = {
+        event_params: dict[str, object] = {
             'name': event.title,
             'description': event.description,
             'start_time': start_time_utc,
@@ -33,14 +34,22 @@ class EventMessageFormatter:
             'location': event.discord_event_location()
         }
 
-        image_bytes = await image_service.download_image_bytes(event.banner_url())
+        banner_url = event.banner_url()
+        if banner_url:
+            image_bytes = await image_service.download_image_bytes(banner_url)
+        else:
+            image_bytes = None
+
         if image_bytes:
             event_params['image'] = image_bytes
 
         return event_params
 
     def format_to_message(self, event: CommunityEvent) -> discord.Embed:
-        event_description = f"***{self.notification_titles.get(event.reminder_time())}***\n\n{event.description}"
+        reminder_time = event.reminder_time()
+        reminder_title = self.notification_titles.get(reminder_time) if reminder_time else None
+        reminder_title = reminder_title or "Evento"
+        event_description = f"***{reminder_title}***\n\n{event.description}"
 
         # Create the embed
         embed = discord.Embed(

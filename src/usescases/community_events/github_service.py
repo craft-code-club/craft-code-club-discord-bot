@@ -1,6 +1,6 @@
 import logging
 import aiohttp
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from datetime import datetime
 from usescases.community_events.community_event import CommunityEvent
 
@@ -18,7 +18,7 @@ class GitHubService:
     async def fetch_community_events(self) -> Dict[str, str]:
         logger.debug('[SERVICES][GITHUB][EVENTS] Fetching community events from GitHub repository...')
 
-        events = {}
+        events: Dict[str, str] = {}
 
         # Get all markdown files from the events directory
         files_url = f"{self.base_url}/repos/{self.github_owner}/{self.github_repo}/contents/{self.events_path}"
@@ -78,17 +78,20 @@ class GitHubService:
                     location = event_data.get('location', ''),
                     type = event_data.get('type', 'online'),
                     banner = event_data.get('banner', None),
+                    is_live = str(event_data.get('isLive', '')).strip().lower() == 'true',
+                    youtube_title = event_data.get('youtubeTitle') or None,
                     registration_link = event_data.get('registrationLink'),
                     recording_link = event_data.get('recordingLink'),
                     post_link = event_data.get('postLink'),
                     github_url = url,
-                    speakers = event_data.get('speakers', []))
+                    speakers = event_data.get('speakers', []),
+                    tags = event_data.get('tags', []))
 
                 logger.debug(f'[SERVICES][GITHUB][EVENTS] Parsed event: {event.title} ({event.id})')
 
                 return event
 
-    def __parse_community_event(self, content: str) -> Optional[Dict[str, Any]]:
+    def __parse_community_event(self, content: str) -> Dict[str, Any]:
         # Extract frontmatter between --- markers
         if not content.startswith('---'):
             raise Exception('Frontmatter does not start with "---"')
@@ -101,7 +104,7 @@ class GitHubService:
             frontmatter = content[3:end_marker].strip()
 
             # Simple YAML parsing for the event fields we need
-            event_data = {}
+            event_data: Dict[str, Any] = {}
 
             for line in frontmatter.split('\n'):
                 line = line.strip()
@@ -118,33 +121,56 @@ class GitHubService:
 
                     event_data[key] = value
 
-            # Handle speakers array (simple parsing)
-            if 'speakers' in content:
-                speakers = []
-                in_speakers = False
-                for line in frontmatter.split('\n'):
-                    line = line.strip()
-                    if line == 'speakers:':
-                        in_speakers = True
-                        continue
-                    elif in_speakers:
-                        if line.startswith('- '):
-                            speaker = line[2:].strip()
-                            if speaker.startswith('"') and speaker.endswith('"'):
-                                speaker = speaker[1:-1]
-                            elif speaker.startswith("'") and speaker.endswith("'"):
-                                speaker = speaker[1:-1]
-                            speakers.append(speaker)
-                        elif not line.startswith(' ') and ':' in line:
-                            break
+            speakers = self.__parse_frontmatter_list(frontmatter, 'speakers')
+            if speakers:
+                event_data['speakers'] = speakers
 
-                if speakers:
-                    event_data['speakers'] = speakers
+            tags = self.__parse_frontmatter_list(frontmatter, 'tags')
+            if tags:
+                event_data['tags'] = tags
+            else:
+                raw_tags = event_data.get('tags')
+                if not isinstance(raw_tags, str):
+                    raw_tags = ''
+
+                event_data['tags'] = [
+                    tag.strip()
+                    for tag in raw_tags.split(',')
+                    if tag.strip()]
 
             return event_data
 
         except Exception as e:
             raise Exception(f'Error parsing Community Event: {e}')
+
+    def __parse_frontmatter_list(self, frontmatter: str, key: str) -> list[str]:
+        values: list[str] = []
+        in_section = False
+
+        for raw_line in frontmatter.split('\n'):
+            line = raw_line.strip()
+            if line == f'{key}:':
+                in_section = True
+                continue
+
+            if not in_section:
+                continue
+
+            if line.startswith('- '):
+                value = line[2:].strip()
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1]
+                elif value.startswith("'") and value.endswith("'"):
+                    value = value[1:-1]
+
+                if value:
+                    values.append(value)
+                continue
+
+            if ':' in line and not line.startswith('- '):
+                break
+
+        return values
 
 
 # Global instance

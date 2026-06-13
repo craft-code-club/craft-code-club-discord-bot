@@ -2,12 +2,14 @@ import os
 import logging
 from typing import Optional
 from discord.ext import tasks, commands
+from usescases.community_events.youtube_live_service import youtube_live_service
 from usescases.community_events.community_events_dao import community_events_dao
 from usescases.community_events.community_event import CommunityEvent, ReminderTime
 from usescases.community_events.github_service import github_service
 from usescases.community_events.community_event_formatter import event_formatter
 from datetime import datetime
-from zoneinfo import ZoneInfo
+
+from utils.timezones import get_brazil_timezone
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +45,7 @@ class CommunityEventsTaskBot(commands.Cog):
             if channel is None:
                 raise ValueError(f'Could not find channel with Id "{self.community_events_channel_id}"')
 
-            time_zone = ZoneInfo('America/Sao_Paulo')
+            time_zone = get_brazil_timezone()
             now = datetime.now(time_zone)
 
             # only send notifications after 8am
@@ -113,6 +115,9 @@ class CommunityEventsTaskBot(commands.Cog):
 
                     existing_event = community_events_dao.get(event.id)
                     if existing_event:
+                        if not event.has_recording_link() and existing_event.has_recording_link():
+                            event.recording_link = existing_event.recording_link
+
                         if existing_event.start_datetime == event.start_datetime:
                             event.discord_event_id = existing_event.discord_event_id
                         else:
@@ -120,6 +125,8 @@ class CommunityEventsTaskBot(commands.Cog):
                             if existing_event.discord_event_id:
                                 await self.__delete_discord_event(existing_event.discord_event_id)
                             community_events_dao.delete(existing_event.id, existing_event.start_datetime)
+
+                    await self.__schedule_youtube_live_if_needed(event)
 
                     if not event.discord_event_id:
                         event.discord_event_id = await self.__create_discord_event(event)
@@ -161,6 +168,18 @@ class CommunityEventsTaskBot(commands.Cog):
         except Exception:
             logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Failed to create discord event for "{event.title}"')
             return None
+
+
+    async def __schedule_youtube_live_if_needed(self, event: CommunityEvent) -> None:
+        if not event.is_live_event():
+            logger.debug(f'[BOT][TASK][COMMUNITY EVENTS][YOUTUBE] Skipping YouTube live scheduling for "{event.title}" because it is not a live event')
+            return
+
+        if event.has_recording_link():
+            logger.debug(f'[BOT][TASK][COMMUNITY EVENTS][YOUTUBE] Skipping YouTube live scheduling for "{event.title}" because recording_link is already defined')
+            return
+
+        event.recording_link = await youtube_live_service.schedule_live_event(event)
 
 
     async def __delete_discord_event(self, discord_event_id: str) -> None:

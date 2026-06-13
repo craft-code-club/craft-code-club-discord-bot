@@ -1,8 +1,9 @@
 from typing import List, Optional
 from datetime import datetime
 from dataclasses import dataclass
-from zoneinfo import ZoneInfo
 from enum import Enum
+
+from utils.timezones import get_brazil_timezone, get_canada_timezone, get_portugal_timezone
 
 
 class ReminderTime(Enum):
@@ -28,11 +29,15 @@ class CommunityEvent:
     type: Optional[str] = None
     banner: Optional[str] = None
 
+    is_live: bool = False
+    youtube_title: Optional[str] = None
+
     registration_link: Optional[str] = None
     recording_link: Optional[str] = None
     post_link: Optional[str] = None
 
     speakers: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
 
     a_weekly_notify: bool = False
     three_days_notify: bool = False
@@ -48,12 +53,29 @@ class CommunityEvent:
         return None
 
     def discord_event_location(self) -> str:
+        if self.has_recording_link() and self.is_live_event():
+            return self.recording_link
         if self.registration_link:
             return self.registration_link
         return self.event_details_url()
 
+    def get_youtube_title(self) -> Optional[str]:
+        if not self.is_live_event():
+            return None
+
+        if self.youtube_title:
+            return self.youtube_title
+
+        return self.title
+
+    def has_recording_link(self) -> bool:
+        return bool(self.recording_link and self.recording_link.strip())
+
+    def is_live_event(self) -> bool:
+        return self.is_live
+
     def is_future_event(self) -> bool:
-        now = datetime.now(ZoneInfo('America/Sao_Paulo'))
+        now = datetime.now(get_brazil_timezone())
         event_time = self.start_datetime
         if event_time.tzinfo is None:
             event_time = event_time.replace(tzinfo=now.tzinfo)
@@ -64,8 +86,8 @@ class CommunityEvent:
 
     def canada_datetime(self) -> str:
         # Convert from Brazil timezone (UTC-3) to Canada Pacific timezone (UTC-8/-7)
-        brazil_tz = ZoneInfo('America/Sao_Paulo')
-        canada_tz = ZoneInfo('America/Vancouver')
+        brazil_tz = get_brazil_timezone()
+        canada_tz = get_canada_timezone()
 
         # Localize the datetime to Brazil timezone if it's naive
         if self.start_datetime.tzinfo is None:
@@ -80,8 +102,8 @@ class CommunityEvent:
 
     def portugal_datetime(self) -> str:
         # Convert from Brazil timezone (UTC-3) to Portugal timezone (UTC+0/+1)
-        brazil_tz = ZoneInfo('America/Sao_Paulo')
-        portugal_tz = ZoneInfo('Europe/Lisbon')
+        brazil_tz = get_brazil_timezone()
+        portugal_tz = get_portugal_timezone()
 
         # Localize the datetime to Brazil timezone if it's naive
         if self.start_datetime.tzinfo is None:
@@ -95,7 +117,7 @@ class CommunityEvent:
         return portugal_time.strftime("%Y/%m/%d - %H:%M")
 
     def reminder_time(self) -> Optional[ReminderTime]:
-        now = datetime.now(ZoneInfo('America/Sao_Paulo'))
+        now = datetime.now(get_brazil_timezone())
         now_date_only = now.date()
 
         event_date = self.start_datetime
