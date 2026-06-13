@@ -2,19 +2,19 @@
 
 [<< README.md](../../README.md)
 
-This feature automatically schedules a private YouTube live when a future community event should have a live stream created by the bot.
+This feature automatically schedules a public YouTube live when a future community event should have a live stream created by the bot.
 
 ## When the Bot Schedules a YouTube Live
 
 The bot schedules a YouTube live only when all of these conditions are true:
 
-- The event type is `live`
+- The event frontmatter field `isLive` is `true`
 - The event `recordingLink` from GitHub is empty
 - The stored `recording_link` in Azure Table Storage is also empty
 
 The bot skips YouTube scheduling when any of these are true:
 
-- The event type is not `live`
+- The event frontmatter field `isLive` is not `true`
 - GitHub already provides a `recordingLink`
 - The database already has a `recording_link` for the event
 
@@ -152,7 +152,7 @@ YOUTUBE_STREAM_ID=YOUR_REUSABLE_YOUTUBE_STREAM_ID
 
 ## Behavior Details
 
-- New YouTube lives are created as `private`
+- New YouTube lives are created as `public`
 - The event banner image is uploaded as the YouTube thumbnail when available
 - The saved `recording_link` may temporarily point to the scheduled YouTube watch page before the event happens
 - If the YouTube environment variables are missing, the bot logs the problem and skips YouTube scheduling without breaking Discord event creation
