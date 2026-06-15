@@ -1,3 +1,15 @@
+# [1.8.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.7.3...v1.8.0) (2026-06-15)
+
+
+### Bug Fixes
+
+* **youtube_live_service:** remove unused title assignment in schedule_live_event ([e45b125](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/e45b1258be916b1af807360aeb6868450ec06115))
+
+
+### Features
+
+* Implement YouTube live scheduling ([a6b70aa](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a6b70aa356816b00e9e5b4694d4f1128dcc56c91))
+
 ## [1.7.3](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.7.2...v1.7.3) (2026-06-09)
 
 
