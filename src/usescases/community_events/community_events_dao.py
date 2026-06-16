@@ -64,6 +64,10 @@ class CommunityEventsDao:
             'type': event.type,
             'banner': event.banner,
 
+            'is_live': event.is_live,
+            'youtube_title': event.youtube_title,
+            'session_link': event.session_link,
+
             'registration_link': event.registration_link,
             'recording_link': event.recording_link,
             'post_link': event.post_link
@@ -87,6 +91,10 @@ class CommunityEventsDao:
             'location': event.location,
             'type': event.type,
             'banner': event.banner,
+
+            'is_live': event.is_live,
+            'youtube_title': event.youtube_title,
+            'session_link': event.session_link,
 
             'registration_link': event.registration_link,
             'recording_link': event.recording_link,
@@ -119,6 +127,10 @@ class CommunityEventsDao:
             location = event["location"] if "location" in event else None,
             type = event["type"] if "type" in event else None,
             banner = event["banner"] if "banner" in event else None,
+
+            is_live = event["is_live"] if "is_live" in event else False,
+            youtube_title = event["youtube_title"] if "youtube_title" in event else None,
+            session_link = event["session_link"] if "session_link" in event else None,
 
             registration_link = event["registration_link"] if "registration_link" in event else None,
             recording_link = event["recording_link"] if "recording_link" in event else None,

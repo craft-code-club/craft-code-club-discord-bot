@@ -82,6 +82,7 @@ class GitHubService:
                     youtube_title = event_data.get('youtubeTitle') or None,
                     registration_link = event_data.get('registrationLink'),
                     recording_link = event_data.get('recordingLink'),
+                    session_link = event_data.get('sessionLink'),
                     post_link = event_data.get('postLink'),
                     github_url = url,
                     speakers = event_data.get('speakers', []),
