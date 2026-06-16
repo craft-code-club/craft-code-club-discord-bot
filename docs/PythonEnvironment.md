@@ -11,7 +11,7 @@ Working with virtual environments is a good practice to keep your project depend
 python -m venv <name_of_the_virtual_environment>
 
 # Example
-python -m venv venv
+python -m venv .venv
 ```
 
 2. Activate the virtual environment
@@ -19,14 +19,14 @@ python -m venv venv
 .\<name_of_the_virtual_environment>\Scripts\activate
 
 # Example
-.\venv\Scripts\activate
+.\.venv\Scripts\activate
 ```
 In windows using powershell
 ```powershell
 .\<name_of_the_virtual_environment>\Scripts\Activate.ps1
 
 # Example
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
 3. Exits the virtual environment
@@ -36,5 +36,5 @@ deactivate
 
 4. To remove the virtual environment
 ```bash
-rm -r venv
+rm -r .venv
 ```

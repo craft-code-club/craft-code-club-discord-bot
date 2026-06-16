@@ -31,6 +31,7 @@ class CommunityEvent:
 
     is_live: bool = False
     youtube_title: Optional[str] = None
+    session_link: Optional[str] = None
 
     registration_link: Optional[str] = None
     recording_link: Optional[str] = None
@@ -53,10 +54,10 @@ class CommunityEvent:
         return None
 
     def discord_event_location(self) -> str:
+        if self.session_link:
+            return self.session_link
         if self.has_recording_link() and self.is_live_event():
             return self.recording_link
-        if self.registration_link:
-            return self.registration_link
         return self.event_details_url()
 
     def get_youtube_title(self) -> Optional[str]:
