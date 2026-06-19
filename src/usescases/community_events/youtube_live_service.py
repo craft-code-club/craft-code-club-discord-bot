@@ -82,7 +82,7 @@ class YouTubeLiveService:
                     },
                     # Stream behavior configuration
                     'contentDetails': {
-                        'enableAutoStart': True,  # Stream automatically goes live when encoder starts
+                        'enableAutoStart': False,  # Keep False so the broadcast does not go live automatically when the encoder starts (allows manual setup/start)
                         'enableAutoStop': True,  # Stream automatically ends when encoder stops
                         'enableDvr': True,  # Viewers can rewind and replay during the stream
                         'recordFromStart': True,  # Full stream is saved as VOD (video on demand)

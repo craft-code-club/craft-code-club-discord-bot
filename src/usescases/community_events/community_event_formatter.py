@@ -73,17 +73,22 @@ class EventMessageFormatter:
             value = f"*{event.portugal_datetime()}*",
             inline = True)
 
-        # Add registration link if available
-        if event.registration_link:
+        if event.session_link:
             embed.add_field(
-                name = "🔗 Participar",
-                value = f"[Clique aqui para se inscrever]({event.registration_link})",
+                name = "🧑‍💻 Participar",
+                value = f"[Clique aqui para participar conosco]({event.session_link})",
                 inline = False)
-        else:
+
+        if event.recording_link:
             embed.add_field(
-                name = "🔗 Participar",
-                value = f"[Clique aqui para ver os detalhes do evento]({event.event_details_url()})",
+                name = "📺 Live",
+                value = f"[Clique aqui para assistir a live]({event.recording_link})",
                 inline = False)
+
+        embed.add_field(
+            name = "🔗 Detalhes",
+            value = f"[Clique aqui para ver os detalhes do evento]({event.event_details_url()})",
+            inline = False)
 
         embed.set_author(
             name = "Ver detalhes completos",
