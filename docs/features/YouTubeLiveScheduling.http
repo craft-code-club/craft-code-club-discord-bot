@@ -1,0 +1,3 @@
+# The access token via google API
+GET https://www.googleapis.com/youtube/v3/liveStreams?part=id,snippet,cdn,status&mine=true&maxResults=50
+Authorization: Bearer {AccessToken}
