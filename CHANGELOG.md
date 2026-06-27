@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.0...v1.8.1) (2026-06-17)
+
+
+### Bug Fixes
+
+* **youtube_live_service:** set enableAutoStart to False for manual stream setup ([0afaf8f](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/0afaf8f3fc2db3de1d6d3dd3886e5c1b6c9f8085))
+
 # [1.8.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.7.3...v1.8.0) (2026-06-15)
 
 
