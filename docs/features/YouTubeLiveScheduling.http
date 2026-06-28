@@ -1,3 +1,3 @@
-# The access token via google API
+# OAuth access token for the YouTube channel that owns the reusable stream
 GET https://www.googleapis.com/youtube/v3/liveStreams?part=id,snippet,cdn,status&mine=true&maxResults=50
-Authorization: Bearer {AccessToken}
+Authorization: Bearer YOUR_ACCESS_TOKEN
