@@ -119,7 +119,7 @@ If the bot logs `liveStreamNotFound` or `Stream not found`:
 
 ### 4. Create One Reusable YouTube Stream
 
-This bot uses one reusable YouTube stream configuration and links each scheduled live page to it. The bot validates the configured value against `liveStreams.list(mine=true)` for the authenticated channel, so the value in `YOUTUBE_STREAM_ID` must be the stream resource id, not the encoder stream key and not a video/watch id.
+This bot uses one reusable YouTube stream configuration and links each scheduled live page to it. The bot attempts to validate the configured value against `liveStreams.list(mine=true)` for the authenticated channel, so the value in `YOUTUBE_STREAM_ID` must be the stream resource id, not the encoder stream key and not a video/watch id.
 
 1. Go to [YouTube Studio](https://studio.youtube.com), click **Create** → **Go Live**
 2. Create or select one stream/encoder setup to reuse
