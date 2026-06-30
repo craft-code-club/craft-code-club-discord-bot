@@ -1,3 +1,17 @@
+## [1.8.3](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.2...v1.8.3) (2026-06-30)
+
+
+### Bug Fixes
+
+* purge build-only packages after pip install, retain libffi8 runtime ([a725dce](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a725dce03ac37fc270d1f2eacb09e18c48edb25f))
+
+## [1.8.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.1...v1.8.2) (2026-06-30)
+
+
+### Bug Fixes
+
+* **youtube_live_service:** set enableAutoStart to False for manual stream setup ([0e4d7f4](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/0e4d7f449ea78c237cbd1c3240cb272d517740f9))
+
 ## [1.8.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.0...v1.8.1) (2026-06-17)
 
 

@@ -119,17 +119,35 @@ If the bot logs `liveStreamNotFound` or `Stream not found`:
 
 ### 4. Create One Reusable YouTube Stream
 
-This bot uses one reusable YouTube stream configuration and links each scheduled live page to it.
+This bot uses one reusable YouTube stream configuration and links each scheduled live page to it. The bot attempts to validate the configured value against `liveStreams.list(mine=true)` for the authenticated channel, so the value in `YOUTUBE_STREAM_ID` must be the stream resource id, not the encoder stream key and not a video/watch id.
 
 1. Go to [YouTube Studio](https://studio.youtube.com), click **Create** → **Go Live**
 2. Create or select one stream/encoder setup to reuse
-3. Get the value for `YOUTUBE_STREAM_ID` using **API Explorer** (recommended):
+3. Get the value for `YOUTUBE_STREAM_ID` using the YouTube Data API (recommended):
    - Open: [liveStreams.list](https://developers.google.com/youtube/v3/docs/liveStreams/list)
-   - Set `part` to `id,snippet`
+   - Set `part` to `id,snippet,cdn,status`
    - Set `mine` to `true`
-   - Execute and sign in with the channel owner account
-   - Copy the stream `id` from the response
-4. Save this value as `YOUTUBE_STREAM_ID` in `.env`
+   - Set `maxResults` to `50` if the UI asks for it
+   - Execute the request while signed in with the channel owner account
+4. Copy the stream resource id from `items[].id` in the response and save that value as `YOUTUBE_STREAM_ID` in `.env`
+5. If you want the encoder stream key for OBS or another encoder, look at `items[].cdn.ingestionInfo.streamName`, but do not use that value for `YOUTUBE_STREAM_ID`
+6. If the response returns multiple streams, pick the reusable stream that belongs to the same channel and matches the setup you want to keep using
+
+Example HTTP request:
+
+```http
+GET https://www.googleapis.com/youtube/v3/liveStreams?part=id,snippet,cdn,status&mine=true&maxResults=50
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+Replace `YOUR_ACCESS_TOKEN` with an OAuth access token for the same YouTube channel that owns the reusable stream.
+
+Expected response fields:
+
+- `items[].id`: use this for `YOUTUBE_STREAM_ID`
+- `items[].snippet.title`: human-readable stream name
+- `items[].status.streamStatus`: current stream health/status
+- `items[].cdn.ingestionInfo.streamName`: encoder stream key for the broadcast setup, not the bot configuration
 
 This is the simplest setup because the bot only creates the scheduled live page and reuses the same stream configuration each time.
 
