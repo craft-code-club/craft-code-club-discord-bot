@@ -1,3 +1,10 @@
+## [1.8.3](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.2...v1.8.3) (2026-06-30)
+
+
+### Bug Fixes
+
+* purge build-only packages after pip install, retain libffi8 runtime ([a725dce](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a725dce03ac37fc270d1f2eacb09e18c48edb25f))
+
 ## [1.8.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.1...v1.8.2) (2026-06-30)
 
 
