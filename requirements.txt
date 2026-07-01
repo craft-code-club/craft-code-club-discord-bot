@@ -4,4 +4,4 @@ aiohttp==3.14.1
 azure-data-tables==12.7.0
 markdownify==1.2.3
 google-api-python-client==2.198.0
-google-auth==2.54.0
+google-auth==2.55.1
