@@ -1,3 +1,18 @@
+# [1.9.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.3...v1.9.0) (2026-07-04)
+
+
+### Bug Fixes
+
+* extract broadcast ([9a06466](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/9a06466f26909dbff7e743c48a0bc97a0628fc2c))
+* preserve YouTube broadcast snippet on update ([a06ace4](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a06ace4379f7f71d75cfa07a3d2515917a7f48f4))
+* support youtu.be and youtube.com/live URL formats in __extract_broadcast_id ([236de5a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/236de5a568f884cba29c4a439bac9f8c19f038b6))
+* **youtube:** use existing title in updated broadcast snippet ([695951a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/695951a82086105ff07dd045a46ef9b025efba15))
+
+
+### Features
+
+* **youtube:** update live event datetime when scheduled ([ac3b067](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/ac3b067aaca3e4b5e03516a710313f38c7163527))
+
 ## [1.8.3](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.2...v1.8.3) (2026-06-30)
 
 
