@@ -5,6 +5,7 @@ import os
 import re
 from datetime import datetime
 from typing import Optional
+from urllib.parse import urlparse, parse_qs
 
 from google.auth.transport.requests import Request
 from google.auth.exceptions import RefreshError
@@ -28,6 +29,36 @@ class YouTubeLiveService:
 
     def __init__(self) -> None:
         self.__live_streaming_disabled = False
+
+    async def update_live_event_datetime(self, event: CommunityEvent) -> None:
+        if self.__live_streaming_disabled:
+            logger.warning(
+                f'[SERVICES][YOUTUBE] Skipping YouTube live date update for "{event.title}". '
+                'Live streaming is not enabled for the configured YouTube account.')
+            return
+
+        missing_configuration = self.__missing_configuration()
+        if missing_configuration:
+            logger.warning(
+                f'[SERVICES][YOUTUBE] Skipping YouTube live date update for "{event.title}". '
+                f'Missing environment variables: {", ".join(missing_configuration)}')
+            return
+
+        invalid_configuration = self.__invalid_configuration()
+        if invalid_configuration:
+            logger.warning(
+                f'[SERVICES][YOUTUBE] Skipping YouTube live date update for "{event.title}". '
+                f'Invalid environment variables (placeholder values detected): {", ".join(invalid_configuration)}')
+            return
+
+        broadcast_id = self.__extract_broadcast_id(event.recording_link)
+        if not broadcast_id:
+            logger.warning(
+                f'[SERVICES][YOUTUBE] Could not extract broadcast Id from recording_link "{event.recording_link}" '
+                f'for "{event.title}". Skipping date update.')
+            return
+
+        await asyncio.to_thread(self.__update_live_broadcast_datetime, event, broadcast_id)
 
     async def schedule_live_event(self, event: CommunityEvent) -> Optional[str]:
         if self.__live_streaming_disabled:
@@ -54,6 +85,48 @@ class YouTubeLiveService:
         banner_url = event.banner_url()
         banner_image = await image_service.download_image(banner_url) if banner_url else None
         return await asyncio.to_thread(self.__create_live_broadcast, event, banner_image)
+
+    def __extract_broadcast_id(self, recording_link: Optional[str]) -> Optional[str]:
+        if not recording_link:
+            return None
+        try:
+            parsed = urlparse(recording_link)
+            if 'youtube.com' not in parsed.netloc:
+                return None
+            params = parse_qs(parsed.query)
+            video_ids = params.get('v', [])
+            return video_ids[0] if video_ids else None
+        except Exception:
+            return None
+
+    def __update_live_broadcast_datetime(self, event: CommunityEvent, broadcast_id: str) -> None:
+        try:
+            youtube = self.__build_client()
+
+            logger.debug(f'[SERVICES][YOUTUBE] Updating scheduled start time for broadcast "{broadcast_id}" of "{event.title}"')
+
+            youtube.liveBroadcasts().update(
+                part = 'snippet',
+                body = {
+                    'id': broadcast_id,
+                    'snippet': {
+                        'title': event.get_youtube_title(),
+                        'scheduledStartTime': self.__youtube_datetime(event.start_datetime),
+                    }
+                }).execute()
+
+            logger.info(f'[SERVICES][YOUTUBE] Updated scheduled start time for broadcast "{broadcast_id}" of "{event.title}" to {self.__youtube_datetime(event.start_datetime)}')
+        except RefreshError as error:
+            self.__log_refresh_error(event.title, error)
+        except HttpError as error:
+            if self.__is_broadcast_not_found(error):
+                logger.warning(
+                    f'[SERVICES][YOUTUBE] Broadcast "{broadcast_id}" not found while updating date for "{event.title}". '
+                    'The recording_link may point to a broadcast not managed by this bot.')
+                return
+            logger.exception(f'[SERVICES][YOUTUBE] YouTube API error while updating broadcast date for "{event.title}": {error}')
+        except Exception:
+            logger.exception(f'[SERVICES][YOUTUBE] Failed to update broadcast date for "{event.title}"')
 
     def __create_live_broadcast(self, event: CommunityEvent, banner_image: Optional[DownloadedImage]) -> Optional[str]:
         youtube = None
@@ -202,6 +275,10 @@ class YouTubeLiveService:
     def __is_stream_not_found(self, error: HttpError) -> bool:
         details = str(error).lower()
         return 'livestreamnotfound' in details or 'stream not found' in details
+
+    def __is_broadcast_not_found(self, error: HttpError) -> bool:
+        details = str(error).lower()
+        return getattr(error, 'resp', None) and error.resp.status == 404 or 'broadcastnotfound' in details or ('not found' in details and 'broadcast' in details)
 
     def __validate_stream_for_authenticated_channel(self, youtube, configured_stream_id: str) -> bool:
         if not configured_stream_id:

@@ -124,6 +124,9 @@ class CommunityEventsTaskBot(commands.Cog):
                             # Delete the old Discord event if it exists
                             if existing_event.discord_event_id:
                                 await self.__delete_discord_event(existing_event.discord_event_id)
+                            # Update the YouTube live start time if already scheduled
+                            if event.has_recording_link() and event.is_live_event():
+                                await youtube_live_service.update_live_event_datetime(event)
                             community_events_dao.delete(existing_event.id, existing_event.start_datetime)
 
                     await self.__schedule_youtube_live_if_needed(event)
