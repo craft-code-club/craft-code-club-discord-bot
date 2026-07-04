@@ -106,14 +106,25 @@ class YouTubeLiveService:
 
             logger.debug(f'[SERVICES][YOUTUBE] Updating scheduled start time for broadcast "{broadcast_id}" of "{event.title}"')
 
+            response = youtube.liveBroadcasts().list(
+                part = 'snippet',
+                id = broadcast_id,
+                maxResults = 1).execute()
+
+            items = response.get('items', [])
+            if not items:
+                logger.warning(
+                    f'[SERVICES][YOUTUBE] Broadcast "{broadcast_id}" not found while updating date for "{event.title}". '
+                    'The recording_link may point to a broadcast not managed by this bot.')
+                return
+
+            snippet = self.__build_updated_broadcast_snippet(items[0].get('snippet', {}), event)
+
             youtube.liveBroadcasts().update(
                 part = 'snippet',
                 body = {
                     'id': broadcast_id,
-                    'snippet': {
-                        'title': event.get_youtube_title(),
-                        'scheduledStartTime': self.__youtube_datetime(event.start_datetime),
-                    }
+                    'snippet': snippet
                 }).execute()
 
             logger.info(f'[SERVICES][YOUTUBE] Updated scheduled start time for broadcast "{broadcast_id}" of "{event.title}" to {self.__youtube_datetime(event.start_datetime)}')
@@ -236,6 +247,19 @@ class YouTubeLiveService:
         credentials.refresh(Request())
 
         return build('youtube', 'v3', credentials = credentials, cache_discovery = False)
+
+    def __build_updated_broadcast_snippet(self, existing_snippet: dict, event: CommunityEvent) -> dict:
+        snippet = {
+            'title': event.get_youtube_title(),
+            'scheduledStartTime': self.__youtube_datetime(event.start_datetime),
+        }
+
+        for field in ['description', 'scheduledEndTime']:
+            value = existing_snippet.get(field)
+            if value:
+                snippet[field] = value
+
+        return snippet
 
     def __missing_configuration(self) -> list[str]:
         missing = []
