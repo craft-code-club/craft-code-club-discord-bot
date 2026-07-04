@@ -279,7 +279,8 @@ class YouTubeLiveService:
 
     def __is_broadcast_not_found(self, error: HttpError) -> bool:
         details = str(error).lower()
-        return getattr(error, 'resp', None) and error.resp.status == 404 or 'broadcastnotfound' in details or ('not found' in details and 'broadcast' in details)
+        has_404 = getattr(error, 'resp', None) is not None and getattr(error.resp, 'status', None) == 404
+        return has_404 or 'broadcastnotfound' in details or ('not found' in details and 'broadcast' in details)
 
     def __validate_stream_for_authenticated_channel(self, youtube, configured_stream_id: str) -> bool:
         if not configured_stream_id:
