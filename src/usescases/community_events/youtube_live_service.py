@@ -250,7 +250,7 @@ class YouTubeLiveService:
 
     def __build_updated_broadcast_snippet(self, existing_snippet: dict, event: CommunityEvent) -> dict:
         snippet = {
-            'title': event.get_youtube_title(),
+            'title': existing_snippet.get('title') or event.get_youtube_title(),
             'scheduledStartTime': self.__youtube_datetime(event.start_datetime),
         }
 
