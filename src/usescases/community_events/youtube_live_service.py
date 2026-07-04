@@ -87,8 +87,9 @@ class YouTubeLiveService:
         return await asyncio.to_thread(self.__create_live_broadcast, event, banner_image)
 
     def __extract_broadcast_id(self, recording_link: Optional[str]) -> Optional[str]:
-        if not recording_link:
+        if not recording_link or not recording_link.strip():
             return None
+        recording_link = recording_link.strip()
         try:
             parsed = urlparse(recording_link)
             host = (parsed.hostname or '').lower()
