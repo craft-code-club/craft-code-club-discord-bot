@@ -256,9 +256,8 @@ class YouTubeLiveService:
         }
 
         for field in ['description', 'scheduledEndTime']:
-            value = existing_snippet.get(field)
-            if value:
-                snippet[field] = value
+            if field in existing_snippet and existing_snippet[field] is not None:
+                snippet[field] = existing_snippet[field]
 
         return snippet
 
