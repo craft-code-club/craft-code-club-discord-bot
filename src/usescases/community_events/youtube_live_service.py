@@ -93,11 +93,24 @@ class YouTubeLiveService:
         try:
             parsed = urlparse(recording_link)
             host = (parsed.hostname or '').lower()
+
+            if host == 'youtu.be':
+                video_id = parsed.path.strip('/')
+                return video_id if video_id else None
+
             if host not in {'youtube.com', 'www.youtube.com', 'm.youtube.com'}:
                 return None
+
             params = parse_qs(parsed.query)
             video_ids = params.get('v', [])
-            return video_ids[0] if video_ids else None
+            if video_ids:
+                return video_ids[0]
+
+            path_parts = [p for p in parsed.path.split('/') if p]
+            if len(path_parts) >= 2 and path_parts[0] == 'live':
+                return path_parts[1]
+
+            return None
         except Exception:
             return None
 
