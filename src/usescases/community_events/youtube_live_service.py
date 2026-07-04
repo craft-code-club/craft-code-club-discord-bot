@@ -37,14 +37,14 @@ class YouTubeLiveService:
                 'Live streaming is not enabled for the configured YouTube account.')
             return
 
-        missing_configuration = self.__missing_configuration()
+        missing_configuration = [env for env in self.__missing_configuration() if env != 'YOUTUBE_STREAM_ID']
         if missing_configuration:
             logger.warning(
                 f'[SERVICES][YOUTUBE] Skipping YouTube live date update for "{event.title}". '
                 f'Missing environment variables: {", ".join(missing_configuration)}')
             return
 
-        invalid_configuration = self.__invalid_configuration()
+        invalid_configuration = [env for env in self.__invalid_configuration() if env != 'YOUTUBE_STREAM_ID']
         if invalid_configuration:
             logger.warning(
                 f'[SERVICES][YOUTUBE] Skipping YouTube live date update for "{event.title}". '
