@@ -91,7 +91,8 @@ class YouTubeLiveService:
             return None
         try:
             parsed = urlparse(recording_link)
-            if 'youtube.com' not in parsed.netloc:
+            host = (parsed.hostname or '').lower()
+            if host not in {'youtube.com', 'www.youtube.com', 'm.youtube.com'}:
                 return None
             params = parse_qs(parsed.query)
             video_ids = params.get('v', [])
