@@ -16,7 +16,7 @@ concurrency:
 env:
   IMAGE_NAME: 'discord-bot'
   RESOURCE_GROUP: 'rg-craft-code-club'
-  CONTAINER_APP_NAME: 'ca-c3-discord-bot-prod'
+  CONTAINER_APP_NAME: 'ca-c3-discord-bot-discord-bot'
 
 
 jobs:

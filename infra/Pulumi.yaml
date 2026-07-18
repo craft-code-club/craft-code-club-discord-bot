@@ -1,0 +1,3 @@
+name: c3-discord-bot
+runtime: nodejs
+description: Craft & Code Club Discord bot infrastructure on Azure (Storage + Container App).
