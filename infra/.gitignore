@@ -1,3 +1,5 @@
 /node_modules/
 /bin/
 *.log
+# Pulumi project-local dir (e.g. local-backend state/metadata) — never commit it.
+.pulumi/
