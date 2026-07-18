@@ -25,6 +25,8 @@ Infrastructure-as-code for the Discord bot, written in **Pulumi (JavaScript)**. 
 
 ## Setup
 
+Requires Node.js **>= 22**.
+
 ```bash
 cd infra
 npm install
