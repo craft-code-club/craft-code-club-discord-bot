@@ -5,7 +5,7 @@ Infrastructure-as-code for the Discord bot, written in **Pulumi (JavaScript)**. 
 
 - **Resource group** `rg-craft-code-club`
 - **Log Analytics workspace** (Container Apps logs)
-- **Storage account** `sttc3discordbotdiscordbot` (Standard_LRS, StorageV2) + `CommunityEvents` table
+- **Storage account** `sttc3discordbotdiscordbo` (Standard_LRS, StorageV2) + `CommunityEvents` table
 - **Container Apps managed environment** `cae-c3-discord-bot-discord-bot` (Consumption)
 - **Container App** `ca-c3-discord-bot-discord-bot` — the bot (public Docker Hub image, no ingress, 1 replica)
 

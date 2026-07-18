@@ -43,7 +43,7 @@ const leetcodeForumId = cfg.get("leetcodeForumId") || "1188947130505769031";
 const communityEventsChannelId = cfg.get("communityEventsChannelId") || "1173716907342430270";
 const sayHiChannel = cfg.get("sayHiChannel") || "1513309230042583090";
 
-// Required secrets — `pulumi up` fails clearly if any is unset (see Pulumi.prod.yaml).
+// Required secrets — `pulumi up` fails clearly if any is unset (see Pulumi.discord-bot.yaml).
 const discordApiToken = cfg.requireSecret("discordApiToken");
 const discordApplicationId = cfg.requireSecret("discordApplicationId");
 const discordPublicKey = cfg.requireSecret("discordPublicKey");
