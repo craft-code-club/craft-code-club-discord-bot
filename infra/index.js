@@ -40,16 +40,19 @@ const image = cfg.get("image") || "docker.io/craftcodeclub/discord-bot:v1.9.0";
 // Non-secret runtime config (defaults mirror the live Container App env).
 const logLevel = cfg.get("logLevel") || "DEBUG";
 const leetcodeForumId = cfg.get("leetcodeForumId") || "1188947130505769031";
-const communityEventsChannelId = cfg.get("communityEventsChannelId") || "1173716907342430270";
-const sayHiChannel = cfg.get("sayHiChannel") || "1513309230042583090";
+// Required (no hard-coded fallback) so a new stack can't silently point at the wrong channels;
+// both are set in Pulumi.discord-bot.yaml.
+const communityEventsChannelId = cfg.require("communityEventsChannelId");
+const sayHiChannel = cfg.require("sayHiChannel");
 
 // Required secrets — `pulumi up` fails clearly if any is unset (see Pulumi.discord-bot.yaml).
 const discordApiToken = cfg.requireSecret("discordApiToken");
 const discordApplicationId = cfg.requireSecret("discordApplicationId");
 const discordPublicKey = cfg.requireSecret("discordPublicKey");
 
-// Optional YouTube secrets — only wired into the app when actually set. A Container App secret with
-// an empty value fails to provision, so we filter out the undefined ones (same guard as myfeed).
+// Optional YouTube secrets — only wired in when the config key is set: `getSecret` returns undefined
+// when the key is absent, and we drop those. (Don't set a key to an empty string — an empty Container
+// App secret fails to provision.) Same guard as myfeed.
 const youtubeSecrets = [
   { secretName: "youtube-client-id",     env: "YOUTUBE_CLIENT_ID",     value: cfg.getSecret("youtubeClientId") },
   { secretName: "youtube-client-secret", env: "YOUTUBE_CLIENT_SECRET", value: cfg.getSecret("youtubeClientSecret") },
@@ -123,7 +126,7 @@ const storageKeys = azure.storage.listStorageAccountKeysOutput({
   resourceGroupName: rg.name,
   accountName: storage.name,
 });
-const storageConnectionString = pulumi.interpolate`DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storageKeys.keys[0].value};EndpointSuffix=core.windows.net`;
+const storageConnectionString = pulumi.secret(pulumi.interpolate`DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storageKeys.keys[0].value};EndpointSuffix=core.windows.net`);
 
 // ---------------------------------------------------------------------------
 // Container Apps environment + the bot app

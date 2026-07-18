@@ -65,5 +65,5 @@ jobs:
       - name: 'Pulumi up'
         working-directory: infra
         run: |
-          pulumi stack select "$PULUMI_STACK" --create
+          pulumi stack select "$PULUMI_STACK"
           pulumi up --yes --skip-preview
