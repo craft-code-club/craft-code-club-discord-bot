@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.9.0...v1.10.0) (2026-07-18)
+
+
+### Features
+
+* provision Azure infra (Storage + Container App) with Pulumi ([e62da2a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/e62da2a13ac1920c6019019f95b32b6de9cd6fdf))
+
 # [1.9.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.8.3...v1.9.0) (2026-07-04)
 
 
