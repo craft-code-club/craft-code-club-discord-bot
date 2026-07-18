@@ -37,7 +37,8 @@ npm install
 
 pulumi stack select discord-bot          # `--create` if it doesn't exist yet
 
-# Required secrets (already set on this stack; re-run only to rotate):
+# Secrets are NOT committed — set them on the stack when needed (Pulumi writes them into the local
+# Pulumi.discord-bot.yaml; do NOT commit the secret lines — the file tracks only non-secret config):
 pulumi config set --secret c3-discord-bot:discordApiToken      <token>
 pulumi config set --secret c3-discord-bot:discordApplicationId <id>
 pulumi config set --secret c3-discord-bot:discordPublicKey     <key>
@@ -50,9 +51,11 @@ pulumi config set --secret c3-discord-bot:youtubeStreamId      <id>
 pulumi up
 ```
 
-The secret values are stored **encrypted** in `Pulumi.discord-bot.yaml` and decrypted by Pulumi Cloud when you authenticate via `PULUMI_ACCESS_TOKEN`.
+Secrets are kept **out of the repo**: `Pulumi.discord-bot.yaml` tracks only non-secret config. The
+Discord/YouTube secrets are set directly on the stack with `pulumi config set --secret ...` when needed
+and are **never committed**. Because they live in the stack config (not Pulumi Cloud), `pulumi up` —
+locally or in CI — requires them to be configured in that environment first.
 
-Treat `Pulumi.discord-bot.yaml` as **sensitive** (it contains encrypted production secrets). Whether it’s acceptable to commit it depends on your security policy and repo access controls.
 ## CI/CD
 
 - [`.github/workflows/infra.yml`](../.github/workflows/infra.yml) runs `pulumi up` on stack
