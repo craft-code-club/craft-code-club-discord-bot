@@ -3,6 +3,9 @@
   "private": true,
   "description": "Pulumi (JS) — Craft & Code Club Discord bot infrastructure on Azure",
   "main": "index.js",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@pulumi/azure-native": "^2.84.0",
     "@pulumi/pulumi": "^3.140.0"
