@@ -50,9 +50,9 @@ pulumi config set --secret c3-discord-bot:youtubeStreamId      <id>
 pulumi up
 ```
 
-The secret values are stored **encrypted** in `Pulumi.discord-bot.yaml` (committed) and decrypted by
-Pulumi Cloud when you authenticate via `PULUMI_ACCESS_TOKEN` — safe to commit.
+The secret values are stored **encrypted** in `Pulumi.discord-bot.yaml` and decrypted by Pulumi Cloud when you authenticate via `PULUMI_ACCESS_TOKEN`.
 
+Treat `Pulumi.discord-bot.yaml` as **sensitive** (it contains encrypted production secrets). Whether it’s acceptable to commit it depends on your security policy and repo access controls.
 ## CI/CD
 
 - [`.github/workflows/infra.yml`](../.github/workflows/infra.yml) runs `pulumi up` on stack
