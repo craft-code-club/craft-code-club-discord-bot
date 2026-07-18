@@ -51,7 +51,7 @@ pulumi up
 ```
 
 The secret values are stored **encrypted** in `Pulumi.discord-bot.yaml` (committed) and decrypted by
-Pulumi Cloud via `PULUMI_TOKEN` — safe to commit.
+Pulumi Cloud when you authenticate via `PULUMI_ACCESS_TOKEN` — safe to commit.
 
 ## CI/CD
 
