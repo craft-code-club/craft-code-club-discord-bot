@@ -1,0 +1,26 @@
+config:
+  # Non-secret config for this stack (values match the defaults in index.js; explicit here so the
+  # stack is self-documenting). Stack name is `discord-bot`, so environment == "discord-bot" and the
+  # derived resource names carry that suffix (e.g. ca-c3-discord-bot-discord-bot).
+  azure-native:location: centralus
+  c3-discord-bot:projectName: c3-discord-bot
+  c3-discord-bot:resourceGroupName: rg-craft-code-club
+  c3-discord-bot:logLevel: DEBUG
+  c3-discord-bot:leetcodeForumId: "1188947130505769031"
+  c3-discord-bot:communityEventsChannelId: "1173716907342430270"
+  c3-discord-bot:sayHiChannel: "1513309230042583090"
+  c3-discord-bot:image: docker.io/craftcodeclub/discord-bot:v1.9.0
+  c3-discord-bot:discordApiToken:
+    secure: AAABALSOBQh1PKNPVbJgFaK89fHE9LJJydc4wlRTecSkf4kz3vD86D4qUbmNNTA3tBJkAz57BW2GOTI5jUEKQ9LISA/1ZXw3a6p07VwhztywyuQWy17oYrxBE7AiFnZR6KOfHI7YmNs=
+  c3-discord-bot:discordApplicationId:
+    secure: AAABAFB5G5DDz8Tc1yPor4OpSP4ze2j/1FOAj41NXl84dMVQvpfd9DnmPcbuzp2Ms8vU
+  c3-discord-bot:discordPublicKey:
+    secure: AAABAGd0hK18s61mHAk4kLu1/Tg0lYFnLlpOeW+QDowyEMN8MBNfcrrqXhP/IudynQJ8CPFzhr+iFGbAZlNsBWJMx8vYqilIgMSySwqFcTZN83g5i6APRNMmJIw6O6Dv
+  c3-discord-bot:youtubeClientId:
+    secure: AAABAAzeAFafxzCHJjG8KaYJ0Ze6hLZzr9dPqSQB+QT6ZDpmYmvDzkzWx3O1p0sdn65Gb6V9zLCGhaUUmoA9fqjLAQ7T9GnjDH9UbCttU47nlCGgEAVyBXDxuQEqBRwCm4Z8DG6/394=
+  c3-discord-bot:youtubeClientSecret:
+    secure: AAABAL058N2WRagLkXuLE8acPQzRtv1viJIi+PsUnMZFuSuBc2Ayv/6rHyl8a2jy/lrCIQS8Ht7bTCFEv+0UjXufpg==
+  c3-discord-bot:youtubeRefreshToken:
+    secure: AAABAN0JDYMdxyt0v/6r1plbeU086IM0LJQmykeeQvp89WIsDviWGsdJjk1egi6VWCG7sYQ8D82ykmZBx66wbtQ/M2WbZD3xSDgLlPfyxddTkq2cRF7XEa91/m6gF2f4R7xLYQPRX8mXf2J2m68jvAkIeFMnTCL7XLAcdxnKasWYojBWi7hO
+  c3-discord-bot:youtubeStreamId:
+    secure: AAABAFI7Jj5Y9Ysq11hsNrJlIG9KDvtZay8GXzoYzPzUhoQeKYWpkmIc/GEitRR7AIkZi2jKRS7m4TDvAJscrWktft2yGA==
