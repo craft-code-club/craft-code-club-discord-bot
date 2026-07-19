@@ -45,20 +45,26 @@ const leetcodeForumId = cfg.get("leetcodeForumId") || "1188947130505769031";
 const communityEventsChannelId = cfg.require("communityEventsChannelId");
 const sayHiChannel = cfg.require("sayHiChannel");
 
-// Required secrets — `pulumi up` fails clearly if any is unset (see Pulumi.discord-bot.yaml).
-const discordApiToken = cfg.requireSecret("discordApiToken");
-const discordApplicationId = cfg.requireSecret("discordApplicationId");
-const discordPublicKey = cfg.requireSecret("discordPublicKey");
+// Secrets come from ENVIRONMENT VARIABLES — never from committed config/files. In CI they're injected
+// from GitHub secrets on the `pulumi up` step; locally, `export` them before `pulumi up`. Wrapped in
+// pulumi.secret so they're also encrypted in Pulumi state.
+const requireEnv = (name) => {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing required env var ${name} — set it (GitHub secret in CI, or 'export' locally) before running 'pulumi up'.`);
+  return v;
+};
+const discordApiToken = pulumi.secret(requireEnv("DISCORD_API_TOKEN"));
+const discordApplicationId = pulumi.secret(requireEnv("DISCORD_APPLICATION_ID"));
+const discordPublicKey = pulumi.secret(requireEnv("DISCORD_PUBLIC_KEY"));
 
-// Optional YouTube secrets — only wired in when the config key is set: `getSecret` returns undefined
-// when the key is absent, and we drop those. (Don't set a key to an empty string — an empty Container
-// App secret fails to provision.) Same guard as myfeed.
+// Optional YouTube secrets — only wired in when the env var is set (non-empty). The bot degrades
+// gracefully when absent.
 const youtubeSecrets = [
-  { secretName: "youtube-client-id",     env: "YOUTUBE_CLIENT_ID",     value: cfg.getSecret("youtubeClientId") },
-  { secretName: "youtube-client-secret", env: "YOUTUBE_CLIENT_SECRET", value: cfg.getSecret("youtubeClientSecret") },
-  { secretName: "youtube-refresh-token", env: "YOUTUBE_REFRESH_TOKEN", value: cfg.getSecret("youtubeRefreshToken") },
-  { secretName: "youtube-stream-id",     env: "YOUTUBE_STREAM_ID",     value: cfg.getSecret("youtubeStreamId") },
-].filter((s) => s.value !== undefined);
+  { secretName: "youtube-client-id",     env: "YOUTUBE_CLIENT_ID",     value: process.env.YOUTUBE_CLIENT_ID },
+  { secretName: "youtube-client-secret", env: "YOUTUBE_CLIENT_SECRET", value: process.env.YOUTUBE_CLIENT_SECRET },
+  { secretName: "youtube-refresh-token", env: "YOUTUBE_REFRESH_TOKEN", value: process.env.YOUTUBE_REFRESH_TOKEN },
+  { secretName: "youtube-stream-id",     env: "YOUTUBE_STREAM_ID",     value: process.env.YOUTUBE_STREAM_ID },
+].filter((s) => s.value).map((s) => ({ secretName: s.secretName, env: s.env, value: pulumi.secret(s.value) }));
 
 const tags = { project: projectName, environment, managedBy: "pulumi" };
 const namePrefix = `${projectName}-${environment}`;

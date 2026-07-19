@@ -37,24 +37,27 @@ npm install
 
 pulumi stack select discord-bot          # `--create` if it doesn't exist yet
 
-# Secrets are NOT committed — set them on the stack when needed (Pulumi writes them into the local
-# Pulumi.discord-bot.yaml; do NOT commit the secret lines — the file tracks only non-secret config):
-pulumi config set --secret c3-discord-bot:discordApiToken      <token>
-pulumi config set --secret c3-discord-bot:discordApplicationId <id>
-pulumi config set --secret c3-discord-bot:discordPublicKey     <key>
+# Secrets are provided via ENV VARS — never written to any file. Required: Discord; optional: YouTube.
+export DISCORD_API_TOKEN=<token>
+export DISCORD_APPLICATION_ID=<id>
+export DISCORD_PUBLIC_KEY=<key>
 # Optional (YouTube live scheduling):
-pulumi config set --secret c3-discord-bot:youtubeClientId      <id>
-pulumi config set --secret c3-discord-bot:youtubeClientSecret  <secret>
-pulumi config set --secret c3-discord-bot:youtubeRefreshToken  <token>
-pulumi config set --secret c3-discord-bot:youtubeStreamId      <id>
+export YOUTUBE_CLIENT_ID=<id>
+export YOUTUBE_CLIENT_SECRET=<secret>
+export YOUTUBE_REFRESH_TOKEN=<token>
+export YOUTUBE_STREAM_ID=<id>
 
 pulumi up
 ```
 
-Secrets are kept **out of the repo**: `Pulumi.discord-bot.yaml` tracks only non-secret config. The
-Discord/YouTube secrets are set directly on the stack with `pulumi config set --secret ...` when needed
-and are **never committed**. Because they live in the stack config (not Pulumi Cloud), `pulumi up` —
-locally or in CI — requires them to be configured in that environment first.
+Secrets are kept **out of every file**: `index.js` reads them from environment variables (wrapped as
+Pulumi secrets), so nothing sensitive is written to `Pulumi.discord-bot.yaml` or anywhere in the repo.
+- **CI:** [`infra.yml`](../.github/workflows/infra.yml) injects them into the `pulumi up` step from
+  **GitHub secrets** (on the `PROD` environment): `DISCORD_API_TOKEN`, `DISCORD_APPLICATION_ID`,
+  `DISCORD_PUBLIC_KEY` (required) and `YOUTUBE_*` (optional).
+- **Local:** `export` them before `pulumi up` (as above).
+
+Only **non-secret** config (region, names, channel IDs, image) lives in `Pulumi.discord-bot.yaml`.
 
 ## CI/CD
 
