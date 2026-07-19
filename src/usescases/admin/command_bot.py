@@ -35,8 +35,7 @@ class AdminCommandBot(commands.Cog):
         logger.debug(f'[BOT][COMMAND][VERSION] User "{ctx.author.name}" requested the bot version')
 
         if not self._is_server_admin(ctx.author.id):
-            logger.warning(f'[BOT][COMMAND][VERSION] User "{ctx.author.name}" is not a server admin. Access denied')
-            await ctx.author.send('Este comando só está disponível para administradores do servidor.')
+            logger.warning(f'[BOT][COMMAND][VERSION] User "{ctx.author.name}" is not a server admin. Ignoring')
             return
 
         version = os.environ.get('BOT_VERSION', 'dev')
@@ -49,8 +48,7 @@ class AdminCommandBot(commands.Cog):
         logger.debug(f'[BOT][COMMAND][INFO] User "{ctx.author.name}" requested the bot info')
 
         if not self._is_server_admin(ctx.author.id):
-            logger.warning(f'[BOT][COMMAND][INFO] User "{ctx.author.name}" is not a server admin. Access denied')
-            await ctx.author.send('Este comando só está disponível para administradores do servidor.')
+            logger.warning(f'[BOT][COMMAND][INFO] User "{ctx.author.name}" is not a server admin. Ignoring')
             return
 
         version = os.environ.get('BOT_VERSION', 'dev')
