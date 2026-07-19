@@ -55,7 +55,7 @@ jobs:
 
     - name: Build Docker
       run: |
-        docker build -f ./Dockerfile . --build-arg VERSION=${{ steps.tag.outputs.version }} -t ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
+        docker build -f ./Dockerfile --build-arg VERSION=${{ steps.tag.outputs.version }} -t ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }} .
 
     - name: 'Save Docker Image'
       run: |
