@@ -1,3 +1,17 @@
+# [1.11.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.10.1...v1.11.0) (2026-07-19)
+
+
+### Bug Fixes
+
+* move docker build context to end ([167c001](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/167c001dd2c50f37076c916650f3eeba07eaf5be))
+* **admin:** update access denial messages for admin commands ([826e04f](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/826e04fa2e45f9d4f0f17500581ca344b4436635))
+* update command error handling to log instead of send message ([2a8e602](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/2a8e602c76168bd174ae920da159ec06778d5875))
+
+
+### Features
+
+* **admin:** add admin commands to check bot version and uptime ([4e7dcde](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/4e7dcdee9ce92bb498403899076a7bed7ffdd4db))
+
 ## [1.10.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.10.0...v1.10.1) (2026-07-19)
 
 
