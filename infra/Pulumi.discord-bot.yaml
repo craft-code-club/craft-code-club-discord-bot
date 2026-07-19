@@ -1,7 +1,7 @@
 config:
-  # Non-secret config only. Secrets (Discord/YouTube) are intentionally NOT committed — set them on
-  # the stack with `pulumi config set --secret c3-discord-bot:<key> <value>` when needed. Pulumi writes
-  # them into this file locally (encrypted); do NOT commit those lines. See infra/README.md.
+  # Non-secret config only. Secrets (Discord/YouTube) are NOT stored here at all — index.js reads them
+  # from ENVIRONMENT VARIABLES at deploy time (GitHub secrets in CI, `export` locally). Never add secret
+  # values to this file (don't use `pulumi config set --secret` for them). See infra/README.md.
   #
   # Values below match the defaults referenced in index.js. Stack name is `discord-bot`, so
   # environment == "discord-bot" and derived names carry that suffix (e.g. ca-c3-discord-bot-discord-bot).
