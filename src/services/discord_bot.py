@@ -50,7 +50,8 @@ class DiscordBot(commands.Bot):
     # Error handling
     async def on_command_error(self, context, error):
         if isinstance(error, commands.CommandNotFound):
-            await context.send('Command not found.')
+            #await context.send('Command not found.')
+            logging.debug
         else:
             logging.error(f'[BOT][GLOBAL] {type(error)}')
             raise error
