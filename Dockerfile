@@ -1,5 +1,8 @@
 FROM python:3.15.0b3-slim
 
+ARG VERSION=dev
+ENV BOT_VERSION=$VERSION
+
 WORKDIR /app
 
 COPY requirements.txt requirements.txt

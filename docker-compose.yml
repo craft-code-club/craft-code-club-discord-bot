@@ -23,6 +23,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VERSION: ${BOT_VERSION:-dev}
     image: c3/discord-bot
     container_name: c3-discord-bot
     environment:
