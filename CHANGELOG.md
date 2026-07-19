@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.10.0...v1.10.1) (2026-07-19)
+
+
+### Bug Fixes
+
+* enable case sensitivity for command recognition ([f8409bd](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/f8409bdc11c77298e089258e266c94aca31e77b4))
+
 # [1.10.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.9.0...v1.10.0) (2026-07-18)
 
 
