@@ -56,7 +56,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: infra/package-lock.json
 
-      - uses: pulumi/actions@v5
+      - uses: pulumi/actions@v7
 
       - name: 'Install IaC deps'
         working-directory: infra
