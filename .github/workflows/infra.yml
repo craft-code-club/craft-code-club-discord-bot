@@ -50,13 +50,13 @@ jobs:
               "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
             }
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: infra/package-lock.json
 
-      - uses: pulumi/actions@v5
+      - uses: pulumi/actions@v7
 
       - name: 'Install IaC deps'
         working-directory: infra
