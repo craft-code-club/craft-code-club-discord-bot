@@ -1,4 +1,4 @@
-FROM python:3.15.0b3-slim
+FROM python:3.15.0b4-slim
 
 ARG VERSION=dev
 ENV BOT_VERSION=${VERSION}
