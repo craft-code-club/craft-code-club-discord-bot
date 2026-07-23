@@ -237,8 +237,7 @@ class AdminCommandBot(commands.Cog):
 
         if old_link:
             logger.info(
-                f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Updated session link for event "{event_key}" '
-                f'from "{old_link}" to "{session_link}" (by "{ctx.author.name}")'
+                f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Updated session link for event "{event_key}" (by "{ctx.author.name}")'
             )
             await ctx.author.send(f'✅ Session link do evento `{event_key}` atualizado com sucesso: `{session_link}`')
         else:
