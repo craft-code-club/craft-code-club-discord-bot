@@ -243,9 +243,18 @@ class AdminCommandBot(commands.Cog):
         lines = text.split('\n')
         chunk = ''
         for line in lines:
+            # Split lines that are themselves longer than the limit into safe slices
+            while len(line) > limit:
+                slice_, line = line[:limit], line[limit:]
+                if chunk:
+                    await user.send(chunk)
+                    chunk = ''
+                await user.send(slice_)
+
             candidate = chunk + '\n' + line if chunk else line
             if len(candidate) > limit:
-                await user.send(chunk)
+                if chunk:
+                    await user.send(chunk)
                 chunk = line
             else:
                 chunk = candidate
