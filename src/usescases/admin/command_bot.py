@@ -84,7 +84,7 @@ class AdminCommandBot(commands.Cog):
         await ctx.author.send(f'Versão do bot: {version}\nTempo online: {uptime}')
         logger.info(f'[BOT][COMMAND][INFO] Sent bot info (version "{version}", uptime "{uptime}") to admin "{ctx.author.name}"')
 
-    @commands.command(name='add-role', help='Adiciona um cargo a um utilizador ou a todos com @all (apenas administradores, via DM)')
+    @commands.command(name='add-role', help='Adiciona um role a um utilizador ou a todos com @all (apenas administradores, via DM)')
     @commands.dm_only()
     async def add_role(self, ctx, user: str, *, role_name: str):
         logger.debug(f'[BOT][COMMAND][ADD-ROLE] User "{ctx.author.name}" requested to add role "{role_name}" to "{user}"')
@@ -147,3 +147,48 @@ class AdminCommandBot(commands.Cog):
             logger.info(f'[BOT][COMMAND][ADD-ROLE] Added role "{role.name}" to {assigned} member(s) in guild "{guild.name}" ({failed} failures)')
 
         await ctx.author.send('\n'.join(summary))
+
+    @commands.command(name='server-status', help='Mostra estatísticas do servidor (apenas administradores, via DM)')
+    @commands.dm_only()
+    async def status(self, ctx):
+        logger.debug(f'[BOT][COMMAND][STATUS] User "{ctx.author.name}" requested the server status')
+
+        guilds = self._admin_guilds(ctx.author.id)
+        if not guilds:
+            logger.warning(f'[BOT][COMMAND][STATUS] User "{ctx.author.name}" is not a server admin. Ignoring')
+            return
+
+        summary = []
+        for guild in guilds:
+            total_users = guild.member_count
+            total_admins = sum(1 for m in guild.members if m.guild_permissions.administrator)
+            no_role_users = sum(1 for m in guild.members if len(m.roles) == 1)
+
+            try:
+                total_bans = len([b async for b in guild.bans(limit=None)])
+                bans_line = f'Total de banidos: {total_bans}'
+            except discord.Forbidden:
+                logger.warning(f'[BOT][COMMAND][STATUS] Missing permissions to fetch bans in guild "{guild.name}"')
+                bans_line = 'Total de banidos: sem permissão para consultar'
+
+            role_lines = [
+                f'  {role.name}: {len(role.members)}'
+                for role in sorted(guild.roles, key=lambda r: r.position, reverse=True)
+                if role != guild.default_role and len(role.members) > 0
+            ]
+
+            lines = [
+                f'**{guild.name}**',
+                f'Total de utilizadores: {total_users}',
+                f'Total de administradores: {total_admins}',
+                bans_line,
+                f'Utilizadores sem role: {no_role_users}',
+                'Utilizadores por role:',
+            ] + role_lines
+            summary.append('\n'.join(lines))
+            logger.info(
+                f'[BOT][COMMAND][STATUS] Sent server status for guild "{guild.name}" to admin "{ctx.author.name}" '
+                f'(users={total_users}, admins={total_admins})'
+            )
+
+        await ctx.author.send('\n\n'.join(summary))
