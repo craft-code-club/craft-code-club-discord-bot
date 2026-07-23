@@ -1,9 +1,12 @@
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from urllib.parse import urlparse
 import discord
 from discord.ext import commands
 import logging
+
+from usescases.community_events.community_events_dao import community_events_dao
 
 logger = logging.getLogger(__name__)
 
@@ -147,3 +150,89 @@ class AdminCommandBot(commands.Cog):
             logger.info(f'[BOT][COMMAND][ADD-ROLE] Added role "{role.name}" to {assigned} member(s) in guild "{guild.name}" ({failed} failures)')
 
         await ctx.author.send('\n'.join(summary))
+
+    @staticmethod
+    def _is_valid_url(url: str) -> bool:
+        try:
+            parsed = urlparse(url)
+            return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
+        except Exception:
+            return False
+
+    @commands.command(name='event-add-session-link', help='Adiciona ou atualiza o session link de um evento (apenas administradores, via DM)')
+    @commands.dm_only()
+    async def event_add_session_link(self, ctx, *args):
+        logger.debug(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] User "{ctx.author.name}" invoked command with args {args}')
+
+        if not self._is_server_admin(ctx.author.id):
+            logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] User "{ctx.author.name}" is not a server admin. Ignoring')
+            return
+
+        args_list = list(args)
+        force = False
+        if args_list and args_list[0] == '-f':
+            force = True
+            args_list = args_list[1:]
+
+        if len(args_list) != 2:
+            await ctx.author.send(
+                '❌ Uso incorreto. Sintaxe: `/event-add-session-link [-f] <eventKey> <sessionLink>`\n'
+                'O `-f` força a atualização quando o evento já tem um session link.'
+            )
+            return
+
+        event_key, session_link = args_list
+
+        if not self._is_valid_url(session_link):
+            logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Invalid URL "{session_link}" provided by "{ctx.author.name}"')
+            await ctx.author.send(f'❌ Link inválido: `{session_link}`. Fornece um URL válido com esquema http ou https.')
+            return
+
+        event = community_events_dao.get(event_key)
+        if event is None:
+            logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Event "{event_key}" not found (requested by "{ctx.author.name}")')
+            await ctx.author.send(f'❌ Evento não encontrado: `{event_key}`.')
+            return
+
+        now = datetime.now(timezone.utc)
+        event_start = event.start_datetime
+        if event_start.tzinfo is None:
+            event_start = event_start.replace(tzinfo=timezone.utc)
+        if event_start < now - timedelta(hours=1):
+            logger.warning(
+                f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Event "{event_key}" started at "{event_start.isoformat()}" '
+                f'which is more than 1h ago (requested by "{ctx.author.name}")'
+            )
+            await ctx.author.send(
+                f'❌ O evento `{event_key}` já ocorreu ou começou há mais de 1 hora. ({event_start.isoformat()}). '
+                'Não é possível adicionar o session link.'
+            )
+            return
+
+        if event.session_link and not force:
+            logger.warning(
+                f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Event "{event_key}" already has a session link '
+                f'and -f was not provided (requested by "{ctx.author.name}")'
+            )
+            await ctx.author.send(
+                f'❌ O evento `{event_key}` já tem um session link: `{event.session_link}`\n'
+                'Usa `-f` para forçar a atualização.'
+            )
+            return
+
+        old_link = event.session_link
+        event.session_link = session_link
+        community_events_dao.update(event)
+
+        if old_link:
+            logger.info(
+                f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Updated session link for event "{event_key}" '
+                f'from "{old_link}" to "{session_link}" (by "{ctx.author.name}")'
+            )
+            await ctx.author.send(f'✅ Session link do evento `{event_key}` atualizado com sucesso: `{session_link}`')
+        else:
+            logger.info(
+                f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Set session link for event "{event_key}" '
+                f'to "{session_link}" (by "{ctx.author.name}")'
+            )
+            await ctx.author.send(f'✅ Session link do evento `{event_key}` definido com sucesso: `{session_link}`')
