@@ -194,19 +194,6 @@ class AdminCommandBot(commands.Cog):
                 f'- **Atualizado em:** {timestamp_str}',
             ]), computed_at
 
-        try:
-            total_bans = sum(1 async for _ in guild.bans(limit=None))
-            bans_line = f'- **Total de banidos:** {total_bans}'
-        except discord.Forbidden:
-            logger.warning(f'[BOT][COMMAND][STATUS] Missing permissions to fetch bans in guild "{guild.name}"')
-            bans_line = '- **Total de banidos:** sem permissão para consultar'
-        except discord.HTTPException:
-            logger.exception(f'[BOT][COMMAND][STATUS] Failed to fetch bans in guild "{guild.name}"')
-            bans_line = '- **Total de banidos:** erro ao consultar'
-        except Exception:
-            logger.exception(f'[BOT][COMMAND][STATUS] Unexpected error while fetching bans in guild "{guild.name}"')
-            bans_line = '- **Total de banidos:** erro inesperado ao consultar'
-
         role_lines = [
             f'  - {role.name}: {role_counts[role.id]}'
             for role in sorted(guild.roles, key=lambda r: r.position, reverse=True)
@@ -220,7 +207,6 @@ class AdminCommandBot(commands.Cog):
             f'**{guild.name}**',
             f'- **Total de utilizadores:** {total_users}',
             f'- **Total de administradores:** {total_admins}',
-            bans_line,
             f'- **Utilizadores sem role:** {no_role_users}',
             '- **Utilizadores por role:**',
         ] + role_lines + [f'- **Atualizado em:** {timestamp_str}']
