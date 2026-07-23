@@ -185,7 +185,7 @@ class AdminCommandBot(commands.Cog):
 
         if not self._is_valid_url(session_link):
             logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Invalid URL "{session_link}" provided by "{ctx.author.name}"')
-            await ctx.author.send(f'❌ Link inválido: `{session_link}`. Fornece um URL válido com esquema http ou https.')
+            await ctx.author.send(f'❌ Link inválido: `{session_link}`. Forneça um URL válido com esquema http ou https.')
             return
 
         event = community_events_dao.get(event_key)
