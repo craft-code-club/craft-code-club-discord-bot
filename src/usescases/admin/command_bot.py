@@ -152,20 +152,47 @@ class AdminCommandBot(commands.Cog):
         await ctx.author.send('\n'.join(summary))
 
     async def _build_guild_status(self, guild) -> tuple[str, datetime]:
-        members = [m async for m in guild.fetch_members(limit=None)]
-
-        total_users = len(members)
+        total_users = 0
         total_admins = 0
         no_role_users = 0
         role_counts: dict[int, int] = {}
-        for m in members:
-            if m.guild_permissions.administrator:
-                total_admins += 1
-            if len(m.roles) == 1:
-                no_role_users += 1
-            for role in m.roles:
-                if role != guild.default_role:
-                    role_counts[role.id] = role_counts.get(role.id, 0) + 1
+        try:
+            async for m in guild.fetch_members(limit=None):
+                total_users += 1
+                if m.guild_permissions.administrator:
+                    total_admins += 1
+                if len(m.roles) == 1:
+                    no_role_users += 1
+                for role in m.roles:
+                    if role != guild.default_role:
+                        role_counts[role.id] = role_counts.get(role.id, 0) + 1
+        except discord.Forbidden:
+            logger.warning(f'[BOT][COMMAND][STATUS] Missing permissions to fetch members in guild "{guild.name}"')
+            computed_at = datetime.now(timezone.utc)
+            timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
+            return '\n'.join([
+                f'**{guild.name}**',
+                '- **Erro:** sem permissão para consultar membros',
+                f'- **Atualizado em:** {timestamp_str}',
+            ]), computed_at
+        except discord.HTTPException:
+            logger.exception(f'[BOT][COMMAND][STATUS] Failed to fetch members in guild "{guild.name}"')
+            computed_at = datetime.now(timezone.utc)
+            timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
+            return '\n'.join([
+                f'**{guild.name}**',
+                '- **Erro:** erro ao consultar membros',
+                f'- **Atualizado em:** {timestamp_str}',
+            ]), computed_at
+        except Exception:
+            logger.exception(f'[BOT][COMMAND][STATUS] Unexpected error while fetching members in guild "{guild.name}"')
+            computed_at = datetime.now(timezone.utc)
+            timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
+            return '\n'.join([
+                f'**{guild.name}**',
+                '- **Erro:** erro inesperado ao consultar membros',
+                f'- **Atualizado em:** {timestamp_str}',
+            ]), computed_at
 
         try:
             total_bans = sum(1 async for _ in guild.bans(limit=None))
