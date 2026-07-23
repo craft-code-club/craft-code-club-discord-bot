@@ -104,6 +104,20 @@ class AdminCommandBot(commands.Cog):
 
             if user.lower() == '@all':
                 members = [m async for m in guild.fetch_members(limit=None)]
+                max_members = int(os.environ.get('ADD_ROLE_ALL_MAX_MEMBERS', '200'))
+                if len(members) > max_members:
+                    logger.warning(
+                        f'[BOT][COMMAND][ADD-ROLE] @all request in guild "{guild.name}" aborted: '
+                        f'{len(members)} members exceeds cap of {max_members}'
+                    )
+                    summary.append(
+                        f'⚠️ {guild.name}: operação cancelada para @all '
+                        f'({len(members)} utilizador(es), limite {max_members})'
+                    )
+                    continue
+                await ctx.author.send(
+                    f'⏳ {guild.name}: a adicionar role "{role.name}" a {len(members)} utilizador(es)...'
+                )
             else:
                 members = self._find_members(guild, user)
 
