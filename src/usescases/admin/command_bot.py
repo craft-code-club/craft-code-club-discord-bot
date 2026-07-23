@@ -194,10 +194,15 @@ class AdminCommandBot(commands.Cog):
             await ctx.author.send(f'❌ Evento não encontrado: `{event_key}`.')
             return
 
-        now = datetime.now(timezone.utc)
+        from utils.timezones import get_brazil_timezone
+
+        brazil_tz = get_brazil_timezone()
+        now = datetime.now(brazil_tz)
         event_start = event.start_datetime
         if event_start.tzinfo is None:
-            event_start = event_start.replace(tzinfo=timezone.utc)
+            event_start = event_start.replace(tzinfo=brazil_tz)
+        else:
+            event_start = event_start.astimezone(brazil_tz)
         if event_start < now - timedelta(hours=1):
             logger.warning(
                 f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Event "{event_key}" started at "{event_start.isoformat()}" '
