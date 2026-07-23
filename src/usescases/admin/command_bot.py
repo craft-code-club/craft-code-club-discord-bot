@@ -102,7 +102,11 @@ class AdminCommandBot(commands.Cog):
                 summary.append(f'❌ {guild.name}: role "{role_name}" não encontrado')
                 continue
 
-            members = self._find_members(guild, user)
+            if user.lower() == '@all':
+                members = [m async for m in guild.fetch_members(limit=None)]
+            else:
+                members = self._find_members(guild, user)
+
             if not members:
                 logger.warning(f'[BOT][COMMAND][ADD-ROLE] User "{user}" not found in guild "{guild.name}"')
                 summary.append(f'❌ {guild.name}: utilizador "{user}" não encontrado')
