@@ -104,7 +104,7 @@ class AdminCommandBot(commands.Cog):
 
             if user.lower() == '@all':
                 members = [m async for m in guild.fetch_members(limit=None)]
-                max_members = int(os.environ.get('ADD_ROLE_ALL_MAX_MEMBERS', '200'))
+                max_members = int(os.environ.get('ADD_ROLE_ALL_MAX_MEMBERS', '3000'))
                 if len(members) > max_members:
                     logger.warning(
                         f'[BOT][COMMAND][ADD-ROLE] @all request in guild "{guild.name}" aborted: '
