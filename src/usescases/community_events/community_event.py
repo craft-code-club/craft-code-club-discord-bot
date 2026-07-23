@@ -30,6 +30,7 @@ class CommunityEvent:
     banner: Optional[str] = None
 
     is_live: bool = False
+    open_session: bool = False
     youtube_title: Optional[str] = None
     session_link: Optional[str] = None
 

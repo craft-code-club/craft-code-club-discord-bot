@@ -65,6 +65,7 @@ class CommunityEventsDao:
             'banner': event.banner,
 
             'is_live': event.is_live,
+            'open_session': event.open_session,
             'youtube_title': event.youtube_title,
             'session_link': event.session_link,
 
@@ -93,6 +94,7 @@ class CommunityEventsDao:
             'banner': event.banner,
 
             'is_live': event.is_live,
+            'open_session': event.open_session,
             'youtube_title': event.youtube_title,
             'session_link': event.session_link,
 
@@ -129,6 +131,7 @@ class CommunityEventsDao:
             banner = event["banner"] if "banner" in event else None,
 
             is_live = event["is_live"] if "is_live" in event else False,
+            open_session = event["open_session"] if "open_session" in event else False,
             youtube_title = event["youtube_title"] if "youtube_title" in event else None,
             session_link = event["session_link"] if "session_link" in event else None,
 
