@@ -227,7 +227,7 @@ class AdminCommandBot(commands.Cog):
             )
             await ctx.author.send(
                 f'❌ O evento `{event_key}` já tem um session link: `{event.session_link}`\n'
-                'Usa `-f` para forçar a atualização.'
+                'Use `-f` para forçar a atualização.'
             )
             return
 
