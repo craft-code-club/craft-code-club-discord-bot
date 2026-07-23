@@ -7,6 +7,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+_STATUS_CACHE_TTL = 30  # seconds
+
 
 async def setup(bot):
     await bot.add_cog(AdminCommandBot(bot))
@@ -16,6 +18,7 @@ class AdminCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.started_at = datetime.now(timezone.utc)
+        self._status_cache: dict[int, tuple[datetime, str]] = {}
 
     def _admin_guilds(self, user_id):
         guilds = []
@@ -148,6 +151,80 @@ class AdminCommandBot(commands.Cog):
 
         await ctx.author.send('\n'.join(summary))
 
+    async def _build_guild_status(self, guild) -> tuple[str, datetime]:
+        members = [m async for m in guild.fetch_members(limit=None)]
+
+        total_users = len(members)
+        total_admins = 0
+        no_role_users = 0
+        role_counts: dict[int, int] = {}
+        for m in members:
+            if m.guild_permissions.administrator:
+                total_admins += 1
+            if len(m.roles) == 1:
+                no_role_users += 1
+            for role in m.roles:
+                if role != guild.default_role:
+                    role_counts[role.id] = role_counts.get(role.id, 0) + 1
+
+        try:
+            total_bans = sum(1 async for _ in guild.bans(limit=None))
+            bans_line = f'- **Total de banidos:** {total_bans}'
+        except discord.Forbidden:
+            logger.warning(f'[BOT][COMMAND][STATUS] Missing permissions to fetch bans in guild "{guild.name}"')
+            bans_line = '- **Total de banidos:** sem permissão para consultar'
+        except discord.HTTPException:
+            logger.exception(f'[BOT][COMMAND][STATUS] Failed to fetch bans in guild "{guild.name}"')
+            bans_line = '- **Total de banidos:** erro ao consultar'
+        except Exception:
+            logger.exception(f'[BOT][COMMAND][STATUS] Unexpected error while fetching bans in guild "{guild.name}"')
+            bans_line = '- **Total de banidos:** erro inesperado ao consultar'
+
+        role_lines = [
+            f'  - {role.name}: {role_counts[role.id]}'
+            for role in sorted(guild.roles, key=lambda r: r.position, reverse=True)
+            if role != guild.default_role and role.id in role_counts
+        ]
+
+        computed_at = datetime.now(timezone.utc)
+        timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
+
+        lines = [
+            f'**{guild.name}**',
+            f'- **Total de utilizadores:** {total_users}',
+            f'- **Total de administradores:** {total_admins}',
+            bans_line,
+            f'- **Utilizadores sem role:** {no_role_users}',
+            '- **Utilizadores por role:**',
+        ] + role_lines + [f'- **Atualizado em:** {timestamp_str}']
+
+        return '\n'.join(lines), computed_at
+
+    async def _get_guild_status(self, guild) -> str:
+        cached = self._status_cache.get(guild.id)
+        if cached:
+            cached_at, text = cached
+            if (datetime.now(timezone.utc) - cached_at).total_seconds() < _STATUS_CACHE_TTL:
+                return text
+
+        text, computed_at = await self._build_guild_status(guild)
+        self._status_cache[guild.id] = (computed_at, text)
+        return text
+
+    @staticmethod
+    async def _send_chunked(user, text: str, limit: int = 2000):
+        lines = text.split('\n')
+        chunk = ''
+        for line in lines:
+            candidate = chunk + '\n' + line if chunk else line
+            if len(candidate) > limit:
+                await user.send(chunk)
+                chunk = line
+            else:
+                chunk = candidate
+        if chunk:
+            await user.send(chunk)
+
     @commands.command(name='server-status', help='Mostra estatísticas do servidor (apenas administradores, via DM)')
     @commands.dm_only()
     async def status(self, ctx):
@@ -158,42 +235,9 @@ class AdminCommandBot(commands.Cog):
             logger.warning(f'[BOT][COMMAND][STATUS] User "{ctx.author.name}" is not a server admin. Ignoring')
             return
 
-        summary = []
         for guild in guilds:
-            total_users = guild.member_count
-            total_admins = sum(1 for m in guild.members if m.guild_permissions.administrator)
-            no_role_users = sum(1 for m in guild.members if len(m.roles) == 1)
-
-            try:
-                total_bans = len([b async for b in guild.bans(limit=None)])
-                bans_line = f'- **Total de banidos:** {total_bans}'
-            except discord.Forbidden:
-                logger.warning(f'[BOT][COMMAND][STATUS] Missing permissions to fetch bans in guild "{guild.name}"')
-                bans_line = '- **Total de banidos:** sem permissão para consultar'
-            except discord.HTTPException:
-                logger.exception(f'[BOT][COMMAND][STATUS] Failed to fetch bans in guild "{guild.name}"')
-                bans_line = '- **Total de banidos:** erro ao consultar'
-            except Exception:
-                logger.exception(f'[BOT][COMMAND][STATUS] Unexpected error while fetching bans in guild "{guild.name}"')
-                bans_line = '- **Total de banidos:** erro inesperado ao consultar'
-            role_lines = [
-                f'  - {role.name}: {len(role.members)}'
-                for role in sorted(guild.roles, key=lambda r: r.position, reverse=True)
-                if role != guild.default_role and len(role.members) > 0
-            ]
-
-            lines = [
-                f'**{guild.name}**',
-                f'- **Total de utilizadores:** {total_users}',
-                f'- **Total de administradores:** {total_admins}',
-                bans_line,
-                f'- **Utilizadores sem role:** {no_role_users}',
-                '- **Utilizadores por role:**',
-            ] + role_lines
-            summary.append('\n'.join(lines))
+            text = await self._get_guild_status(guild)
+            await self._send_chunked(ctx.author, text)
             logger.info(
-                f'[BOT][COMMAND][STATUS] Sent server status for guild "{guild.name}" to admin "{ctx.author.name}" '
-                f'(users={total_users}, admins={total_admins})'
+                f'[BOT][COMMAND][STATUS] Sent server status for guild "{guild.name}" to admin "{ctx.author.name}"'
             )
-
-        await ctx.author.send('\n\n'.join(summary))
