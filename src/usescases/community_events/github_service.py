@@ -81,7 +81,7 @@ class GitHubService:
                     is_live = str(event_data.get('isLive', '')).strip().lower() == 'true',
                     open_session = str(event_data.get('openSession', '')).strip().lower() == 'true',
                     youtube_title = event_data.get('youtubeTitle') or None,
-                    registration_link = None if event_data.get('registrationLink') == '{{discord-link}}' else event_data.get('registrationLink'),
+                    registration_link = None if (event_data.get('registrationLink') or '').strip() in ('', '{{discord-link}}') else (event_data.get('registrationLink') or '').strip(),
                     recording_link = event_data.get('recordingLink'),
                     session_link = event_data.get('sessionLink'),
                     post_link = event_data.get('postLink'),
