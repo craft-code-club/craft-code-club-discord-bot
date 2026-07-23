@@ -1,3 +1,15 @@
+# [1.12.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.11.0...v1.12.0) (2026-07-23)
+
+
+### Bug Fixes
+
+* **add-role:** increase max members limit for [@all](https://github.com/all) role assignment ([063e4f6](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/063e4f6b919143556c3d9d7e982d60f1c21638bf))
+
+
+### Features
+
+* **admin:** add command to assign roles to users or [@all](https://github.com/all) ([af325ae](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/af325aed744ca045df471d01d7c57a81a1782bca))
+
 # [1.11.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.10.1...v1.11.0) (2026-07-19)
 
 
