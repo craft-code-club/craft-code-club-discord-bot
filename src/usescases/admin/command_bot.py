@@ -45,7 +45,9 @@ class AdminCommandBot(commands.Cog):
         target = user.lower()
         return [
             m for m in guild.members
-            if target in (m.name.lower(), m.display_name.lower(), (m.global_name or '').lower())
+            if target == m.name.lower()
+            or target == m.display_name.lower()
+            or target == (m.global_name or '').lower()
         ]
 
     def _format_uptime(self):
