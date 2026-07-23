@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord
+import asyncio
 import os
 from utils.message_loader import load_message
 import logging
@@ -14,6 +15,8 @@ async def setup(bot):
 class NewMemberEventBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        raw_welcome_delay = os.environ.get('WELCOME_DELAY_SECONDS', '').strip()
+        self.welcome_delay_seconds = int(raw_welcome_delay) if raw_welcome_delay.isdigit() else 10
         raw_say_hi_channel_id = os.environ.get('SAY_HI_CHANNEL', '').strip()
         say_hi_channel_id = int(raw_say_hi_channel_id) if raw_say_hi_channel_id.isdigit() else 0
         self.say_hi_channel = f'<#{say_hi_channel_id}>' if say_hi_channel_id else ''
@@ -37,6 +40,20 @@ class NewMemberEventBot(commands.Cog):
             return
 
         logger.info(f'[BOT][EVENT][NEW MEMBER] "{member.name}" joined the server')
+
+        # Wait before greeting so that anti-scam/anti-troll moderation bots have time to
+        # kick suspicious accounts. Avoids sending a welcome message/DM to a user that has
+        # already been removed from the server.
+        await asyncio.sleep(self.welcome_delay_seconds)
+
+        try:
+            await member.guild.fetch_member(member.id)
+        except discord.NotFound:
+            logger.info(f'[BOT][EVENT][NEW MEMBER] "{member.name}" left the server during the grace period. No welcome message will be sent.')
+            return
+        except discord.HTTPException:
+            logger.exception(f'[BOT][EVENT][NEW MEMBER] Could not verify if "{member.name}" is still in the server')
+            return
 
         try:
             system_channel = member.guild.system_channel
