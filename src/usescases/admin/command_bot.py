@@ -152,6 +152,20 @@ class AdminCommandBot(commands.Cog):
         await ctx.author.send('\n'.join(summary))
 
     async def _build_guild_status(self, guild) -> tuple[str, datetime]:
+        max_members = int(os.environ.get('STATUS_MAX_MEMBERS', '5000'))
+        if guild.member_count and guild.member_count > max_members:
+            logger.warning(
+                f'[BOT][COMMAND][STATUS] Guild "{guild.name}" has {guild.member_count} members, '
+                f'exceeding cap of {max_members}. Skipping status fetch.'
+            )
+            computed_at = datetime.now(timezone.utc)
+            timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
+            return '\n'.join([
+                f'**{guild.name}**',
+                f'- **Erro:** servidor demasiado grande ({guild.member_count} membros, limite {max_members})',
+                f'- **Atualizado em:** {timestamp_str}',
+            ]), computed_at
+
         total_users = 0
         total_admins = 0
         no_role_users = 0
