@@ -54,8 +54,8 @@ class CommunityEvent:
         return None
 
     def discord_event_location(self) -> str:
-        if self.session_link:
-            return self.session_link
+        # if self.session_link:
+        #     return self.session_link
         if self.has_recording_link() and self.is_live_event():
             return self.recording_link
         return self.event_details_url()
