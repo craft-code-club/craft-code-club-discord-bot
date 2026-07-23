@@ -165,30 +165,30 @@ class AdminCommandBot(commands.Cog):
             no_role_users = sum(1 for m in guild.members if len(m.roles) == 1)
 
             try:
-                total_bans = sum(1 async for _ in guild.bans(limit=None))
-                bans_line = f'Total de banidos: {total_bans}'
+                total_bans = len([b async for b in guild.bans(limit=None)])
+                bans_line = f'- **Total de banidos:** {total_bans}'
             except discord.Forbidden:
                 logger.warning(f'[BOT][COMMAND][STATUS] Missing permissions to fetch bans in guild "{guild.name}"')
-                bans_line = 'Total de banidos: sem permissão para consultar'
+                bans_line = '- **Total de banidos:** sem permissão para consultar'
             except discord.HTTPException:
                 logger.exception(f'[BOT][COMMAND][STATUS] Failed to fetch bans in guild "{guild.name}"')
-                bans_line = 'Total de banidos: erro ao consultar'
+                bans_line = '- **Total de banidos:** erro ao consultar'
             except Exception:
                 logger.exception(f'[BOT][COMMAND][STATUS] Unexpected error while fetching bans in guild "{guild.name}"')
-                bans_line = 'Total de banidos: erro inesperado ao consultar'
+                bans_line = '- **Total de banidos:** erro inesperado ao consultar'
             role_lines = [
-                f'  {role.name}: {len(role.members)}'
+                f'  - {role.name}: {len(role.members)}'
                 for role in sorted(guild.roles, key=lambda r: r.position, reverse=True)
                 if role != guild.default_role and len(role.members) > 0
             ]
 
             lines = [
                 f'**{guild.name}**',
-                f'Total de utilizadores: {total_users}',
-                f'Total de administradores: {total_admins}',
+                f'- **Total de utilizadores:** {total_users}',
+                f'- **Total de administradores:** {total_admins}',
                 bans_line,
-                f'Utilizadores sem role: {no_role_users}',
-                'Utilizadores por role:',
+                f'- **Utilizadores sem role:** {no_role_users}',
+                '- **Utilizadores por role:**',
             ] + role_lines
             summary.append('\n'.join(lines))
             logger.info(
