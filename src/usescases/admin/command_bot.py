@@ -165,12 +165,17 @@ class AdminCommandBot(commands.Cog):
             no_role_users = sum(1 for m in guild.members if len(m.roles) == 1)
 
             try:
-                total_bans = len([b async for b in guild.bans(limit=None)])
+                total_bans = sum(1 async for _ in guild.bans(limit=None))
                 bans_line = f'Total de banidos: {total_bans}'
             except discord.Forbidden:
                 logger.warning(f'[BOT][COMMAND][STATUS] Missing permissions to fetch bans in guild "{guild.name}"')
                 bans_line = 'Total de banidos: sem permissão para consultar'
-
+            except discord.HTTPException:
+                logger.exception(f'[BOT][COMMAND][STATUS] Failed to fetch bans in guild "{guild.name}"')
+                bans_line = 'Total de banidos: erro ao consultar'
+            except Exception:
+                logger.exception(f'[BOT][COMMAND][STATUS] Unexpected error while fetching bans in guild "{guild.name}"')
+                bans_line = 'Total de banidos: erro inesperado ao consultar'
             role_lines = [
                 f'  {role.name}: {len(role.members)}'
                 for role in sorted(guild.roles, key=lambda r: r.position, reverse=True)
