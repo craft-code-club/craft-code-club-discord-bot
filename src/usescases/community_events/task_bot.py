@@ -118,7 +118,7 @@ class CommunityEventsTaskBot(commands.Cog):
                         if not event.has_recording_link() and existing_event.has_recording_link():
                             event.recording_link = existing_event.recording_link
 
-                        if not event.session_link and existing_event.session_link:
+                        if existing_event.session_link:
                             event.session_link = existing_event.session_link
 
                         if existing_event.start_datetime == event.start_datetime:
