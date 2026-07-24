@@ -155,12 +155,13 @@ class AdminCommandBot(commands.Cog):
         await ctx.author.send('\n'.join(summary))
 
     @staticmethod
-    def _is_valid_url(url: str) -> bool:
-        try:
-            parsed = urlparse(url)
-            return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
-        except Exception:
+def _is_valid_url(url: str) -> bool:
+        url = url.strip()
+        if not url or ' ' in url:
             return False
+
+        parsed = urlparse(url)
+        return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
 
     @commands.command(name='event-add-session-link', help='Adiciona ou atualiza o session link de um evento (apenas administradores, via DM)')
     @commands.dm_only()
