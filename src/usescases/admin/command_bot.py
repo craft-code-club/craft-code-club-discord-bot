@@ -6,8 +6,6 @@ import discord
 from discord.ext import commands
 import logging
 
-from usescases.community_events.community_events_dao import community_events_dao
-
 logger = logging.getLogger(__name__)
 
 _STATUS_CACHE_TTL = 30  # seconds
@@ -196,6 +194,13 @@ def _is_valid_url(url: str) -> bool:
         if not self._is_valid_url(session_link):
             logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Invalid URL "{session_link}" provided by "{ctx.author.name}"')
             await ctx.author.send(f'❌ Link inválido: `{session_link}`. Forneça um URL válido com esquema http ou https.')
+            return
+
+        try:
+            from usescases.community_events.community_events_dao import community_events_dao
+        except Exception:
+            logger.exception('[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Failed to initialize community events DAO')
+            await ctx.author.send('❌ Não foi possível conectar ao armazenamento de eventos. Verifica a configuração do Azure Storage.')
             return
 
         event = community_events_dao.get(event_key)
