@@ -1,3 +1,42 @@
+# [1.15.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.14.0...v1.15.0) (2026-07-24)
+
+
+### Bug Fixes
+
+* **github_service:** handle invalid registration link for events ([172f60a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/172f60a3e50e10e183a5157d2362f7b266808463))
+
+
+### Features
+
+* **community_event:** only show session link if open session is true and reminder time is an hour ([df0750a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/df0750ad60058b963255c0356a6b069f711c5e34))
+
+# [1.14.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.13.0...v1.14.0) (2026-07-24)
+
+
+### Features
+
+* **new-member:** add delay before sending welcome messages ([02c963a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/02c963abbc45517fc01daed7f73eee14d26b590a))
+
+# [1.13.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.12.0...v1.13.0) (2026-07-24)
+
+
+### Bug Fixes
+
+* **status:** add STATUS_MAX_MEMBERS safety cap to _build_guild_status ([b779290](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/b779290bc3a499c741b95e7406e6a19b686bc67d))
+* **status:** improve formatting of server status command output ([0a6c8a1](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/0a6c8a1a6b7ff46b23a0d247c800d23a1aa44114))
+* **send_chunked:** skip empty chunk flushes and split overlong lines into safe slices ([3036ff2](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/3036ff2cd49962cef97fadf530a20b2bdf093b9a))
+* **status:** stream member fetch and handle member query failures ([e3be33a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/e3be33ab14fe6e068ca0265851e7237956f9858b))
+
+
+### Features
+
+* **status:** add server status command for admins via DM ([1c44812](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/1c4481234ff60a52d61772e60c3b0c01fd3b4827))
+
+
+### Performance Improvements
+
+* **status:** single-pass role counting, 30s cache, timestamp, chunked DM output ([fe22152](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/fe2215202c9979b7cb336f401e69cf12fa58d337))
+
 # [1.12.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.11.0...v1.12.0) (2026-07-23)
 
 

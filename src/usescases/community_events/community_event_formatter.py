@@ -73,7 +73,7 @@ class EventMessageFormatter:
             value = f"*{event.portugal_datetime()}*",
             inline = True)
 
-        if event.session_link:
+        if (event.session_link and event.session_link.strip()) and event.open_session and reminder_time == ReminderTime.A_HOUR:
             embed.add_field(
                 name = "🧑‍💻 Participar",
                 value = f"[Clique aqui para participar conosco]({event.session_link})",
