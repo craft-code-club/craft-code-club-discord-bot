@@ -1,3 +1,15 @@
+# [1.15.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.14.0...v1.15.0) (2026-07-24)
+
+
+### Bug Fixes
+
+* **github_service:** handle invalid registration link for events ([172f60a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/172f60a3e50e10e183a5157d2362f7b266808463))
+
+
+### Features
+
+* **community_event:** only show session link if open session is true and reminder time is an hour ([df0750a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/df0750ad60058b963255c0356a6b069f711c5e34))
+
 # [1.14.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.13.0...v1.14.0) (2026-07-24)
 
 
