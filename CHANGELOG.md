@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.13.0...v1.14.0) (2026-07-24)
+
+
+### Features
+
+* **new-member:** add delay before sending welcome messages ([02c963a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/02c963abbc45517fc01daed7f73eee14d26b590a))
+
 # [1.13.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.12.0...v1.13.0) (2026-07-24)
 
 
