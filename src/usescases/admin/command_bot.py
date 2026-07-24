@@ -153,7 +153,7 @@ class AdminCommandBot(commands.Cog):
         await ctx.author.send('\n'.join(summary))
 
     @staticmethod
-def _is_valid_url(url: str) -> bool:
+    def _is_valid_url(url: str) -> bool:
         url = url.strip()
         if not url or ' ' in url:
             return False
