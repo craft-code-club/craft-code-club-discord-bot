@@ -44,7 +44,12 @@ class DiscordLogHandler(logging.Handler):
 
         self._guard.active = True
         try:
-            message = self.format(record)
+            original_levelname = record.levelname
+            record.levelname = logging.getLevelName(record.levelno)
+            try:
+                message = self.format(record)
+            finally:
+                record.levelname = original_levelname
             message = message.replace("```", "`\u200b``")
             if len(message) > MAX_CONTENT_LENGTH:
                 message = message[:MAX_CONTENT_LENGTH]
