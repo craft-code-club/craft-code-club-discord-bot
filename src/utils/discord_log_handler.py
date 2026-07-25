@@ -67,6 +67,17 @@ class DiscordLogHandler(logging.Handler):
         # logging, which breaks the potential infinite loop.
         try:
             channel = self.bot.get_channel(self.channel_id)
+            if channel is None:
+                try:
+                    channel = await self.bot.fetch_channel(self.channel_id)
+                except Exception as fetch_error:  # noqa: BLE001 - must not escape or log
+                    if not self._channel_warning_shown:
+                        self._channel_warning_shown = True
+                        print(
+                            f"[DiscordLogHandler] Channel {self.channel_id} could not be fetched ({fetch_error}); logs will not be forwarded. Check LOGS_CHANNEL_ID.",
+                            file=sys.stderr,
+                        )
+                    return
             if not isinstance(channel, discord.abc.Messageable):
                 if not self._channel_warning_shown:
                     self._channel_warning_shown = True
