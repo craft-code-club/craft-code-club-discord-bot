@@ -20,8 +20,12 @@ if (Test-Path ".env" -PathType Leaf) {
             Write-Host "[.env] Copying .env from main worktree root: $root" -ForegroundColor Green
             Copy-Item $rootEnv ".env"
         } else {
-            Write-Host "[.env] No .env in root — copying .env.example" -ForegroundColor Green
-            Copy-Item ".env.example" ".env"
+            if (Test-Path ".env.example" -PathType Leaf) {
+                Write-Host "[.env] No .env in root — copying .env.example" -ForegroundColor Green
+                Copy-Item ".env.example" ".env"
+            } else {
+                Write-Host "[.env] Warning: no .env.example found. Skipping." -ForegroundColor Yellow
+            }
         }
     } else {
         Write-Host "[.env] Unexpected .git file format — copying .env.example" -ForegroundColor Yellow
