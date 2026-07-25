@@ -79,12 +79,18 @@ class ServerStatusCommandBot(commands.Cog):
             if role != guild.default_role and role.id in role_counts
         ]
 
+        online_count = sum(
+            1 for m in guild.members
+            if m.status != discord.Status.offline
+        )
+
         computed_at = datetime.now(timezone.utc)
         timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
 
         lines = [
             f'**{guild.name}**',
             f'- **Total de utilizadores:** {total_users}',
+            f'- **Utilizadores online:** {online_count}',
             f'- **Total de administradores:** {total_admins}',
             f'- **Utilizadores sem role:** {no_role_users}',
             '- **Utilizadores por role:**',
