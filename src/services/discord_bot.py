@@ -1,3 +1,4 @@
+import asyncio
 import os
 from pathlib import Path
 import discord
@@ -49,9 +50,9 @@ class DiscordBot(commands.Bot):
 
     async def on_ready(self):
         logging.info(f'[BOT][STARTUP] Logged in as {self.user} ({self.user.id})')
-        self.setup_channel_logs()
+        self.setup_channel_logs(asyncio.get_running_loop())
 
-    def setup_channel_logs(self):
+    def setup_channel_logs(self, loop: asyncio.AbstractEventLoop):
         logs_channel_id = os.environ.get('LOGS_CHANNEL_ID')
         if logs_channel_id is None or logs_channel_id == '':
             logging.debug('[BOT][STARTUP][LOGS] LOGS_CHANNEL_ID is not set, skipping channel logs')
@@ -69,7 +70,7 @@ class DiscordBot(commands.Bot):
             logging.error(f'[BOT][STARTUP][LOGS] LOGS_CHANNEL_ID "{logs_channel_id}" is not a valid channel id')
             return
 
-        handler = DiscordLogHandler(self, channel_id)
+        handler = DiscordLogHandler(self, channel_id, loop)
         handler.setFormatter(logging.Formatter(
             fmt='%(asctime)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
