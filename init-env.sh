@@ -20,9 +20,12 @@ elif [ -f ".git" ]; then
             echo "[.env] Copying .env from main worktree root: $root"
             cp "$root/.env" .env
         else
-            echo "[.env] No .env in root — copying .env.example"
-            cp .env.example .env
-        fi
+            if [ -f ".env.example" ]; then
+                echo "[.env] No .env in root — copying .env.example"
+                cp .env.example .env
+            else
+                echo "[.env] Warning: no .env.example found. Skipping."
+            fi
     else
         echo "[.env] Unexpected .git file format — copying .env.example"
         cp .env.example .env
