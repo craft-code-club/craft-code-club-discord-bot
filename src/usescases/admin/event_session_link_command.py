@@ -12,7 +12,7 @@ class EventSessionLinkCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='event-add-session-link', help='Adiciona ou atualiza o session link de um evento (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'usage': '[-f] <eventKey> <sessionLink>', 'notes': 'Usa `-f` para forçar a atualização quando o evento já tem um session link.'})
+    @commands.command(name='event-add-session-link', help='Adiciona ou atualiza o session link de um evento (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'usage': '[-f] <eventId> <sessionLink>', 'notes': 'Usa `-f` para forçar a atualização quando o evento já tem um session link.'})
     @commands.dm_only()
     async def event_add_session_link(self, ctx, *args):
         logger.debug(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] User "{ctx.author.name}" invoked command with args {args}')
@@ -29,7 +29,7 @@ class EventSessionLinkCommandBot(commands.Cog):
 
         if len(args_list) != 2:
             await ctx.author.send(
-                '❌ Uso incorreto. Sintaxe: `/event-add-session-link [-f] <eventKey> <sessionLink>`\n'
+                '❌ Uso incorreto. Sintaxe: `/event-add-session-link [-f] <eventId> <sessionLink>`\n'
                 'O `-f` força a atualização quando o evento já tem um session link.'
             )
             return
