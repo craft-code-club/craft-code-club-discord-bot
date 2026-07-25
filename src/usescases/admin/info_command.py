@@ -13,7 +13,7 @@ class InfoCommandBot(commands.Cog):
         self.bot = bot
         self.started_at = datetime.now(timezone.utc)
 
-    @commands.command(name='info', help='Mostra a versão e o tempo online do bot (apenas administradores, via DM)')
+    @commands.command(name='info', help='Mostra a versão e o tempo online do bot (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM'})
     @commands.dm_only()
     async def info(self, ctx):
         logger.debug(f'[BOT][COMMAND][INFO] User "{ctx.author.name}" requested the bot info')

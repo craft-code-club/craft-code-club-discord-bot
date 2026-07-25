@@ -13,7 +13,7 @@ class RulesCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name = 'rules', help = 'Envia as regras para o utilizador')
+    @commands.command(name = 'rules', help = 'Envia as regras para o utilizador', extras={'scope': 'Servidor e DM'})
     async def rules(self, ctx):
         logger.debug(f'[BOT][COMMAND][RULES] User "{ctx.author.name}" requested the rules')
 

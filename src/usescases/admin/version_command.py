@@ -11,7 +11,7 @@ class VersionCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='version', help='Mostra a versão do bot (apenas administradores, via DM)')
+    @commands.command(name='version', help='Mostra a versão do bot (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM'})
     @commands.dm_only()
     async def version(self, ctx):
         logger.debug(f'[BOT][COMMAND][VERSION] User "{ctx.author.name}" requested the bot version')
