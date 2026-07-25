@@ -9,7 +9,4 @@ config:
   c3-discord-bot:projectName: c3-discord-bot
   c3-discord-bot:resourceGroupName: rg-craft-code-club
   c3-discord-bot:logLevel: DEBUG
-  c3-discord-bot:leetcodeForumId: "1188947130505769031"
-  c3-discord-bot:communityEventsChannelId: "1173716907342430270"
-  c3-discord-bot:sayHiChannel: "1513309230042583090"
-  c3-discord-bot:image: docker.io/craftcodeclub/discord-bot:v1.9.0
+  c3-discord-bot:image: docker.io/craftcodeclub/discord-bot:v1.16.0
