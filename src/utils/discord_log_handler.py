@@ -92,7 +92,7 @@ class DiscordLogHandler(logging.Handler):
                         file=sys.stderr,
                     )
                 return
-            await channel.send(f"```\n{message}\n```")
+            await channel.send(f"```\n{message}\n```", allowed_mentions=discord.AllowedMentions.none())
         except Exception as error:  # noqa: BLE001 - must not escape or log
             print(
                 f"[DiscordLogHandler] Failed to send log to channel "
