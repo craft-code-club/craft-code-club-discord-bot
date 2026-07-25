@@ -1,3 +1,15 @@
+# [1.16.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.15.0...v1.16.0) (2026-07-25)
+
+
+### Bug Fixes
+
+* lazy-load community_events_dao inside event_add_session_link ([37067d1](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/37067d1237634a3c5744bec74b1a1f4987c45f0b))
+
+
+### Features
+
+* **event:** add command to manage event session links ([48828e3](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/48828e3549c00d53a1be3fa3d537864a00c32391))
+
 # [1.15.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.14.0...v1.15.0) (2026-07-24)
 
 
