@@ -29,9 +29,10 @@ class EventsCommandBot(commands.Cog):
             await ctx.author.send('❌ Não foi possível conectar ao armazenamento de eventos. Verifica a configuração do Azure Storage.')
             return
 
-        now = datetime.now(get_brazil_timezone())
+        brazil_tz = get_brazil_timezone()
+        now = datetime.now(brazil_tz)
         upcoming_events = community_events_dao.get_upcoming_events(now)
-        upcoming_events.sort(key=lambda event: event.start_datetime)
+        upcoming_events.sort(key=lambda event: (event.start_datetime.replace(tzinfo=brazil_tz) if event.start_datetime.tzinfo is None else event.start_datetime.astimezone(brazil_tz)))
 
         if not upcoming_events:
             await ctx.author.send('📭 Não há eventos futuros cadastrados.')
