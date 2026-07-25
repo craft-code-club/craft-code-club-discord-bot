@@ -66,7 +66,7 @@ class EventDetailsCommandBot(commands.Cog):
 
         if not re.fullmatch(r'[A-Za-z0-9_-]+', event_key):
             logger.warning(f'[BOT][COMMAND][EVENT] Invalid event key "{event_key}" provided by "{ctx.author.name}"')
-            await ctx.author.send(f'❌ Event key inválida: `{event_key}`. Use apenas letras, números, "-" e "_".')
+            await ctx.author.send(f'❌ Event id inválido: `{event_key}`. Use apenas letras, números, "-" e "_".')
             return
 
         try:
