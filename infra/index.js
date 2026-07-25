@@ -37,11 +37,13 @@ const resourceGroupName = cfg.get("resourceGroupName") || "rg-craft-code-club";
 // `pulumi up` from reverting the tag the pipeline set.
 const image = cfg.get("image") || "docker.io/craftcodeclub/discord-bot:v1.9.0";
 
-// Non-secret runtime config (defaults mirror the live Container App env).
+// Non-secret runtime config. logLevel has a safe default; channel/forum IDs must be set
+// explicitly via `pulumi config set` (no hard-coded fallback) so a new stack can't silently
+// point at the wrong channels.
 const logLevel = cfg.get("logLevel") || "DEBUG";
-const leetcodeForumId = cfg.get("leetcodeForumId") || "1188947130505769031";
-const communityEventsChannelId = cfg.get("communityEventsChannelId") || "1173716907342430270";
-const sayHiChannel = cfg.get("sayHiChannel") || "1513309230042583090";
+const leetcodeForumId = cfg.require("leetcodeForumId");
+const communityEventsChannelId = cfg.require("communityEventsChannelId");
+const sayHiChannel = cfg.require("sayHiChannel");
 
 // Secrets come from ENVIRONMENT VARIABLES — never from committed config/files. In CI they're injected
 // from GitHub secrets on the `pulumi up` step; locally, `export` them before `pulumi up`. Wrapped in
