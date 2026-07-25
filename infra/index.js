@@ -44,6 +44,7 @@ const leetcodeForumId = cfg.get("leetcodeForumId") || "1188947130505769031";
 // both are set in Pulumi.discord-bot.yaml.
 const communityEventsChannelId = cfg.require("communityEventsChannelId");
 const sayHiChannel = cfg.require("sayHiChannel");
+const logsChannelId = cfg.get("logsChannelId") || "";
 
 // Secrets come from ENVIRONMENT VARIABLES — never from committed config/files. In CI they're injected
 // from GitHub secrets on the `pulumi up` step; locally, `export` them before `pulumi up`. Wrapped in
@@ -172,6 +173,7 @@ const appEnv = [
   { name: "LEETCODE_FORUM_ID", value: leetcodeForumId },
   { name: "COMMUNITY_EVENTS_CHANNEL_ID", value: communityEventsChannelId },
   { name: "SAY_HI_CHANNEL", value: sayHiChannel },
+  { name: "LOGS_CHANNEL_ID", value: logsChannelId },
   { name: "DISCORD_API_TOKEN", secretRef: "discord-api-token" },
   { name: "DISCORD_APPLICATION_ID", secretRef: "discord-application-id" },
   { name: "DISCORD_PUBLIC_KEY", secretRef: "discord-public-key" },
