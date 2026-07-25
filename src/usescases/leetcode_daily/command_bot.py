@@ -14,7 +14,7 @@ class LeetcodeDailyCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='leetcode-daily', help='Obtém o problema diário do LeetCode')
+    @commands.command(name='leetcode-daily', help='Obtém o problema diário do LeetCode', extras={'scope': 'Servidor e DM'})
     async def leetcode_daily(self, ctx):
         logger.debug(f'[BOT][COMMAND][LEETCODE DAILY] User "{ctx.author.name}" requested the LeetCode problem of the day')
 

@@ -1,3 +1,12 @@
+# [1.17.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.16.0...v1.17.0) (2026-07-25)
+
+
+### Features
+
+* **help:** add help command to list available commands with descriptions ([4065057](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/4065057a5393f4152cd7dce31853d6f56e8c420b))
+* **init-env:** add initialization script for Python environment setup ([70c028f](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/70c028f13592353085c5120a7a5261af95ef98a3))
+* **commands:** split admin commands ([04bc45d](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/04bc45da785f44ead092bbb6af265e200f11b0b8))
+
 # [1.16.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.15.0...v1.16.0) (2026-07-25)
 
 
