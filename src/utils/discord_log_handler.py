@@ -22,10 +22,11 @@ class DiscordLogHandler(logging.Handler):
     writes to ``sys.stderr`` directly instead of using the logging module.
     """
 
-    def __init__(self, bot: commands.Bot, channel_id: int, level: int = logging.WARNING):
+    def __init__(self, bot: commands.Bot, channel_id: int, loop: asyncio.AbstractEventLoop, level: int = logging.WARNING):
         super().__init__(level=level)
         self.bot = bot
         self.channel_id = channel_id
+        self.loop = loop
         # Per-thread reentrancy guard to prevent recursive emit calls.
         self._guard = threading.local()
         # Ensures the "channel not found" notice is printed at most once.
@@ -53,7 +54,7 @@ class DiscordLogHandler(logging.Handler):
             message = message.replace("```", "`\u200b``")
             if len(message) > MAX_CONTENT_LENGTH:
                 message = message[:MAX_CONTENT_LENGTH]
-            loop = self.bot.loop
+            loop = self.loop
             if not loop.is_running():
                 return
 
