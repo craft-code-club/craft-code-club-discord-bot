@@ -45,9 +45,9 @@ class DiscordLogHandler(logging.Handler):
         self._guard.active = True
         try:
             message = self.format(record)
+            message = message.replace("```", "`\u200b``")
             if len(message) > MAX_CONTENT_LENGTH:
                 message = message[:MAX_CONTENT_LENGTH]
-
             loop = self.bot.loop
             if not loop.is_running():
                 return
