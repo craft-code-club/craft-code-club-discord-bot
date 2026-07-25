@@ -74,7 +74,12 @@ class DiscordLogHandler(logging.Handler):
                 if self._in_flight >= self._MAX_IN_FLIGHT:
                     return
                 self._in_flight += 1
-            future = asyncio.run_coroutine_threadsafe(self._send(message), loop)
+            try:
+                future = asyncio.run_coroutine_threadsafe(self._send(message), loop)
+            except Exception:
+                with self._in_flight_lock:
+                    self._in_flight -= 1
+                raise
             future.add_done_callback(self._on_send_done)
         except Exception:
             # Layer 4: emit must never raise or log; handleError writes to
