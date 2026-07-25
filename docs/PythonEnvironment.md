@@ -38,3 +38,19 @@ deactivate
 ```bash
 rm -r .venv
 ```
+
+
+
+## Update existing virtual environment
+
+```bash
+python.exe -m pip install --upgrade pip
+```
+
+
+
+## Install the required packages
+
+```bash
+pip install -r requirements.txt
+```
