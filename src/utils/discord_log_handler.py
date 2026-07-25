@@ -97,11 +97,15 @@ class DiscordLogHandler(logging.Handler):
         # Layer 5: any failure here is written to sys.stderr only, never via
         # logging, which breaks the potential infinite loop.
         try:
-            channel = self.bot.get_channel(self.channel_id)
+            if getattr(self, '_disabled', False):
+                return
+
+            channel = getattr(self, '_channel', None) or self.bot.get_channel(self.channel_id)
             if channel is None:
                 try:
                     channel = await self.bot.fetch_channel(self.channel_id)
                 except Exception as fetch_error:  # noqa: BLE001 - must not escape or log
+                    self._disabled = True
                     if not self._channel_warning_shown:
                         self._channel_warning_shown = True
                         print(
@@ -109,7 +113,9 @@ class DiscordLogHandler(logging.Handler):
                             file=sys.stderr,
                         )
                     return
+
             if not isinstance(channel, discord.abc.Messageable):
+                self._disabled = True
                 if not self._channel_warning_shown:
                     self._channel_warning_shown = True
                     print(
@@ -118,6 +124,8 @@ class DiscordLogHandler(logging.Handler):
                         file=sys.stderr,
                     )
                 return
+
+            self._channel = channel
             await channel.send(f"```\n{message}\n```", allowed_mentions=discord.AllowedMentions.none())
         except Exception as error:  # noqa: BLE001 - must not escape or log
             print(
