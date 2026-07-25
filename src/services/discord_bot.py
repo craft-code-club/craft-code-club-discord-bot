@@ -74,6 +74,8 @@ class DiscordBot(commands.Bot):
             datefmt='%Y-%m-%d %H:%M:%S'
         ))
         root_logger.addHandler(handler)
+        root_logger.removeHandler(handler)
+        root_logger.handlers.insert(0, handler)
         logging.info(f'[BOT][STARTUP][LOGS] Channel logs enabled on channel {channel_id}')
 
     # Error handling
