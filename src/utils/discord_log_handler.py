@@ -22,6 +22,11 @@ class DiscordLogHandler(logging.Handler):
     writes to ``sys.stderr`` directly instead of using the logging module.
     """
 
+    # Maximum number of coroutines that may be pending at the same time.
+    # New records are dropped (not queued) once this limit is reached so that
+    # bursty logging cannot exhaust memory or trigger Discord rate-limit bans.
+    _MAX_IN_FLIGHT = 10
+
     def __init__(self, bot: commands.Bot, channel_id: int, loop: asyncio.AbstractEventLoop, level: int = logging.WARNING):
         super().__init__(level=level)
         self.bot = bot
@@ -31,6 +36,9 @@ class DiscordLogHandler(logging.Handler):
         self._guard = threading.local()
         # Ensures the "channel not found" notice is printed at most once.
         self._channel_warning_shown = False
+        # Backpressure: track how many _send coroutines are currently in flight.
+        self._in_flight = 0
+        self._in_flight_lock = threading.Lock()
 
     def emit(self, record: logging.LogRecord):
         # Layer 1: reentrancy guard - if we are already inside emit on this
@@ -58,15 +66,27 @@ class DiscordLogHandler(logging.Handler):
             if not loop.is_running():
                 return
 
-            # Layer 3: fire-and-forget; do not call .result() so emit never
-            # blocks and coroutine errors are handled inside _send.
-            asyncio.run_coroutine_threadsafe(self._send(message), loop)
+            # Layer 3: bounded fire-and-forget – drop the record when too many
+            # sends are already pending so bursty logging cannot exhaust memory
+            # or trigger Discord rate-limit bans.  Do not call .result() so
+            # emit never blocks; errors are handled inside _send.
+            with self._in_flight_lock:
+                if self._in_flight >= self._MAX_IN_FLIGHT:
+                    return
+                self._in_flight += 1
+            future = asyncio.run_coroutine_threadsafe(self._send(message), loop)
+            future.add_done_callback(self._on_send_done)
         except Exception:
             # Layer 4: emit must never raise or log; handleError writes to
             # sys.stderr, not through the logging system.
             self.handleError(record)
         finally:
             self._guard.active = False
+
+    def _on_send_done(self, _future) -> None:
+        """Decrement the in-flight counter when a _send coroutine completes."""
+        with self._in_flight_lock:
+            self._in_flight -= 1
 
     async def _send(self, message: str):
         # Layer 5: any failure here is written to sys.stderr only, never via
