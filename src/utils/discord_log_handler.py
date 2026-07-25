@@ -57,18 +57,18 @@ class DiscordLogHandler(logging.Handler):
             if not loop.is_running():
                 return
 
-            # Layer 5: fire-and-forget; do not call .result() so emit never
+            # Layer 3: fire-and-forget; do not call .result() so emit never
             # blocks and coroutine errors are handled inside _send.
             asyncio.run_coroutine_threadsafe(self._send(message), loop)
         except Exception:
-            # Layer 3: emit must never raise or log; handleError writes to
+            # Layer 4: emit must never raise or log; handleError writes to
             # sys.stderr, not through the logging system.
             self.handleError(record)
         finally:
             self._guard.active = False
 
     async def _send(self, message: str):
-        # Layer 4: any failure here is written to sys.stderr only, never via
+        # Layer 5: any failure here is written to sys.stderr only, never via
         # logging, which breaks the potential infinite loop.
         try:
             channel = self.bot.get_channel(self.channel_id)
