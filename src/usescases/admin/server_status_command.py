@@ -103,7 +103,7 @@ class ServerStatusCommandBot(commands.Cog):
         self._status_cache[guild.id] = (computed_at, text)
         return text
 
-    @commands.command(name='server-status', help='Mostra estatísticas do servidor (apenas administradores, via DM)')
+    @commands.command(name='server-status', help='Mostra estatísticas do servidor (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM'})
     @commands.dm_only()
     async def status(self, ctx):
         logger.debug(f'[BOT][COMMAND][STATUS] User "{ctx.author.name}" requested the server status')

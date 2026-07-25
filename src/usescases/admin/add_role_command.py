@@ -12,7 +12,7 @@ class AddRoleCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='add-role', help='Adiciona um role a um utilizador ou a todos com @all (apenas administradores, via DM)')
+    @commands.command(name='add-role', help='Adiciona um role a um utilizador ou a todo (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'notes': 'Usa `@all` em `<user>` para aplicar o role a todos os membros do servidor.'})
     @commands.dm_only()
     async def add_role(self, ctx, user: str, *, role_name: str):
         logger.debug(f'[BOT][COMMAND][ADD-ROLE] User "{ctx.author.name}" requested to add role "{role_name}" to "{user}"')
