@@ -16,6 +16,7 @@ class DiscordBot(commands.Bot):
         super().__init__(
             command_prefix=commands.when_mentioned_or('/'),
             case_insensitive=True,
+            help_command=None,
             intents=intents)
 
     # Initial setup
