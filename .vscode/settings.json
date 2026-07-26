@@ -1,0 +1,4 @@
+{
+    // Windows venv interpreter. On Linux/macOS use "${workspaceFolder}/.venv/bin/python".
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe"
+}
