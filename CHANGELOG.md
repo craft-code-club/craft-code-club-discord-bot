@@ -1,3 +1,15 @@
+# [1.19.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.18.0...v1.19.0) (2026-07-26)
+
+
+### Bug Fixes
+
+* **infra:** add LOGS_CHANNEL_ID to Pulumi production container env ([cd63754](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/cd63754bd3ee3990e949aa3ac31cfd887728fef5))
+
+
+### Features
+
+* **logging:** add logging to Discord channel for warnings and errors ([a77d6d2](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/a77d6d22c96eb702ec4b85b0afb778c78cde8fa2))
+
 # [1.18.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.17.0...v1.18.0) (2026-07-26)
 
 
