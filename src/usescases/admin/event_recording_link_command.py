@@ -10,7 +10,7 @@ class EventRecordingLinkCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='event-add-recording-link', help='Adiciona ou atualiza o recording link de um evento (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'usage': '[-f] <eventKey> <recordingLink>', 'notes': 'Usa `-f` para forçar a atualização quando o evento já tem um recording link.'})
+    @commands.command(name='event-add-recording-link', help='Adiciona ou atualiza o recording link de um evento (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'usage': '[-f] <eventId> <recordingLink>', 'notes': 'Usa `-f` para forçar a atualização quando o evento já tem um recording link.'})
     @commands.dm_only()
     async def event_add_recording_link(self, ctx, *args):
         result = await parse_event_link_args(ctx, args, self.bot, 'event-add-recording-link', 'recordingLink')
