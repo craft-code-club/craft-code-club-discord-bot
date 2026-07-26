@@ -66,9 +66,9 @@ pulumi up
 Nothing sensitive is written to any file: `index.js` reads every value (secret or not) from
 environment variables (secrets wrapped as Pulumi secrets), so no `Pulumi.<stack>.yaml` exists.
 - **CI:** [`infra.yml`](../.github/workflows/infra.yml) injects them into the `pulumi up` step from
-  **GitHub `vars`** (non-secret config: `PROJECT_NAME`, `ENVIRONMENT`, `LOCATION`,
+  **GitHub `vars`** (non-secret config: `PROJECT_NAME`, `LOCATION`,
   `RESOURCE_GROUP_NAME`, `IMAGE`, `LOG_LEVEL`, `LEETCODE_FORUM_ID`, `COMMUNITY_EVENTS_CHANNEL_ID`,
-  `SAY_HI_CHANNEL`, `LOGS_CHANNEL_ID`) and **GitHub secrets** (on the `PROD` environment, all
+  `SAY_HI_CHANNEL`, `LOGS_CHANNEL_ID`; `ENVIRONMENT` is optional and defaults to the Pulumi stack name) and **GitHub secrets** (on the `PROD` environment, all
   required): `DISCORD_API_TOKEN`, `DISCORD_APPLICATION_ID`, `DISCORD_PUBLIC_KEY`,
   `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, `YOUTUBE_REFRESH_TOKEN`, `YOUTUBE_STREAM_ID`.
 - **Local:** `export` them before `pulumi up` (as above).
