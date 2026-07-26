@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.20.1...v1.21.0) (2026-07-26)
+
+
+### Features
+
+* **event:** add event recording link command for admins ([5b4ac46](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/5b4ac4614feb09c8e9d74e2bf32f61123ad9275c))
+
 ## [1.20.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.20.0...v1.20.1) (2026-07-26)
 
 
