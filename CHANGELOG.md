@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.19.0...v1.20.0) (2026-07-26)
+
+
+### Features
+
+* **server-status:** add online user count to server status command ([c806665](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/c8066654fccc6b7a8535c3e97df9695625ed7723))
+
 # [1.19.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.18.0...v1.19.0) (2026-07-26)
 
 
