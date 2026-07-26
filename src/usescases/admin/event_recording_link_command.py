@@ -41,7 +41,7 @@ class EventRecordingLinkCommandBot(commands.Cog):
             await ctx.author.send('❌ Não foi possível atualizar o evento no armazenamento. Verifica a configuração do Azure Storage.')
             return
 
-        if old_link:
+        if old_link and old_link.strip():
             logger.info(
                 f'[BOT][COMMAND][EVENT-ADD-RECORDING-LINK] Updated recording link for event "{event_key}" (by "{ctx.author.name}")'
             )
