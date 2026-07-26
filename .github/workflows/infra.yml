@@ -65,8 +65,8 @@ jobs:
       - name: 'Pulumi up'
         working-directory: infra
         env:
-          # Non-secret config — index.js reads these via process.env, falling back to its own
-          # defaults when a var isn't set. Sourced from repo/environment "vars", not secrets.
+# Non-secret config — index.js reads these via process.env. Some have defaults (PROJECT_NAME, LOCATION, RESOURCE_GROUP_NAME, LOG_LEVEL); others are required (IMAGE + channel/forum IDs).
+# Sourced from repo/environment "vars", not secrets.
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           LOCATION: ${{ vars.LOCATION }}
           RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
