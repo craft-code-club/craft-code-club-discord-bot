@@ -1,3 +1,17 @@
+# [1.18.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.17.0...v1.18.0) (2026-07-26)
+
+
+### Bug Fixes
+
+* brazil time for event list ([43375b6](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/43375b666f1f4072af9b9b25e936cb434de9bdfc))
+* brazil time for event list ([639cff7](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/639cff7148253cb923f5fab57350b6e89025a251))
+* indentation ([863ac80](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/863ac80af53df65e16a2a26b0104c57194fce3d2))
+
+
+### Features
+
+* **commands:** add events command to list upcoming events for admins ([4e360fd](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/4e360fdfa603a93e2810bc0253b5caed2dc6292e))
+
 # [1.17.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.16.0...v1.17.0) (2026-07-25)
 
 
