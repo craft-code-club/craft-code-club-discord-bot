@@ -34,7 +34,7 @@ class EventRecordingLinkCommandBot(commands.Cog):
             return
 
         event_key, recording_link = args_list
-
+        recording_link = recording_link.strip()
         if not re.fullmatch(r'[A-Za-z0-9_-]+', event_key):
             logger.warning(f'[BOT][COMMAND][EVENT-ADD-RECORDING-LINK] Invalid event key "{event_key}" provided by "{ctx.author.name}"')
             await ctx.author.send(
