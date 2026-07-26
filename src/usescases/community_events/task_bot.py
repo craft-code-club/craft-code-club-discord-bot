@@ -1,6 +1,7 @@
 import os
 import logging
 from typing import Optional
+import discord
 from discord.ext import tasks, commands
 from usescases.community_events.youtube_live_service import youtube_live_service
 from usescases.community_events.community_events_dao import community_events_dao
@@ -90,7 +91,13 @@ class CommunityEventsTaskBot(commands.Cog):
                 logger.debug(f'[BOT][TASK][COMMUNITY EVENTS][NOTIFY] The event: "{event.title}" will now notify {reminder_time.name} in advance')
 
                 embed = event_formatter.format_to_message(event)
-                await channel.send(embed=embed)
+                if reminder_time == ReminderTime.A_HOUR:
+                    await channel.send(
+                        content='@everyone',
+                        embed=embed,
+                        allowed_mentions=discord.AllowedMentions(everyone=True))
+                else:
+                    await channel.send(embed=embed)
 
                 community_events_dao.update(event)
 
