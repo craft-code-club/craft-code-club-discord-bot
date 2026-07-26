@@ -1,8 +1,11 @@
+import asyncio
 import os
 from pathlib import Path
 import discord
 from discord.ext import commands
 import logging
+
+from utils.discord_log_handler import DiscordLogHandler
 
 
 class DiscordBot(commands.Bot):
@@ -48,6 +51,35 @@ class DiscordBot(commands.Bot):
 
     async def on_ready(self):
         logging.info(f'[BOT][STARTUP] Logged in as {self.user} ({self.user.id})')
+        self.setup_channel_logs(asyncio.get_running_loop())
+
+    def setup_channel_logs(self, loop: asyncio.AbstractEventLoop):
+        logs_channel_id = os.environ.get('LOGS_CHANNEL_ID')
+        if logs_channel_id is None or logs_channel_id == '':
+            logging.debug('[BOT][STARTUP][LOGS] LOGS_CHANNEL_ID is not set, skipping channel logs')
+            return
+
+        root_logger = logging.getLogger()
+
+        # Guard against on_ready firing again on reconnect adding duplicates.
+        if any(isinstance(handler, DiscordLogHandler) for handler in root_logger.handlers):
+            return
+
+        try:
+            channel_id = int(logs_channel_id)
+        except ValueError:
+            logging.error(f'[BOT][STARTUP][LOGS] LOGS_CHANNEL_ID "{logs_channel_id}" is not a valid channel id')
+            return
+
+        handler = DiscordLogHandler(self, channel_id, loop)
+        handler.setFormatter(logging.Formatter(
+            fmt='%(asctime)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        ))
+        root_logger.addHandler(handler)
+        root_logger.handlers.remove(handler)
+        root_logger.handlers.insert(0, handler)
+        logging.info(f'[BOT][STARTUP][LOGS] Channel logs enabled on channel {channel_id}')
 
     # Error handling
     async def on_command_error(self, context, error):
