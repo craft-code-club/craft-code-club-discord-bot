@@ -1,9 +1,8 @@
-import re
+import logging
 from datetime import datetime, timedelta
 from discord.ext import commands
-import logging
 
-from ._helpers import is_server_admin, is_valid_url
+from ._helpers import parse_event_link_args
 
 logger = logging.getLogger(__name__)
 
@@ -15,50 +14,11 @@ class EventSessionLinkCommandBot(commands.Cog):
     @commands.command(name='event-add-session-link', help='Adiciona ou atualiza o session link de um evento (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'usage': '[-f] <eventKey> <sessionLink>', 'notes': 'Usa `-f` para forçar a atualização quando o evento já tem um session link.'})
     @commands.dm_only()
     async def event_add_session_link(self, ctx, *args):
-        logger.debug(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] User "{ctx.author.name}" invoked command with args {args}')
-
-        if not is_server_admin(self.bot, ctx.author.id):
-            logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] User "{ctx.author.name}" is not a server admin. Ignoring')
+        result = await parse_event_link_args(ctx, args, self.bot, 'event-add-session-link', 'sessionLink')
+        if result is None:
             return
 
-        args_list = list(args)
-        force = False
-        if args_list and args_list[0] == '-f':
-            force = True
-            args_list = args_list[1:]
-
-        if len(args_list) != 2:
-            await ctx.author.send(
-                '❌ Uso incorreto. Sintaxe: `/event-add-session-link [-f] <eventKey> <sessionLink>`\n'
-                'O `-f` força a atualização quando o evento já tem um session link.'
-            )
-            return
-
-        event_key, session_link = args_list
-
-        if not re.fullmatch(r'[A-Za-z0-9_-]+', event_key):
-            logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Invalid event key "{event_key}" provided by "{ctx.author.name}"')
-            await ctx.author.send(
-                f'❌ Event key inválida: `{event_key}`. Use apenas letras, números, "-" e "_".'
-            )
-            return
-        if not is_valid_url(session_link):
-            logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Invalid URL "{session_link}" provided by "{ctx.author.name}"')
-            await ctx.author.send(f'❌ Link inválido: `{session_link}`. Forneça um URL válido com esquema http ou https.')
-            return
-
-        try:
-            from usescases.community_events.community_events_dao import community_events_dao
-        except Exception:
-            logger.exception('[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Failed to initialize community events DAO')
-            await ctx.author.send('❌ Não foi possível conectar ao armazenamento de eventos. Verifica a configuração do Azure Storage.')
-            return
-
-        event = community_events_dao.get(event_key)
-        if event is None:
-            logger.warning(f'[BOT][COMMAND][EVENT-ADD-SESSION-LINK] Event "{event_key}" not found (requested by "{ctx.author.name}")')
-            await ctx.author.send(f'❌ Evento não encontrado: `{event_key}`.')
-            return
+        force, event_key, session_link, community_events_dao, event = result
 
         from utils.timezones import get_brazil_timezone
 
