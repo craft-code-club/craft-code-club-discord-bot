@@ -40,7 +40,8 @@ class EventsCommandBot(commands.Cog):
 
         lines = ['📅 **Próximos eventos:**', '']
         for event in upcoming_events:
-            lines.append(f'`{event.id}` — {event.title} — {event.brazil_datetime()}')
+            event_start = event.start_datetime.replace(tzinfo=brazil_tz) if event.start_datetime.tzinfo is None else event.start_datetime.astimezone(brazil_tz)
+            lines.append(f'`{event.id}` — {event.title} — {event_start.strftime("%Y/%m/%d - %H:%M")}')
 
         await send_chunked(ctx.author, '\n'.join(lines))
         logger.info(f'[BOT][COMMAND][EVENTS] Sent {len(upcoming_events)} upcoming event(s) to admin "{ctx.author.name}"')
