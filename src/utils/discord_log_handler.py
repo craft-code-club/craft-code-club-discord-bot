@@ -1,0 +1,135 @@
+import asyncio
+import logging
+import sys
+import threading
+
+import discord
+from discord.ext import commands
+
+# Maximum characters Discord allows in a single message.
+DISCORD_MESSAGE_LIMIT = 2000
+# Reserve room for the surrounding code block markers ("```\n" ... "\n```").
+CODE_BLOCK_OVERHEAD = 8
+MAX_CONTENT_LENGTH = DISCORD_MESSAGE_LIMIT - CODE_BLOCK_OVERHEAD
+
+
+class DiscordLogHandler(logging.Handler):
+    """Logging handler that forwards WARNING and above records to a Discord channel.
+
+    The handler is designed to never feed its own failures back into the logging
+    system, which would otherwise create an infinite loop (a failed ``send`` that
+    logs an error would trigger another ``send`` and so on). Every failure path
+    writes to ``sys.stderr`` directly instead of using the logging module.
+    """
+
+    # Maximum number of coroutines that may be pending at the same time.
+    # New records are dropped (not queued) once this limit is reached so that
+    # bursty logging cannot exhaust memory or trigger Discord rate-limit bans.
+    _MAX_IN_FLIGHT = 10
+
+    def __init__(self, bot: commands.Bot, channel_id: int, loop: asyncio.AbstractEventLoop, level: int = logging.WARNING):
+        super().__init__(level=level)
+        self.bot = bot
+        self.channel_id = channel_id
+        self.loop = loop
+        # Per-thread reentrancy guard to prevent recursive emit calls.
+        self._guard = threading.local()
+        # Ensures the "channel not found" notice is printed at most once.
+        self._channel_warning_shown = False
+        # Backpressure: track how many _send coroutines are currently in flight.
+        self._in_flight = 0
+        self._in_flight_lock = threading.Lock()
+
+    def emit(self, record: logging.LogRecord):
+        # Layer 1: reentrancy guard - if we are already inside emit on this
+        # thread, bail out immediately.
+        if getattr(self._guard, 'active', False):
+            return
+
+        # Layer 2: never forward records produced by discord.py itself or by
+        # this handler's own module, so send-related logging can't loop back.
+        if record.name.startswith('discord') or record.name == __name__:
+            return
+
+        self._guard.active = True
+        try:
+            original_levelname = record.levelname
+            record.levelname = logging.getLevelName(record.levelno)
+            try:
+                message = self.format(record)
+            finally:
+                record.levelname = original_levelname
+            message = message.replace("```", "`\u200b``")
+            if len(message) > MAX_CONTENT_LENGTH:
+                message = message[:MAX_CONTENT_LENGTH]
+            loop = self.loop
+            if not loop.is_running():
+                return
+
+            # Layer 3: bounded fire-and-forget – drop the record when too many
+            # sends are already pending so bursty logging cannot exhaust memory
+            # or trigger Discord rate-limit bans.  Do not call .result() so
+            # emit never blocks; errors are handled inside _send.
+            with self._in_flight_lock:
+                if self._in_flight >= self._MAX_IN_FLIGHT:
+                    return
+                self._in_flight += 1
+            try:
+                future = asyncio.run_coroutine_threadsafe(self._send(message), loop)
+            except Exception:
+                with self._in_flight_lock:
+                    self._in_flight -= 1
+                raise
+            future.add_done_callback(self._on_send_done)
+        except Exception:
+            # Layer 4: emit must never raise or log; handleError writes to
+            # sys.stderr, not through the logging system.
+            self.handleError(record)
+        finally:
+            self._guard.active = False
+
+    def _on_send_done(self, _future) -> None:
+        """Decrement the in-flight counter when a _send coroutine completes."""
+        with self._in_flight_lock:
+            self._in_flight -= 1
+
+    async def _send(self, message: str):
+        # Layer 5: any failure here is written to sys.stderr only, never via
+        # logging, which breaks the potential infinite loop.
+        try:
+            if getattr(self, '_disabled', False):
+                return
+
+            channel = getattr(self, '_channel', None) or self.bot.get_channel(self.channel_id)
+            if channel is None:
+                try:
+                    channel = await self.bot.fetch_channel(self.channel_id)
+                except Exception as fetch_error:  # noqa: BLE001 - must not escape or log
+                    self._disabled = True
+                    if not self._channel_warning_shown:
+                        self._channel_warning_shown = True
+                        print(
+                            f"[DiscordLogHandler] Channel {self.channel_id} could not be fetched ({fetch_error}); logs will not be forwarded. Check LOGS_CHANNEL_ID.",
+                            file=sys.stderr,
+                        )
+                    return
+
+            if not isinstance(channel, discord.abc.Messageable):
+                self._disabled = True
+                if not self._channel_warning_shown:
+                    self._channel_warning_shown = True
+                    print(
+                        f"[DiscordLogHandler] Channel {self.channel_id} was not found or is "
+                        f"not a text channel; logs will not be forwarded. Check LOGS_CHANNEL_ID.",
+                        file=sys.stderr,
+                    )
+                return
+
+            self._channel = channel
+            await channel.send(f"```\n{message}\n```", allowed_mentions=discord.AllowedMentions.none())
+        except Exception as error:  # noqa: BLE001 - must not escape or log
+            print(
+                f"[DiscordLogHandler] Failed to send log to channel "
+                f"{self.channel_id}: {error}",
+                file=sys.stderr,
+            )
