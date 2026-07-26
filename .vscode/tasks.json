@@ -1,0 +1,60 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "init-env",
+            "type": "shell",
+            "windows": {
+                "command": "pwsh",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/init-env.ps1"
+                ]
+            },
+            "linux": {
+                "command": "bash",
+                "args": [
+                    "${workspaceFolder}/init-env.sh"
+                ]
+            },
+            "osx": {
+                "command": "bash",
+                "args": [
+                    "${workspaceFolder}/init-env.sh"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "azurite: up",
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                "compose",
+                "up",
+                "-d",
+                "--wait",
+                "azurite"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "prelaunch",
+            "dependsOn": [
+                "init-env",
+                "azurite: up"
+            ],
+            "dependsOrder": "parallel",
+            "problemMatcher": []
+        }
+    ]
+}
