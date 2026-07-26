@@ -59,7 +59,7 @@ class EventRecordingLinkCommandBot(commands.Cog):
             await ctx.author.send(f'❌ Evento não encontrado: `{event_key}`.')
             return
 
-        if event.recording_link and not force:
+        if event.has_recording_link() and not force:
             logger.warning(
                 f'[BOT][COMMAND][EVENT-ADD-RECORDING-LINK] Event "{event_key}" already has a recording link '
                 f'and -f was not provided (requested by "{ctx.author.name}")'
