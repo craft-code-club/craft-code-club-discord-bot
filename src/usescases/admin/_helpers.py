@@ -106,7 +106,7 @@ async def parse_event_link_args(ctx, args, bot, command_name, link_label):
 
     if len(args_list) != 2:
         await ctx.author.send(
-            f'❌ Uso incorreto. Sintaxe: `/{command_name} [-f] <eventKey> <{link_label}>`\n'
+            f'❌ Uso incorreto. Sintaxe: `/{command_name} [-f] <eventId> <{link_label}>`\n'
             f'O `-f` força a atualização quando o evento já tem um {link_label}.'
         )
         return None
