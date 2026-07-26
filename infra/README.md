@@ -43,7 +43,7 @@ export LEETCODE_FORUM_ID=<id>
 export COMMUNITY_EVENTS_CHANNEL_ID=<id>
 export SAY_HI_CHANNEL=<id>
 export LOGS_CHANNEL_ID=<id>
-export IMAGE=docker.io/craftcodeclub/discord-bot:v1.9.0
+export IMAGE=docker.io/craftcodeclub/discord-bot:v1.16.0
 # Non-secret (optional — index.js falls back to sane defaults if unset):
 export PROJECT_NAME=c3-discord-bot
 export ENVIRONMENT=discord-bot
