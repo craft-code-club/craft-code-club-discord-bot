@@ -4,7 +4,7 @@
 // Pattern mirrored from the sibling `myfeed` project, but deliberately simpler:
 //   - the bot image is a PUBLIC Docker Hub image (docker.io/craftcodeclub/discord-bot),
 //     so there is NO ACR, NO managed identity and NO registry credentials;
-//   - secrets live as plain Container App secrets (not Key Vault) sourced from Pulumi config,
+//   - secrets live as plain Container App secrets (not Key Vault) sourced from env vars,
 //     except the Storage connection string, which is DERIVED from the storage account here;
 //   - a single Container App (the bot) — no ingress: it dials out to the Discord gateway,
 //     it does not receive HTTP;
@@ -13,10 +13,15 @@
 // Resource names are `${projectName}-${environment}`, where `environment` defaults to the Pulumi
 // stack name. This lives on stack `discord-bot`, so the names carry that suffix — e.g. the app is
 // `ca-c3-discord-bot-discord-bot` in `rg-craft-code-club`, which is what
-// .github/workflows/publish.yml deploys to. Every name is config-overridable (see Pulumi.discord-bot.yaml).
+// .github/workflows/publish.yml deploys to. Every name is overridable via env vars (see below).
 //
-// First deploy: `npm install` here, authenticate to Azure, set the Discord/YouTube secrets with
-// `pulumi config set --secret ...` (persisted encrypted in Pulumi.discord-bot.yaml), then `pulumi up`.
+// ALL config — secret and non-secret alike — comes from ENVIRONMENT VARIABLES, never from
+// committed files (no `Pulumi.<stack>.yaml`, no `pulumi config set`). In CI they're injected from
+// GitHub `vars`/`secrets` on the `pulumi up` step (see .github/workflows/infra.yml); locally,
+// `export` them before running `pulumi up`.
+//
+// First deploy: `npm install` here, authenticate to Azure, `export` the required env vars below,
+// then `pulumi up`.
 
 const pulumi = require("@pulumi/pulumi");
 const azure = require("@pulumi/azure-native");
@@ -24,48 +29,43 @@ const azure = require("@pulumi/azure-native");
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const cfg = new pulumi.Config();
-const azCfg = new pulumi.Config("azure-native");
+// Required env vars throw a clear error instead of silently deploying with a wrong/missing value.
+const requireEnv = (name) => {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing required env var ${name} — set it (GitHub var/secret in CI, or 'export' locally) before running 'pulumi up'.`);
+  return v;
+};
 
-const projectName = cfg.get("projectName") || "c3-discord-bot";
-const environment = cfg.get("environment") || pulumi.getStack();
-const location = azCfg.get("location") || "centralus";
-const resourceGroupName = cfg.get("resourceGroupName") || "rg-craft-code-club";
+const projectName = process.env.PROJECT_NAME || "c3-discord-bot";
+const environment = process.env.ENVIRONMENT || pulumi.getStack();
+const location = process.env.LOCATION || "centralus";
+const resourceGroupName = process.env.RESOURCE_GROUP_NAME || "rg-craft-code-club";
 
 // The image tag is owned by the deploy pipeline (publish.yml -> Update-AzContainerApp). This is
 // only the bootstrap image used on the very first `pulumi up`; `ignoreChanges` below stops a later
 // `pulumi up` from reverting the tag the pipeline set.
-const image = cfg.get("image") || "docker.io/craftcodeclub/discord-bot:v1.9.0";
+const image = requireEnv("IMAGE");
 
 // Non-secret runtime config. logLevel has a safe default; channel/forum IDs must be set
-// explicitly via `pulumi config set` (no hard-coded fallback) so a new stack can't silently
-// point at the wrong channels.
-const logLevel = cfg.get("logLevel") || "DEBUG";
-const leetcodeForumId = cfg.require("leetcodeForumId");
-const communityEventsChannelId = cfg.require("communityEventsChannelId");
-const sayHiChannel = cfg.require("sayHiChannel");
-const logsChannelId = cfg.get("logsChannelId") || "";
+// explicitly (no hard-coded fallback) so a new stack can't silently point at the wrong channels.
+const logLevel = process.env.LOG_LEVEL || "DEBUG";
+const leetcodeForumId = requireEnv("LEETCODE_FORUM_ID");
+const communityEventsChannelId = requireEnv("COMMUNITY_EVENTS_CHANNEL_ID");
+const sayHiChannel = requireEnv("SAY_HI_CHANNEL");
+const logsChannelId = requireEnv("LOGS_CHANNEL_ID");
 
-// Secrets come from ENVIRONMENT VARIABLES — never from committed config/files. In CI they're injected
-// from GitHub secrets on the `pulumi up` step; locally, `export` them before `pulumi up`. Wrapped in
-// pulumi.secret so they're also encrypted in Pulumi state.
-const requireEnv = (name) => {
-  const v = process.env[name];
-  if (!v) throw new Error(`Missing required env var ${name} — set it (GitHub secret in CI, or 'export' locally) before running 'pulumi up'.`);
-  return v;
-};
+// Secrets are wrapped in pulumi.secret so they're encrypted in Pulumi state too.
 const discordApiToken = pulumi.secret(requireEnv("DISCORD_API_TOKEN"));
 const discordApplicationId = pulumi.secret(requireEnv("DISCORD_APPLICATION_ID"));
 const discordPublicKey = pulumi.secret(requireEnv("DISCORD_PUBLIC_KEY"));
 
-// Optional YouTube secrets — only wired in when the env var is set (non-empty). The bot degrades
-// gracefully when absent.
+// YouTube secrets are also required — live scheduling is a core feature, not optional.
 const youtubeSecrets = [
-  { secretName: "youtube-client-id",     env: "YOUTUBE_CLIENT_ID",     value: process.env.YOUTUBE_CLIENT_ID },
-  { secretName: "youtube-client-secret", env: "YOUTUBE_CLIENT_SECRET", value: process.env.YOUTUBE_CLIENT_SECRET },
-  { secretName: "youtube-refresh-token", env: "YOUTUBE_REFRESH_TOKEN", value: process.env.YOUTUBE_REFRESH_TOKEN },
-  { secretName: "youtube-stream-id",     env: "YOUTUBE_STREAM_ID",     value: process.env.YOUTUBE_STREAM_ID },
-].filter((s) => s.value).map((s) => ({ secretName: s.secretName, env: s.env, value: pulumi.secret(s.value) }));
+  { secretName: "youtube-client-id",     env: "YOUTUBE_CLIENT_ID",     value: requireEnv("YOUTUBE_CLIENT_ID") },
+  { secretName: "youtube-client-secret", env: "YOUTUBE_CLIENT_SECRET", value: requireEnv("YOUTUBE_CLIENT_SECRET") },
+  { secretName: "youtube-refresh-token", env: "YOUTUBE_REFRESH_TOKEN", value: requireEnv("YOUTUBE_REFRESH_TOKEN") },
+  { secretName: "youtube-stream-id",     env: "YOUTUBE_STREAM_ID",     value: requireEnv("YOUTUBE_STREAM_ID") },
+].map((s) => ({ secretName: s.secretName, env: s.env, value: pulumi.secret(s.value) }));
 
 const tags = { project: projectName, environment, managedBy: "pulumi" };
 const namePrefix = `${projectName}-${environment}`;
@@ -158,7 +158,7 @@ const containerEnv = new azure.app.ManagedEnvironment("env", {
 });
 
 // Container App secrets: the three required Discord secrets, the derived storage connection
-// string, and any YouTube secrets that were configured.
+// string, and the four required YouTube secrets.
 const appSecrets = [
   { name: "discord-api-token", value: discordApiToken },
   { name: "discord-application-id", value: discordApplicationId },

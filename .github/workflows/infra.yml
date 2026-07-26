@@ -65,8 +65,19 @@ jobs:
       - name: 'Pulumi up'
         working-directory: infra
         env:
+          # Non-secret config — index.js reads these via process.env, falling back to its own
+          # defaults when a var isn't set. Sourced from repo/environment "vars", not secrets.
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          LOCATION: ${{ vars.LOCATION }}
+          RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
+          IMAGE: ${{ vars.IMAGE }}
+          LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          LEETCODE_FORUM_ID: ${{ vars.LEETCODE_FORUM_ID }}
+          COMMUNITY_EVENTS_CHANNEL_ID: ${{ vars.COMMUNITY_EVENTS_CHANNEL_ID }}
+          SAY_HI_CHANNEL: ${{ vars.SAY_HI_CHANNEL }}
+          LOGS_CHANNEL_ID: ${{ vars.LOGS_CHANNEL_ID }}
           # Bot secrets — scoped to ONLY this step (least privilege), not the whole job. index.js reads
-          # them via process.env; optional YOUTUBE_* are skipped when their secret is unset.
+          # them via process.env; all of these (Discord + YouTube) are required.
           DISCORD_API_TOKEN: ${{ secrets.DISCORD_API_TOKEN }}
           DISCORD_APPLICATION_ID: ${{ secrets.DISCORD_APPLICATION_ID }}
           DISCORD_PUBLIC_KEY: ${{ secrets.DISCORD_PUBLIC_KEY }}
