@@ -49,11 +49,13 @@ class EventMessageFormatter:
         reminder_time = event.reminder_time()
         reminder_title = self.notification_titles.get(reminder_time) if reminder_time else None
         reminder_title = reminder_title or "Evento"
-        event_description = f"***{reminder_title}***\n\n{event.description}"
+        safe_title = discord.utils.escape_mentions(event.title)
+        safe_description = discord.utils.escape_mentions(event.description)
+        event_description = f"***{reminder_title}***\n\n{safe_description}"
 
         # Create the embed
         embed = discord.Embed(
-            title = f"📢 {event.title}",
+            title = f"📢 {safe_title}",
             description = event_description,
             color = 0x2ecc71 # Green color
         )
