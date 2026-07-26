@@ -1,3 +1,13 @@
+## [1.20.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.20.0...v1.20.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* hardcode communityEventsChannelId and sayHiChannel defaults in index.js ([3203093](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/3203093d4264d83d828c9c0aed96562a6e529d5f))
+* remove hardcoded defaults for channel/forum IDs from index.js ([008421e](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/008421e1d3f63af3a66d06be7185b11f0f77fca3))
+* restore communityEventsChannelId and sayHiChannel in Pulumi.discord-bot.yaml ([fbd1ec7](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/fbd1ec747efff73a05ff96318658a769e9f66c09))
+* **infra:** update environment variable handling and remove config file ([1102f03](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/1102f039c5b3ccd33b8a2b21d27c471eed9e6ddc))
+
 # [1.20.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.19.0...v1.20.0) (2026-07-26)
 
 

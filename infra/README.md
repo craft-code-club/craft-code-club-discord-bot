@@ -11,17 +11,17 @@ Infrastructure-as-code for the Discord bot, written in **Pulumi (JavaScript)**. 
 
 > **Naming:** resource names are `${projectName}-${environment}` and `environment` defaults to the
 > Pulumi **stack name**. This stack is named `discord-bot`, so the names carry that suffix
-> (e.g. `ca-c3-discord-bot-discord-bot`). All names are config-overridable in `Pulumi.discord-bot.yaml`.
+> (e.g. `ca-c3-discord-bot-discord-bot`). All names are overridable via env vars (see Setup below).
 
 ## Design notes
 
 - **No ACR / managed identity / Key Vault.** The image is a public Docker Hub image and secrets are
-  plain Container App secrets sourced from Pulumi config — simpler than the sibling `myfeed` setup
+  plain Container App secrets sourced from env vars — simpler than the sibling `myfeed` setup
   this pattern is based on.
 - **`AZURE_STORAGE_CONNECTION_STRING` is derived** from the storage account key inside `index.js`.
-  Do not set it in config.
+  Do not set it via env var.
 - **The image tag is owned by the deploy pipeline.** `index.js` keeps `template.containers[0].image`
-  under `ignoreChanges`; `Pulumi.discord-bot.yaml:image` is only the bootstrap tag for the first `up`.
+  under `ignoreChanges`; `IMAGE` is only the bootstrap tag for the first `up`.
 
 ## Setup
 
@@ -37,11 +37,24 @@ npm install
 
 pulumi stack select discord-bot          # `--create` if it doesn't exist yet
 
-# Secrets are provided via ENV VARS — never written to any file. Required: Discord; optional: YouTube.
+# ALL config — secret and non-secret — is provided via ENV VARS, never written to any file.
+# Non-secret (required, no hard-coded fallback):
+export LEETCODE_FORUM_ID=<id>
+export COMMUNITY_EVENTS_CHANNEL_ID=<id>
+export SAY_HI_CHANNEL=<id>
+export LOGS_CHANNEL_ID=<id>
+export IMAGE=docker.io/craftcodeclub/discord-bot:v1.16.0
+# Non-secret (optional — index.js falls back to sane defaults if unset):
+export PROJECT_NAME=c3-discord-bot
+export ENVIRONMENT=discord-bot
+export LOCATION=centralus
+export RESOURCE_GROUP_NAME=rg-craft-code-club
+export LOG_LEVEL=DEBUG
+
+# Secrets (all required: Discord + YouTube):
 export DISCORD_API_TOKEN=<token>
 export DISCORD_APPLICATION_ID=<id>
 export DISCORD_PUBLIC_KEY=<key>
-# Optional (YouTube live scheduling):
 export YOUTUBE_CLIENT_ID=<id>
 export YOUTUBE_CLIENT_SECRET=<secret>
 export YOUTUBE_REFRESH_TOKEN=<token>
@@ -50,14 +63,15 @@ export YOUTUBE_STREAM_ID=<id>
 pulumi up
 ```
 
-Secrets are kept **out of every file**: `index.js` reads them from environment variables (wrapped as
-Pulumi secrets), so nothing sensitive is written to `Pulumi.discord-bot.yaml` or anywhere in the repo.
+Nothing sensitive is written to any file: `index.js` reads every value (secret or not) from
+environment variables (secrets wrapped as Pulumi secrets), so no `Pulumi.<stack>.yaml` exists.
 - **CI:** [`infra.yml`](../.github/workflows/infra.yml) injects them into the `pulumi up` step from
-  **GitHub secrets** (on the `PROD` environment): `DISCORD_API_TOKEN`, `DISCORD_APPLICATION_ID`,
-  `DISCORD_PUBLIC_KEY` (required) and `YOUTUBE_*` (optional).
+  **GitHub `vars`** (non-secret config: `PROJECT_NAME`, `LOCATION`,
+  `RESOURCE_GROUP_NAME`, `IMAGE`, `LOG_LEVEL`, `LEETCODE_FORUM_ID`, `COMMUNITY_EVENTS_CHANNEL_ID`,
+  `SAY_HI_CHANNEL`, `LOGS_CHANNEL_ID`; `ENVIRONMENT` is optional and defaults to the Pulumi stack name) and **GitHub secrets** (on the `PROD` environment, all
+  required): `DISCORD_API_TOKEN`, `DISCORD_APPLICATION_ID`, `DISCORD_PUBLIC_KEY`,
+  `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, `YOUTUBE_REFRESH_TOKEN`, `YOUTUBE_STREAM_ID`.
 - **Local:** `export` them before `pulumi up` (as above).
-
-Only **non-secret** config (region, names, channel IDs, image) lives in `Pulumi.discord-bot.yaml`.
 
 ## CI/CD
 
