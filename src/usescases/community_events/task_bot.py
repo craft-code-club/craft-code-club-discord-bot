@@ -95,9 +95,11 @@ class CommunityEventsTaskBot(commands.Cog):
                     await channel.send(
                         content='@everyone',
                         embed=embed,
-                        allowed_mentions=discord.AllowedMentions(everyone=True))
+                        allowed_mentions=discord.AllowedMentions(everyone=True, roles=False, users=False))
                 else:
-                    await channel.send(embed=embed)
+                    await channel.send(
+                        embed=embed,
+                        allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=False))
 
                 community_events_dao.update(event)
 
