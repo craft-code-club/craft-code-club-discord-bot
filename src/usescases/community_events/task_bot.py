@@ -92,14 +92,16 @@ class CommunityEventsTaskBot(commands.Cog):
 
                 embed = event_formatter.format_to_message(event)
                 if reminder_time == ReminderTime.A_HOUR:
-                    await channel.send(
-                        content='@everyone',
-                        embed=embed,
-                        allowed_mentions=discord.AllowedMentions(everyone=True, roles=False, users=False))
+                    content = '@everyone'
+                    allowed_mentions = discord.AllowedMentions(everyone=True, roles=False, users=False)
                 else:
-                    await channel.send(
-                        embed=embed,
-                        allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=False))
+                    content = None
+                    allowed_mentions = discord.AllowedMentions.none()
+
+                await channel.send(
+                    content=content,
+                    embed=embed,
+                    allowed_mentions=allowed_mentions)
 
                 community_events_dao.update(event)
 
