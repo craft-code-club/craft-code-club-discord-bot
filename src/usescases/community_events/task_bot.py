@@ -98,12 +98,26 @@ class CommunityEventsTaskBot(commands.Cog):
                     content = None
                     allowed_mentions = discord.AllowedMentions.none()
 
-                await channel.send(
-                    content=content,
-                    embed=embed,
-                    allowed_mentions=allowed_mentions)
-
-                community_events_dao.update(event)
+                if reminder_time == ReminderTime.A_HOUR:
+                    # Persist the flag before sending to avoid duplicate @everyone pings
+                    # if the process crashes or update fails after a successful send
+                    community_events_dao.update(event)
+                    try:
+                        await channel.send(
+                            content=content,
+                            embed=embed,
+                            allowed_mentions=allowed_mentions)
+                    except Exception:
+                        # Roll back the flag so the notification will retry on the next run
+                        event.a_hour_notify = False
+                        community_events_dao.update(event)
+                        raise
+                else:
+                    await channel.send(
+                        content=content,
+                        embed=embed,
+                        allowed_mentions=allowed_mentions)
+                    community_events_dao.update(event)
 
                 logger.info(f'[BOT][TASK][COMMUNITY EVENTS][NOTIFY] Notifying event: "{event.title}" at {event.start_datetime} - Reminder: {reminder_time.name}')
                 break
