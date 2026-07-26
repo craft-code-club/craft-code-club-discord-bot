@@ -76,15 +76,17 @@ class EventMessageFormatter:
             inline = True)
 
         if (event.session_link and event.session_link.strip()) and event.open_session and reminder_time == ReminderTime.A_HOUR:
+            safe_session_link = discord.utils.escape_mentions(event.session_link).replace(')', '%29')
             embed.add_field(
                 name = "🧑‍💻 Participar",
-                value = f"[Clique aqui para participar conosco]({event.session_link})",
+                value = f"[Clique aqui para participar conosco]({safe_session_link})",
                 inline = False)
 
         if event.recording_link:
+            safe_recording_link = discord.utils.escape_mentions(event.recording_link).replace(')', '%29')
             embed.add_field(
                 name = "📺 Live",
-                value = f"[Clique aqui para assistir a live]({event.recording_link})",
+                value = f"[Clique aqui para assistir a live]({safe_recording_link})",
                 inline = False)
 
         embed.add_field(
