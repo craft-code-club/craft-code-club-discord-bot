@@ -87,8 +87,8 @@ async def parse_event_link_args(ctx, args, bot, command_name, link_label):
     Handles the common boilerplate for event link commands: admin check, -f flag
     parsing, argument count/format validation, DAO loading, and event retrieval.
 
-    Returns (force, event_key, link, dao, event) on success, or None if an error
-    was already sent to the user and the caller should return early.
+    Returns (force, event_key, link, dao, event) on success, or None if the
+    command should be ignored (e.g. non-admin) or if an error message was already sent.
     """
     log_prefix = f'[BOT][COMMAND][{command_name.upper()}]'
 
