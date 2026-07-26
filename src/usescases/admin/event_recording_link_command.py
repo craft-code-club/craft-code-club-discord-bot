@@ -72,7 +72,14 @@ class EventRecordingLinkCommandBot(commands.Cog):
 
         old_link = event.recording_link
         event.recording_link = recording_link
-        community_events_dao.update(event)
+        try:
+            community_events_dao.update(event)
+        except Exception:
+            logger.exception(
+                f'[BOT][COMMAND][EVENT-ADD-RECORDING-LINK] Failed to update recording link for event "{event_key}"'
+            )
+            await ctx.author.send('❌ Não foi possível atualizar o evento no armazenamento. Verifica a configuração do Azure Storage.')
+            return
 
         if old_link:
             logger.info(
