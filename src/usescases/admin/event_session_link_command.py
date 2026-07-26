@@ -11,7 +11,7 @@ class EventSessionLinkCommandBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='event-add-session-link', help='Adiciona ou atualiza o session link de um evento (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'usage': '[-f] <eventKey> <sessionLink>', 'notes': 'Usa `-f` para forçar a atualização quando o evento já tem um session link.'})
+    @commands.command(name='event-add-session-link', help='Adiciona ou atualiza o session link de um evento (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'usage': '[-f] <eventId> <sessionLink>', 'notes': 'Usa `-f` para forçar a atualização quando o evento já tem um session link.'})
     @commands.dm_only()
     async def event_add_session_link(self, ctx, *args):
         result = await parse_event_link_args(ctx, args, self.bot, 'event-add-session-link', 'sessionLink')
