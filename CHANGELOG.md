@@ -1,3 +1,18 @@
+# [1.22.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.21.0...v1.22.0) (2026-07-27)
+
+
+### Bug Fixes
+
+* escape Discord mentions in embed title/description to prevent unexpected pings ([4412087](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/44120875fbb039410a611c516ca3dc2073640a16))
+* remove escape_mentions from URL fields to prevent corrupting @ in links ([b8076e3](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/b8076e3ee7b4c7f5f398f3ccca7d79dabf32c75e))
+* sanitize session_link and recording_link URLs in embed fields ([e3b731b](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/e3b731b234a32ec15906ecbc769a1392cd37bbf1))
+* strip session_link and recording_link before building markdown URLs ([87af12f](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/87af12f4224bb9266f915ccdc0f54d212cfacc68))
+
+
+### Features
+
+* **notify:** tag everyone when publishing event reminders ([8c13d04](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/8c13d0462b08f4a83824dfcd34f9a35e63013b08))
+
 # [1.21.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.20.1...v1.21.0) (2026-07-26)
 
 
