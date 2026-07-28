@@ -26,6 +26,10 @@ class YouTubeLiveService:
     SCOPES = ['https://www.googleapis.com/auth/youtube']
     TOKEN_URI = 'https://oauth2.googleapis.com/token'
     GLOBAL_TAGS = ['CraftCodeClub', 'AI', 'ComputerScience', 'Coding', 'Development']
+    # YouTube video category "Education". Without an explicit category the video defaults to
+    # "Entertainment" (id 24). liveBroadcasts.insert has no category field, so this is applied
+    # to the underlying video resource with videos.update after the broadcast is created.
+    EDUCATION_CATEGORY_ID = '27'
 
     def __init__(self) -> None:
         self.__live_streaming_disabled = False
@@ -198,6 +202,10 @@ class YouTubeLiveService:
                 id = broadcast_id,
                 streamId = stream_id).execute()
 
+            # The broadcast id is also the video id. liveBroadcasts.insert cannot set a category,
+            # so classify the video as "Education" on the underlying video resource.
+            self.__set_video_category(youtube, broadcast_id)
+
             if banner_image:
                 self.__upload_thumbnail(youtube, broadcast_id, banner_image)
 
@@ -248,6 +256,44 @@ class YouTubeLiveService:
             logger.warning(f'[SERVICES][YOUTUBE] Failed to upload thumbnail for broadcast Id "{broadcast_id}": {error}')
         except Exception:
             logger.warning(f'[SERVICES][YOUTUBE] Failed to upload thumbnail for broadcast Id "{broadcast_id}"', exc_info = True)
+
+    def __set_video_category(self, youtube, video_id: str) -> None:
+        try:
+            response = youtube.videos().list(
+                part = 'snippet',
+                id = video_id,
+                maxResults = 1).execute()
+
+            items = response.get('items', [])
+            if not items:
+                logger.warning(
+                    f'[SERVICES][YOUTUBE] Video "{video_id}" not found while setting category. Skipping category update.')
+                return
+
+            existing_snippet = items[0].get('snippet', {})
+
+            # videos.update replaces the whole snippet and requires title + categoryId, so preserve
+            # the existing snippet fields and override only the category to avoid wiping metadata.
+            snippet = {
+                'title': existing_snippet.get('title', ''),
+                'categoryId': self.EDUCATION_CATEGORY_ID,
+            }
+            for field in ['description', 'tags', 'defaultLanguage']:
+                if field in existing_snippet and existing_snippet[field] is not None:
+                    snippet[field] = existing_snippet[field]
+
+            youtube.videos().update(
+                part = 'snippet',
+                body = {
+                    'id': video_id,
+                    'snippet': snippet,
+                }).execute()
+
+            logger.info(f'[SERVICES][YOUTUBE] Set category to "Education" (Id {self.EDUCATION_CATEGORY_ID}) for video "{video_id}"')
+        except HttpError as error:
+            logger.warning(f'[SERVICES][YOUTUBE] Failed to set category for video "{video_id}": {error}')
+        except Exception:
+            logger.warning(f'[SERVICES][YOUTUBE] Failed to set category for video "{video_id}"', exc_info = True)
 
     def __build_client(self):
         credentials = Credentials(
