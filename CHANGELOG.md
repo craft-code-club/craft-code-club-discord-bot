@@ -1,3 +1,10 @@
+# [1.23.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.22.0...v1.23.0) (2026-07-28)
+
+
+### Features
+
+* **youtube:** classify scheduled lives as Education instead of Entertainment ([8bf3a2a](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/8bf3a2a5f6aa6fbeb0aa90dce514f1e17ff2318a))
+
 # [1.22.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.21.0...v1.22.0) (2026-07-27)
 
 
