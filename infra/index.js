@@ -54,6 +54,13 @@ const communityEventsChannelId = requireEnv("COMMUNITY_EVENTS_CHANNEL_ID");
 const sayHiChannel = requireEnv("SAY_HI_CHANNEL");
 const logsChannelId = requireEnv("LOGS_CHANNEL_ID");
 
+// New-member messaging. Toggles have safe defaults; the channel IDs are optional (empty = the
+// bot skips that message), so a missing value can't silently point at the wrong channel.
+const welcomeMessageEnabled = process.env.WELCOME_MESSAGE_ENABLED || "true";
+const welcomeChannelId = process.env.WELCOME_CHANNEL_ID || "";
+const adminJoinNotificationEnabled = process.env.ADMIN_JOIN_NOTIFICATION_ENABLED || "false";
+const adminJoinNotificationChannelId = process.env.ADMIN_JOIN_NOTIFICATION_CHANNEL_ID || "";
+
 // Secrets are wrapped in pulumi.secret so they're encrypted in Pulumi state too.
 const discordApiToken = pulumi.secret(requireEnv("DISCORD_API_TOKEN"));
 const discordApplicationId = pulumi.secret(requireEnv("DISCORD_APPLICATION_ID"));
@@ -174,6 +181,10 @@ const appEnv = [
   { name: "COMMUNITY_EVENTS_CHANNEL_ID", value: communityEventsChannelId },
   { name: "SAY_HI_CHANNEL", value: sayHiChannel },
   { name: "LOGS_CHANNEL_ID", value: logsChannelId },
+  { name: "WELCOME_MESSAGE_ENABLED", value: welcomeMessageEnabled },
+  { name: "WELCOME_CHANNEL_ID", value: welcomeChannelId },
+  { name: "ADMIN_JOIN_NOTIFICATION_ENABLED", value: adminJoinNotificationEnabled },
+  { name: "ADMIN_JOIN_NOTIFICATION_CHANNEL_ID", value: adminJoinNotificationChannelId },
   { name: "DISCORD_API_TOKEN", secretRef: "discord-api-token" },
   { name: "DISCORD_APPLICATION_ID", secretRef: "discord-application-id" },
   { name: "DISCORD_PUBLIC_KEY", secretRef: "discord-public-key" },
