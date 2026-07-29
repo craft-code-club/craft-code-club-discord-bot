@@ -56,7 +56,7 @@ const logsChannelId = requireEnv("LOGS_CHANNEL_ID");
 
 // New-member messaging. Toggles have safe defaults; the channel IDs are optional (empty = the
 // bot skips that message), so a missing value can't silently point at the wrong channel.
-const welcomeMessageEnabled = process.env.WELCOME_MESSAGE_ENABLED || "true";
+const welcomeMessageEnabled = process.env.WELCOME_MESSAGE_ENABLED || "false";
 const welcomeChannelId = process.env.WELCOME_CHANNEL_ID || "";
 const adminJoinNotificationEnabled = process.env.ADMIN_JOIN_NOTIFICATION_ENABLED || "false";
 const adminJoinNotificationChannelId = process.env.ADMIN_JOIN_NOTIFICATION_CHANNEL_ID || "";
