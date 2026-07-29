@@ -70,10 +70,7 @@ class NewMemberEventBot(commands.Cog):
         return '\n'.join(lines)
 
     def _replace_admin_placeholders(self, message: str, member) -> str:
-        member_count = member.guild.member_count or 0
-        return (message
-                .replace('##[username]##', member.mention)
-                .replace('##[member_count]##', str(member_count)))
+        return message.replace('##[username]##', member.mention)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
