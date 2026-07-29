@@ -35,9 +35,9 @@ class NewMemberEventBot(commands.Cog):
         elif not self.say_hi_channel:
             logger.warning('[BOT][EVENT][NEW MEMBER] SAY_HI_CHANNEL is not set. Welcome messages will not include a channel.')
 
-        # Public channel welcome message. Gated by WELCOME_MESSAGE_ENABLED (default on) and posted to
+        # Public channel welcome message. Gated by WELCOME_MESSAGE_ENABLED (default off) and posted to
         # WELCOME_CHANNEL_ID. The direct-message welcome is always sent and is not affected by these.
-        self.welcome_message_enabled = _parse_bool(os.environ.get('WELCOME_MESSAGE_ENABLED', ''), default=True)
+        self.welcome_message_enabled = _parse_bool(os.environ.get('WELCOME_MESSAGE_ENABLED', ''), default=False)
         self.welcome_channel_id = self.__parse_channel_id('WELCOME_CHANNEL_ID')
 
         if self.welcome_message_enabled and not self.welcome_channel_id:
