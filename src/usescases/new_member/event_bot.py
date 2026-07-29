@@ -110,10 +110,10 @@ class NewMemberEventBot(commands.Cog):
 
         try:
             channel = self.bot.get_channel(self.welcome_channel_id)
-            if channel is None:
+            if not isinstance(channel, discord.abc.Messageable):
                 logger.warning(
-                    f'[BOT][EVENT][NEW MEMBER] Welcome channel "{self.welcome_channel_id}" not found. '
-                    f'Skipping public welcome for "{member.name}".')
+                    f'[BOT][EVENT][NEW MEMBER] Welcome channel "{self.welcome_channel_id}" was not found or is not a '
+                    f'messageable text channel. Skipping public welcome for "{member.name}".')
                 return
 
             channel_message = self._replace_welcome_placeholders(
@@ -134,18 +134,20 @@ class NewMemberEventBot(commands.Cog):
 
         try:
             channel = self.bot.get_channel(self.admin_notification_channel_id)
-            if channel is None:
+            if not isinstance(channel, discord.abc.Messageable):
                 logger.warning(
-                    f'[BOT][EVENT][NEW MEMBER] Admin notification channel "{self.admin_notification_channel_id}" not found. '
-                    f'Skipping admin notification for "{member.name}".')
+                    f'[BOT][EVENT][NEW MEMBER] Admin notification channel "{self.admin_notification_channel_id}" was not '
+                    f'found or is not a messageable text channel. Skipping admin notification for "{member.name}".')
                 return
 
             admin_message = self._replace_admin_placeholders(
                 load_message('admin_new_member_message.md'),
                 member
             )
-            # Suppress pings: the new member usually cannot see the admin channel, so a real mention
-            # would be a confusing "ghost ping". The mention still renders as a clickable name.
+            # allowed_mentions only controls the notification (ping), not the rendering: the client
+            # still parses <@id> into a clickable name pill from the message content. We suppress the
+            # ping because the new member usually cannot see the admin channel, so pinging them would
+            # be a confusing "ghost ping".
             await channel.send(admin_message, allowed_mentions=discord.AllowedMentions.none())
         except Exception:
             logger.exception('[BOT][EVENT][NEW MEMBER]: It was not possible to send the admin join notification')
