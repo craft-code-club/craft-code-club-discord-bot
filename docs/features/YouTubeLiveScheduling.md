@@ -171,6 +171,7 @@ YOUTUBE_STREAM_ID=YOUR_REUSABLE_YOUTUBE_STREAM_ID
 ## Behavior Details
 
 - New YouTube lives are created as `public`
+- New YouTube lives are classified under the **Education** category (id `27`) instead of the default **Entertainment** (id `24`). Because `liveBroadcasts.insert` has no category field, the bot applies the category to the underlying video with `videos.update` right after the broadcast is created and bound
 - The event banner image is uploaded as the YouTube thumbnail when available
 - The saved `recording_link` may temporarily point to the scheduled YouTube watch page before the event happens
 - If the YouTube environment variables are missing, the bot logs the problem and skips YouTube scheduling without breaking Discord event creation
