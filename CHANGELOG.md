@@ -1,3 +1,10 @@
+# [1.24.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.23.0...v1.24.0) (2026-07-30)
+
+
+### Features
+
+* **new-member:** configurable public welcome + admin join notification ([fc966b1](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/fc966b135479cb3f46cac2784ec0f006860e3c47))
+
 # [1.23.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.22.0...v1.23.0) (2026-07-28)
 
 
