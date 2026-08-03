@@ -99,7 +99,6 @@ class EventDetailsCommandBot(commands.Cog):
             f'**banner:** {event.banner}',
             f'**is_live:** {event.is_live}',
             f'**open_session:** {event.open_session}',
-            f'**youtube_title:** {event.youtube_title}',
             f'**session_link:** {event.session_link}',
             f'**registration_link:** {event.registration_link}',
             f'**recording_link:** {event.recording_link}',
