@@ -3,7 +3,6 @@ import logging
 from typing import Optional
 import discord
 from discord.ext import tasks, commands
-from usescases.community_events.youtube_live_service import youtube_live_service
 from usescases.community_events.community_events_dao import community_events_dao
 from usescases.community_events.community_event import CommunityEvent, ReminderTime
 from usescases.community_events.github_service import github_service
@@ -138,12 +137,7 @@ class CommunityEventsTaskBot(commands.Cog):
                             # Delete the old Discord event if it exists
                             if existing_event.discord_event_id:
                                 await self.__delete_discord_event(existing_event.discord_event_id)
-                            # Update the YouTube live start time if already scheduled
-                            if event.has_recording_link() and event.is_live_event():
-                                await youtube_live_service.update_live_event_datetime(event)
                             community_events_dao.delete(existing_event.id, existing_event.start_datetime)
-
-                    await self.__schedule_youtube_live_if_needed(event)
 
                     if not event.discord_event_id:
                         event.discord_event_id = await self.__create_discord_event(event)
@@ -185,18 +179,6 @@ class CommunityEventsTaskBot(commands.Cog):
         except Exception:
             logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Failed to create discord event for "{event.title}"')
             return None
-
-
-    async def __schedule_youtube_live_if_needed(self, event: CommunityEvent) -> None:
-        if not event.is_live_event():
-            logger.debug(f'[BOT][TASK][COMMUNITY EVENTS][YOUTUBE] Skipping YouTube live scheduling for "{event.title}" because it is not a live event')
-            return
-
-        if event.has_recording_link():
-            logger.debug(f'[BOT][TASK][COMMUNITY EVENTS][YOUTUBE] Skipping YouTube live scheduling for "{event.title}" because recording_link is already defined')
-            return
-
-        event.recording_link = await youtube_live_service.schedule_live_event(event)
 
 
     async def __delete_discord_event(self, discord_event_id: str) -> None:
