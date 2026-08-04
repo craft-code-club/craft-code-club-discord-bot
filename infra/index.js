@@ -49,7 +49,6 @@ const image = requireEnv("IMAGE");
 // Non-secret runtime config. logLevel has a safe default; channel/forum IDs must be set
 // explicitly (no hard-coded fallback) so a new stack can't silently point at the wrong channels.
 const logLevel = process.env.LOG_LEVEL || "DEBUG";
-const leetcodeForumId = requireEnv("LEETCODE_FORUM_ID");
 const communityEventsChannelId = requireEnv("COMMUNITY_EVENTS_CHANNEL_ID");
 const sayHiChannel = requireEnv("SAY_HI_CHANNEL");
 const logsChannelId = requireEnv("LOGS_CHANNEL_ID");
@@ -177,7 +176,6 @@ const appSecrets = [
 // Env: plain values + secretRefs. Mirrors the exported Container App template.
 const appEnv = [
   { name: "LOG_LEVEL", value: logLevel },
-  { name: "LEETCODE_FORUM_ID", value: leetcodeForumId },
   { name: "COMMUNITY_EVENTS_CHANNEL_ID", value: communityEventsChannelId },
   { name: "SAY_HI_CHANNEL", value: sayHiChannel },
   { name: "LOGS_CHANNEL_ID", value: logsChannelId },
