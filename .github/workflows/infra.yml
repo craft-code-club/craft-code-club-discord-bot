@@ -72,7 +72,6 @@ jobs:
           RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
           IMAGE: ${{ vars.IMAGE }}
           LOG_LEVEL: ${{ vars.LOG_LEVEL }}
-          LEETCODE_FORUM_ID: ${{ vars.LEETCODE_FORUM_ID }}
           COMMUNITY_EVENTS_CHANNEL_ID: ${{ vars.COMMUNITY_EVENTS_CHANNEL_ID }}
           SAY_HI_CHANNEL: ${{ vars.SAY_HI_CHANNEL }}
           LOGS_CHANNEL_ID: ${{ vars.LOGS_CHANNEL_ID }}
