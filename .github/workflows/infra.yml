@@ -81,14 +81,10 @@ jobs:
           ADMIN_JOIN_NOTIFICATION_ENABLED: ${{ vars.ADMIN_JOIN_NOTIFICATION_ENABLED }}
           ADMIN_JOIN_NOTIFICATION_CHANNEL_ID: ${{ vars.ADMIN_JOIN_NOTIFICATION_CHANNEL_ID }}
           # Bot secrets — scoped to ONLY this step (least privilege), not the whole job. index.js reads
-          # them via process.env; all of these (Discord + YouTube) are required.
+          # them via process.env; all of these (Discord) are required.
           DISCORD_API_TOKEN: ${{ secrets.DISCORD_API_TOKEN }}
           DISCORD_APPLICATION_ID: ${{ secrets.DISCORD_APPLICATION_ID }}
           DISCORD_PUBLIC_KEY: ${{ secrets.DISCORD_PUBLIC_KEY }}
-          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
-          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
-          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-          YOUTUBE_STREAM_ID: ${{ secrets.YOUTUBE_STREAM_ID }}
         run: |
           pulumi stack select "$PULUMI_STACK"
           pulumi up --yes --skip-preview
