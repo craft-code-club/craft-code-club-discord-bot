@@ -66,13 +66,6 @@ const discordApiToken = pulumi.secret(requireEnv("DISCORD_API_TOKEN"));
 const discordApplicationId = pulumi.secret(requireEnv("DISCORD_APPLICATION_ID"));
 const discordPublicKey = pulumi.secret(requireEnv("DISCORD_PUBLIC_KEY"));
 
-// YouTube secrets are also required — live scheduling is a core feature, not optional.
-const youtubeSecrets = [
-  { secretName: "youtube-client-id",     env: "YOUTUBE_CLIENT_ID",     value: requireEnv("YOUTUBE_CLIENT_ID") },
-  { secretName: "youtube-client-secret", env: "YOUTUBE_CLIENT_SECRET", value: requireEnv("YOUTUBE_CLIENT_SECRET") },
-  { secretName: "youtube-refresh-token", env: "YOUTUBE_REFRESH_TOKEN", value: requireEnv("YOUTUBE_REFRESH_TOKEN") },
-  { secretName: "youtube-stream-id",     env: "YOUTUBE_STREAM_ID",     value: requireEnv("YOUTUBE_STREAM_ID") },
-].map((s) => ({ secretName: s.secretName, env: s.env, value: pulumi.secret(s.value) }));
 
 const tags = { project: projectName, environment, managedBy: "pulumi" };
 const namePrefix = `${projectName}-${environment}`;
@@ -164,14 +157,12 @@ const containerEnv = new azure.app.ManagedEnvironment("env", {
   tags,
 });
 
-// Container App secrets: the three required Discord secrets, the derived storage connection
-// string, and the four required YouTube secrets.
+// Container App secrets: the three required Discord secrets and the derived storage connection string.
 const appSecrets = [
   { name: "discord-api-token", value: discordApiToken },
   { name: "discord-application-id", value: discordApplicationId },
   { name: "discord-public-key", value: discordPublicKey },
   { name: "azure-storage-connection-string", value: storageConnectionString },
-  ...youtubeSecrets.map((s) => ({ name: s.secretName, value: s.value })),
 ];
 
 // Env: plain values + secretRefs. Mirrors the exported Container App template.
@@ -189,7 +180,6 @@ const appEnv = [
   { name: "DISCORD_APPLICATION_ID", secretRef: "discord-application-id" },
   { name: "DISCORD_PUBLIC_KEY", secretRef: "discord-public-key" },
   { name: "AZURE_STORAGE_CONNECTION_STRING", secretRef: "azure-storage-connection-string" },
-  ...youtubeSecrets.map((s) => ({ name: s.env, secretRef: s.secretName })),
 ];
 
 // No ingress: the bot is an outbound gateway client. Exactly 1 replica (fixed) so scheduled jobs
