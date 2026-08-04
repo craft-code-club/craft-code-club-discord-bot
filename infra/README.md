@@ -50,14 +50,10 @@ export LOCATION=centralus
 export RESOURCE_GROUP_NAME=rg-craft-code-club
 export LOG_LEVEL=DEBUG
 
-# Secrets (all required: Discord + YouTube):
+# Secrets (all required: Discord only):
 export DISCORD_API_TOKEN=<token>
 export DISCORD_APPLICATION_ID=<id>
 export DISCORD_PUBLIC_KEY=<key>
-export YOUTUBE_CLIENT_ID=<id>
-export YOUTUBE_CLIENT_SECRET=<secret>
-export YOUTUBE_REFRESH_TOKEN=<token>
-export YOUTUBE_STREAM_ID=<id>
 
 pulumi up
 ```
@@ -68,8 +64,7 @@ environment variables (secrets wrapped as Pulumi secrets), so no `Pulumi.<stack>
   **GitHub `vars`** (non-secret config: `PROJECT_NAME`, `LOCATION`,
   `RESOURCE_GROUP_NAME`, `IMAGE`, `LOG_LEVEL`, `COMMUNITY_EVENTS_CHANNEL_ID`,
   `SAY_HI_CHANNEL`, `LOGS_CHANNEL_ID`; `ENVIRONMENT` is optional and defaults to the Pulumi stack name) and **GitHub secrets** (on the `PROD` environment, all
-  required): `DISCORD_API_TOKEN`, `DISCORD_APPLICATION_ID`, `DISCORD_PUBLIC_KEY`,
-  `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, `YOUTUBE_REFRESH_TOKEN`, `YOUTUBE_STREAM_ID`.
+  required): `DISCORD_API_TOKEN`, `DISCORD_APPLICATION_ID`, `DISCORD_PUBLIC_KEY`.
 - **Local:** `export` them before `pulumi up` (as above).
 
 ## CI/CD
