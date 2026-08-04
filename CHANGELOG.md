@@ -1,3 +1,22 @@
+## [1.24.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.24.1...v1.24.2) (2026-08-04)
+
+
+### Bug Fixes
+
+* remove YouTube secrets from infra files ([bee048b](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/bee048b485e63800ab41b446a98543f48dd3dcfa))
+
+
+### Code Refactoring
+
+* **youtube:** remove YouTube live scheduling functionality and related configurations ([9075345](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/9075345447a091e9ecf605bf5ab4b51947a1fbe4))
+* **youtube:** remove YouTube live scheduling functionality and related configurations ([f896dab](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/f896dab524b5298f182924326c77677068593766))
+
+
+### BREAKING CHANGES
+
+* **youtube:** This commit removes the YouTube live scheduling feature, including all related code, configurations, and documentation. The bot will no longer schedule YouTube live events for community events.
+* **youtube:** This commit removes the YouTube live scheduling feature, including all related code, configurations, and documentation. The bot will no longer schedule YouTube live events for community events.
+
 ## [1.24.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.24.0...v1.24.1) (2026-08-04)
 
 # [1.24.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.23.0...v1.24.0) (2026-07-30)
