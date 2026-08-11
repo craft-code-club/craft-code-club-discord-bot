@@ -21,7 +21,8 @@ async def setup(bot):
 class CommunityEventsTaskBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.community_events_channel_id = int(os.environ.get('COMMUNITY_EVENTS_CHANNEL_ID', '0'))
+        self.community_events_channel_id = self.__parse_channel_id('COMMUNITY_EVENTS_CHANNEL_ID')
+        self.logs_channel_id = self.__parse_channel_id('LOGS_CHANNEL_ID')
 
         if not self.community_events_channel_id:
             logger.warning('[BOT][TASK][COMMUNITY EVENTS] COMMUNITY_EVENTS_CHANNEL_ID is not set. Daily task will not run.')
@@ -29,6 +30,14 @@ class CommunityEventsTaskBot(commands.Cog):
 
         self.update_community_events_task.start()
         self.notify_upcoming_events.start()
+
+
+    def __parse_channel_id(self, env_var: str) -> int:
+        raw = os.environ.get(env_var, '').strip()
+        if raw and not raw.isdigit():
+            logger.warning(f'[BOT][TASK][COMMUNITY EVENTS] {env_var} must be a Discord channel ID (digits).')
+            return 0
+        return int(raw) if raw.isdigit() else 0
 
 
     def cog_unload(self):
@@ -175,10 +184,33 @@ class CommunityEventsTaskBot(commands.Cog):
 
             logger.info(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Created discord event for "{event.title}" with Id "{discord_event.id}"')
 
+            await self.__send_event_created_log_message(event, str(discord_event.id))
+
             return str(discord_event.id)
         except Exception:
             logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Failed to create discord event for "{event.title}"')
             return None
+
+
+    async def __send_event_created_log_message(self, event: CommunityEvent, discord_event_id: str) -> None:
+        if not self.logs_channel_id:
+            return
+
+        try:
+            channel = self.bot.get_channel(self.logs_channel_id)
+            if not isinstance(channel, discord.abc.Messageable):
+                logger.warning(
+                    f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Logs channel "{self.logs_channel_id}" was not '
+                    f'found or is not a messageable text channel. Skipping event-created log message for "{event.title}".')
+                return
+
+            await channel.send(
+                f'[COMMUNITY EVENT] Event created: {event.title} (id: {discord_event_id})',
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
+        except Exception:
+            logger.exception(
+                f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Failed to send event-created log message for "{event.title}"')
 
 
     async def __delete_discord_event(self, discord_event_id: str) -> None:
