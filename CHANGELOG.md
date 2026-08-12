@@ -1,3 +1,10 @@
+# [1.25.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.24.2...v1.25.0) (2026-08-12)
+
+
+### Features
+
+* **task_bot:** add logs channel ID parsing and event log message sending ([09a0b0c](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/09a0b0cb943d5260a8a0a35d7bd0363baf691aca))
+
 ## [1.24.2](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.24.1...v1.24.2) (2026-08-04)
 
 
