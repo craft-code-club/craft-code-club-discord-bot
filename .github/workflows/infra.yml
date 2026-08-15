@@ -38,7 +38,7 @@ jobs:
       # The repo secret is named PULUMI_TOKEN; the Pulumi CLI reads PULUMI_ACCESS_TOKEN.
       PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_TOKEN }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3
         with:
