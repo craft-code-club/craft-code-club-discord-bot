@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: write
     # The AZURE_* service-principal secrets live on the PROD environment (same one publish.yml
     # deploys to), so the job must declare it to see them.
     environment: PROD
