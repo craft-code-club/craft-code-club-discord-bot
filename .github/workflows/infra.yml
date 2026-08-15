@@ -15,8 +15,9 @@ on:
   #     - 'infra/**'
   #     - '.github/workflows/infra.yml'
 
-permissions:
-  contents: read
+
+permissions: {}
+
 
 env:
   PULUMI_STACK: ${{ vars.PULUMI_STACK || 'discord-bot' }}
@@ -25,6 +26,8 @@ jobs:
   pulumi:
     name: 'Pulumi up'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     # The AZURE_* service-principal secrets live on the PROD environment (same one publish.yml
     # deploys to), so the job must declare it to see them.
     environment: PROD
@@ -39,6 +42,8 @@ jobs:
       PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3
         with:
