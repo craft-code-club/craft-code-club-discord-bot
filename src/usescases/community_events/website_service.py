@@ -6,7 +6,7 @@ from usescases.community_events.community_event import CommunityEvent
 
 logger = logging.getLogger(__name__)
 
-FUTURE_EVENTS_URL = "http://craftcodeclub.io/api/events/future"
+FUTURE_EVENTS_URL = "https://craftcodeclub.io/api/events/future"
 
 
 class WebsiteService:
