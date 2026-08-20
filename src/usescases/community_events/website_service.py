@@ -31,7 +31,9 @@ class WebsiteService:
     def __parse_event(self, data: dict) -> CommunityEvent:
         event_date = data['date']
         time_range = data['time']
-        time_parts = time_range.split('-')
+        time_parts = [p.strip() for p in time_range.split('-')]
+        if len(time_parts) != 2:
+            raise Exception(f'Invalid time range "{time_range}" for event "{data.get("id")}"')
 
         start_str = f"{event_date}T{time_parts[0]}:00"
         end_str = f"{event_date}T{time_parts[1]}:00"
