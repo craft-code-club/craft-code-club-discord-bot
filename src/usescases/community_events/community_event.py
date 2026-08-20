@@ -17,12 +17,11 @@ class ReminderTime(Enum):
 class CommunityEvent:
     id: str
     title: str
-    github_url: str
     description: str
-
     start_datetime: datetime
     end_datetime: datetime
 
+    github_url: Optional[str] = None
     discord_event_id: Optional[str] = None
 
     location: Optional[str] = None
@@ -49,13 +48,9 @@ class CommunityEvent:
         return f"https://craftcodeclub.io/events/{self.id}"
 
     def banner_url(self) -> Optional[str]:
-        if self.banner:
-            return f"https://raw.githubusercontent.com/craft-code-club/blog-c3/refs/heads/main/public/events/{self.banner}"
-        return None
+        return self.banner
 
     def discord_event_location(self) -> str:
-        # if self.session_link:
-        #     return self.session_link
         if self.has_recording_link() and self.is_live_event():
             return self.recording_link
         return self.event_details_url()
