@@ -5,7 +5,7 @@ import discord
 from discord.ext import tasks, commands
 from usescases.community_events.community_events_dao import community_events_dao
 from usescases.community_events.community_event import CommunityEvent, ReminderTime
-from usescases.community_events.github_service import github_service
+from usescases.community_events.website_service import website_service
 from usescases.community_events.community_event_formatter import event_formatter
 from datetime import datetime
 
@@ -50,9 +50,7 @@ class CommunityEventsTaskBot(commands.Cog):
         try:
             logger.debug('[BOT][TASK][COMMUNITY EVENTS][NOTIFY] Notifying upcoming events...')
 
-            channel = self.bot.get_channel(self.community_events_channel_id)
-            if channel is None:
-                raise ValueError(f'Could not find channel with Id "{self.community_events_channel_id}"')
+            channel = await self.__get_or_fetch_channel(self.community_events_channel_id)
 
             time_zone = get_brazil_timezone()
             now = datetime.now(time_zone)
@@ -123,15 +121,10 @@ class CommunityEventsTaskBot(commands.Cog):
     async def update_community_events_task(self):
         try:
             logger.debug('[BOT][TASK][COMMUNITY EVENTS][UPDATE] Updating community events...')
-            events = await github_service.fetch_community_events()
+            events = await website_service.fetch_future_events()
 
-            for name, url in events.items():
+            for event in events:
                 try:
-                    event = await github_service.fetch_community_event(url)
-
-                    if not event.is_future_event():
-                        continue
-
                     existing_event = community_events_dao.get(event.id)
                     if existing_event:
                         if not event.has_recording_link() and existing_event.has_recording_link():
@@ -153,9 +146,9 @@ class CommunityEventsTaskBot(commands.Cog):
 
                     community_events_dao.upsert(event)
 
-                    logger.info(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] upserted event "{name}" from "{url}"')
+                    logger.info(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] upserted event "{event.id}"')
                 except Exception:
-                    logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] Failed to process event "{name}" from "{url}"')
+                    logger.exception(f'[BOT][TASK][COMMUNITY EVENTS][UPDATE] Failed to process event "{event.id}"')
 
             logger.debug('[BOT][TASK][COMMUNITY EVENTS][UPDATE] Updated community events finished successfully.')
         except Exception:
@@ -172,9 +165,7 @@ class CommunityEventsTaskBot(commands.Cog):
         try:
             logger.debug(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Creating discord event for "{event.title}"')
 
-            channel = self.bot.get_channel(self.community_events_channel_id)
-            if channel is None:
-                raise ValueError(f'Could not find channel with Id "{self.community_events_channel_id}"')
+            channel = await self.__get_or_fetch_channel(self.community_events_channel_id)
 
             guild = channel.guild
 
@@ -197,7 +188,7 @@ class CommunityEventsTaskBot(commands.Cog):
             return
 
         try:
-            channel = self.bot.get_channel(self.logs_channel_id)
+            channel = await self.__get_or_fetch_channel(self.logs_channel_id)
             if not isinstance(channel, discord.abc.Messageable):
                 logger.warning(
                     f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Logs channel "{self.logs_channel_id}" was not '
@@ -213,13 +204,18 @@ class CommunityEventsTaskBot(commands.Cog):
                 f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Failed to send event-created log message for "{event.title}"')
 
 
+    async def __get_or_fetch_channel(self, channel_id: int):
+        channel = self.bot.get_channel(channel_id)
+        if channel is None:
+            channel = await self.bot.fetch_channel(channel_id)
+        return channel
+
+
     async def __delete_discord_event(self, discord_event_id: str) -> None:
         try:
             logger.debug(f'[BOT][TASK][COMMUNITY EVENTS][DISCORD] Deleting discord event Id "{discord_event_id}"')
 
-            channel = self.bot.get_channel(self.community_events_channel_id)
-            if channel is None:
-                raise ValueError(f'Could not find channel with Id "{self.community_events_channel_id}"')
+            channel = await self.__get_or_fetch_channel(self.community_events_channel_id)
 
             guild = channel.guild
             discord_event = await guild.fetch_scheduled_event(int(discord_event_id))
