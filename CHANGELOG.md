@@ -1,3 +1,5 @@
+## [1.25.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.25.0...v1.25.1) (2026-08-21)
+
 # [1.25.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.24.2...v1.25.0) (2026-08-12)
 
 

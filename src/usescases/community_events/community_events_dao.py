@@ -119,7 +119,7 @@ class CommunityEventsDao:
             end_datetime = end_datetime,
 
             title = event["title"],
-            github_url = event["github_url"],
+            github_url = event["github_url"] if "github_url" in event else None,
             description = event["description"],
 
             discord_event_id = event["discord_event_id"] if "discord_event_id" in event else None,
