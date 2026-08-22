@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+
+permissions: {}
+
+
 env:
   IMAGE_NAME: ${{ github.repository_owner }}/${{ github.event.repository.name }}/cicd-test-build-image:validation-${{ github.run_number }}
 
@@ -17,6 +21,9 @@ jobs:
   test-docker-build:
     name: Test Docker Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
 
     steps:
       - name: Checkout
