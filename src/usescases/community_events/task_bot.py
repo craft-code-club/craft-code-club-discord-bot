@@ -96,7 +96,7 @@ class CommunityEventsTaskBot(commands.Cog):
 
                 logger.debug(f'[BOT][TASK][COMMUNITY EVENTS][NOTIFY] The event: "{event.title}" will now notify {reminder_time.name} in advance')
 
-                embed = event_formatter.format_to_message(event)
+                embed = event_formatter.format_to_message(event, now)
                 if reminder_time == ReminderTime.A_HOUR:
                     content = '@everyone'
                     allowed_mentions = discord.AllowedMentions(everyone=True, roles=False, users=False)
