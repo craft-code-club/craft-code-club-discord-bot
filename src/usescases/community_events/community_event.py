@@ -103,6 +103,13 @@ class CommunityEvent:
 
         return portugal_time.strftime("%Y/%m/%d - %H:%M")
 
+    def days_until_event(self) -> int:
+        now = datetime.now(get_brazil_timezone())
+        event_date = self.start_datetime
+        if event_date.tzinfo is None:
+            event_date = event_date.replace(tzinfo=now.tzinfo)
+        return (event_date.date() - now.date()).days
+
     def reminder_time(self) -> Optional[ReminderTime]:
         now = datetime.now(get_brazil_timezone())
         now_date_only = now.date()
@@ -124,7 +131,7 @@ class CommunityEvent:
         if delta_days == 3: # 3 days
             return ReminderTime.THREE_DAYS
 
-        if delta_days == 7: # 1 week
+        if 4 <= delta_days <= 7: # 1 week (catch-up from day 4)
             return ReminderTime.A_WEEK
 
         return None

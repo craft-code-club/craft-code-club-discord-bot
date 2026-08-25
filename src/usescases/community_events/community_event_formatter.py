@@ -47,8 +47,12 @@ class EventMessageFormatter:
 
     def format_to_message(self, event: CommunityEvent) -> discord.Embed:
         reminder_time = event.reminder_time()
-        reminder_title = self.notification_titles.get(reminder_time) if reminder_time else None
-        reminder_title = reminder_title or "Evento"
+        if reminder_time == ReminderTime.A_WEEK:
+            days = event.days_until_event()
+            reminder_title = "Evento em 1 semana!" if days == 7 else f"Evento em {days} dias!"
+        else:
+            reminder_title = self.notification_titles.get(reminder_time) if reminder_time else None
+            reminder_title = reminder_title or "Evento"
         safe_title = discord.utils.escape_mentions(event.title)
         safe_description = discord.utils.escape_mentions(event.description)
         event_description = f"***{reminder_title}***\n\n{safe_description}"
