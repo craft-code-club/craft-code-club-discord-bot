@@ -77,8 +77,12 @@ class EventMessageFormatter:
             image_content_type=image_content_type,
         )
 
-    def format_to_message(self, event: CommunityEvent) -> dict:
-        reminder_time = event.reminder_time()
+    def format_to_message(self, event: CommunityEvent,
+                          reminder_time: Optional[ReminderTime] = None) -> dict:
+        # The caller usually already computed the window; recomputing it here
+        # against a slightly later clock could render a different reminder than
+        # the one being sent.
+        reminder_time = reminder_time or event.reminder_time()
         reminder_title = self.notification_titles.get(reminder_time) if reminder_time else None
         reminder_title = reminder_title or "Evento"
         safe_title = escape_mentions(event.title)

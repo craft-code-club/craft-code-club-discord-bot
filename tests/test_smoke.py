@@ -36,6 +36,15 @@ import azure.functions as func  # noqa: E402
 import discord_api.rest as rest_module  # noqa: E402
 from discord_api import interactions  # noqa: E402
 from usescases.community_events.community_event import CommunityEvent  # noqa: E402
+from utils.timezones import get_brazil_timezone  # noqa: E402
+
+# Stored event datetimes are naive São Paulo local time, so test data must be
+# built from that clock rather than from the runner's (CI runs in UTC).
+BRAZIL_TZ = get_brazil_timezone()
+
+
+def brazil_now():
+    return datetime.now(BRAZIL_TZ)
 
 CALLS: list[tuple] = []
 
@@ -207,7 +216,7 @@ class CommandTests(unittest.TestCase):
         CALLS.clear()
         FAKE_EVENTS.events.clear()
         FAKE_STATE.values.clear()
-        start = datetime.now() + timedelta(minutes=50)
+        start = brazil_now().replace(tzinfo=None) + timedelta(minutes=50)
         FAKE_EVENTS.upsert(CommunityEvent(id='ev1', title='Test Event', description='desc',
                                           start_datetime=start,
                                           end_datetime=start + timedelta(hours=2)))
@@ -287,17 +296,21 @@ class TimerTests(unittest.TestCase):
         FAKE_STATE.values.clear()
 
     def test_notify_sends_once_and_then_stops(self):
-        start = datetime.now() + timedelta(minutes=50)
+        # A fixed clock: the task refuses to notify before 8am São Paulo, and
+        # the reminder windows are relative to "now", so neither may depend on
+        # when or where the test runs.
+        now = datetime(2026, 9, 15, 12, 0, tzinfo=BRAZIL_TZ)
+        start = now.replace(tzinfo=None) + timedelta(minutes=50)
         FAKE_EVENTS.upsert(CommunityEvent(id='ev1', title='Soon', description='d',
                                           start_datetime=start,
                                           end_datetime=start + timedelta(hours=1)))
 
         async def run_twice():
             async with rest_module.DiscordRest() as rest:
-                await notify_task.run(rest)
+                await notify_task.run(rest, now=now)
                 first = [c for c in CALLS if c[1] == '/channels/111/messages']
                 CALLS.clear()
-                await notify_task.run(rest)
+                await notify_task.run(rest, now=now)
                 second = [c for c in CALLS if c[1] == '/channels/111/messages']
                 return first, second
 

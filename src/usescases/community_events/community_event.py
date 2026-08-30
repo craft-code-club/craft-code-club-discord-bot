@@ -103,8 +103,13 @@ class CommunityEvent:
 
         return portugal_time.strftime("%Y/%m/%d - %H:%M")
 
-    def reminder_time(self) -> Optional[ReminderTime]:
-        now = datetime.now(get_brazil_timezone())
+    def reminder_time(self, now: Optional[datetime] = None) -> Optional[ReminderTime]:
+        """Which reminder window this event falls into, if any.
+
+        `now` is injectable so the windows can be exercised deterministically;
+        it defaults to the current São Paulo time.
+        """
+        now = now or datetime.now(get_brazil_timezone())
         now_date_only = now.date()
 
         event_date = self.start_datetime

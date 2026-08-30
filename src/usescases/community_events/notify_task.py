@@ -7,6 +7,7 @@ process happens to be alive.
 
 import logging
 from datetime import datetime, timezone
+from typing import Optional
 
 from discord_api.rest import DiscordRest, everyone_mention, no_mentions
 from usescases.community_events.community_event import CommunityEvent, ReminderTime
@@ -28,7 +29,13 @@ _NOTIFY_FLAGS = {
 }
 
 
-async def run(rest: DiscordRest) -> None:
+async def run(rest: DiscordRest, now: Optional[datetime] = None) -> None:
+    """Check for due reminders.
+
+    `now` is injectable so the 8am gate and the reminder windows can be tested
+    without depending on the host clock or timezone; the timer trigger always
+    uses the real São Paulo time.
+    """
     get_state_dao().set(LAST_NOTIFY_KEY, datetime.now(timezone.utc).isoformat(timespec='seconds'))
 
     channel_id = config.community_events_channel_id()
@@ -36,8 +43,7 @@ async def run(rest: DiscordRest) -> None:
         logger.warning('[TASK][COMMUNITY EVENTS][NOTIFY] COMMUNITY_EVENTS_CHANNEL_ID is not set. Skipping.')
         return
 
-    time_zone = get_brazil_timezone()
-    now = datetime.now(time_zone)
+    now = now or datetime.now(get_brazil_timezone())
 
     # only send notifications after 8am
     if now.hour < 8:
@@ -52,7 +58,7 @@ async def run(rest: DiscordRest) -> None:
                  len(upcoming_events))
 
     for event in upcoming_events:
-        reminder_time = event.reminder_time()
+        reminder_time = event.reminder_time(now)
         if not reminder_time:
             logger.debug('[TASK][COMMUNITY EVENTS][NOTIFY] The event: "%s" is not in a timewindow for notification',
                          event.title)
@@ -82,7 +88,7 @@ async def _notify(rest: DiscordRest, dao, event: CommunityEvent, reminder_time: 
     setattr(event, flag, True)
     dao.merge(event, {flag: True})
 
-    embed = event_formatter.format_to_message(event)
+    embed = event_formatter.format_to_message(event, reminder_time)
     if reminder_time == ReminderTime.A_HOUR:
         content = '@everyone'
         allowed_mentions = everyone_mention()
