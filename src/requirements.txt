@@ -1,5 +1,6 @@
-# Azure Functions worker.
-azure-functions==2.3.0
+# Azure Functions worker. Pinned to the 1.x line: azure-functions 2.x requires
+# Python >= 3.13, and the function app runs on 3.12 (see infra/index.js).
+azure-functions==1.25.0
 
 # Discord REST calls and the craftcodeclub.io fetch.
 aiohttp==3.14.3
