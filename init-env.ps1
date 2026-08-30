@@ -75,7 +75,15 @@ Write-Host ""
 
 # --- Install requirements ---
 Write-Host "[pip] Installing requirements..." -ForegroundColor Cyan
-pip install -r requirements.txt
+pip install -r src/requirements.txt
+
+# --- Functions local settings ---
+if (Test-Path "src/local.settings.json") {
+    Write-Host "[func] src/local.settings.json already exists - skipping." -ForegroundColor Yellow
+} elseif (Test-Path "src/local.settings.json.example") {
+    Write-Host "[func] Copying src/local.settings.json.example -> src/local.settings.json" -ForegroundColor Cyan
+    Copy-Item "src/local.settings.json.example" "src/local.settings.json"
+}
 Write-Host ""
 
 Write-Host "=== Done! ===" -ForegroundColor Green

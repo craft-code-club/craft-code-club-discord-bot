@@ -73,7 +73,16 @@ echo ""
 
 # --- Install requirements ---
 echo "[pip] Installing requirements..."
-pip install -r requirements.txt
+pip install -r src/requirements.txt
+echo ""
+
+# --- Functions local settings ---
+if [ -f "src/local.settings.json" ]; then
+    echo "[func] src/local.settings.json already exists — skipping."
+elif [ -f "src/local.settings.json.example" ]; then
+    echo "[func] Copying src/local.settings.json.example -> src/local.settings.json"
+    cp src/local.settings.json.example src/local.settings.json
+fi
 echo ""
 
 echo "=== Done! ==="

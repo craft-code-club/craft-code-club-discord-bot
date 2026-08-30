@@ -1,0 +1,30 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+
+    "LOG_LEVEL": "DEBUG",
+    "BOT_VERSION": "dev",
+
+    "DISCORD_API_TOKEN": "",
+    "DISCORD_APPLICATION_ID": "",
+    "DISCORD_PUBLIC_KEY": "",
+    "DISCORD_GUILD_ID": "",
+
+    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+
+    "COMMUNITY_EVENTS_CHANNEL_ID": "",
+    "LOGS_CHANNEL_ID": "",
+    "SAY_HI_CHANNEL": "",
+
+    "WELCOME_MESSAGE_ENABLED": "false",
+    "WELCOME_CHANNEL_ID": "",
+    "WELCOME_DELAY_SECONDS": "10",
+    "ADMIN_JOIN_NOTIFICATION_ENABLED": "false",
+    "ADMIN_JOIN_NOTIFICATION_CHANNEL_ID": "",
+
+    "STATUS_MAX_MEMBERS": "5000",
+    "ADD_ROLE_ALL_MAX_MEMBERS": "3000"
+  }
+}

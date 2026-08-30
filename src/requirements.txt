@@ -1,0 +1,16 @@
+# Azure Functions worker.
+azure-functions==2.3.0
+
+# Discord REST calls and the craftcodeclub.io fetch.
+aiohttp==3.14.3
+
+# Ed25519 verification of Discord interaction requests.
+pynacl==1.6.2
+
+# CommunityEvents / BotState tables.
+azure-data-tables==12.7.0
+
+# System timezone database: zoneinfo has no bundled data on some images, and a
+# missing tzdata silently degrades the Canada/Portugal event times to fixed
+# offsets that are wrong for ~8 months of the year.
+tzdata==2026.3

@@ -1,127 +1,94 @@
+"""/server-status - membership statistics for the guild.
+
+Everything here used to be read from the gateway member cache. Members and
+roles now come from REST (one page of 1000 members per request), and
+administrator counts are computed from the role permission bitfields.
+
+One genuine downgrade: the exact online count is gone. Per-member presence is
+only delivered over the gateway with the GUILD_PRESENCES intent and has no
+REST equivalent, so this reports Discord's `approximate_presence_count`.
+"""
+
+import logging
 import os
 from datetime import datetime, timezone
-import discord
-from discord.ext import commands
-import logging
 
-from ._helpers import admin_guilds, send_chunked
+from discord_api import interactions
+from discord_api.rest import DiscordRest, member_is_administrator
+
+from .permissions import require_admin
 
 logger = logging.getLogger(__name__)
 
-_STATUS_CACHE_TTL = 30  # seconds
+
+async def handle(rest: DiscordRest, interaction: dict) -> None:
+    guild_id = await require_admin(rest, interaction, 'server-status')
+    if not guild_id:
+        return
+
+    logger.debug('[COMMAND][STATUS] User "%s" requested the server status',
+                 interactions.user_name(interaction))
+
+    guild = await rest.get_guild(guild_id, with_counts=True)
+    guild_name = guild.get('name', guild_id)
+    member_count = guild.get('approximate_member_count')
+    presence_count = guild.get('approximate_presence_count')
+
+    max_members = int(os.environ.get('STATUS_MAX_MEMBERS', '5000'))
+    if member_count and member_count > max_members:
+        logger.warning('[COMMAND][STATUS] Guild "%s" has %s members, exceeding cap of %s. '
+                       'Skipping status fetch.', guild_name, member_count, max_members)
+        await rest.edit_original_response(
+            interaction['token'],
+            content='\n'.join([
+                f'**{guild_name}**',
+                f'- **Erro:** servidor demasiado grande ({member_count} membros, limite {max_members})',
+                f'- **Atualizado em:** {_timestamp()}',
+            ]))
+        return
+
+    roles = await rest.get_guild_roles(guild_id)
+    roles_by_id = {str(role['id']): role for role in roles}
+    owner_id = str(guild.get('owner_id', ''))
+
+    total_users = 0
+    total_admins = 0
+    no_role_users = 0
+    role_counts: dict[str, int] = {}
+
+    async for member in rest.iter_members(guild_id):
+        total_users += 1
+        if member_is_administrator(member, roles_by_id, guild_id, owner_id):
+            total_admins += 1
+        member_roles = [str(role_id) for role_id in member.get('roles', [])]
+        if not member_roles:
+            no_role_users += 1
+        for role_id in member_roles:
+            role_counts[role_id] = role_counts.get(role_id, 0) + 1
+
+    role_lines = [
+        f'  - {roles_by_id[role_id]["name"]}: {role_counts[role_id]}'
+        for role_id in sorted(role_counts,
+                              key=lambda rid: roles_by_id.get(rid, {}).get('position', 0),
+                              reverse=True)
+        if role_id in roles_by_id and role_id != str(guild_id)
+    ]
+
+    online = f'{presence_count} (aproximado)' if presence_count is not None else 'indisponível'
+
+    lines = [
+        f'**{guild_name}**',
+        f'- **Total de utilizadores:** {total_users}',
+        f'- **Utilizadores online:** {online}',
+        f'- **Total de administradores:** {total_admins}',
+        f'- **Utilizadores sem role:** {no_role_users}',
+        '- **Utilizadores por role:**',
+    ] + role_lines + [f'- **Atualizado em:** {_timestamp()}']
+
+    await rest.respond_chunked(interaction['token'], '\n'.join(lines))
+    logger.info('[COMMAND][STATUS] Sent server status for guild "%s" to admin "%s"',
+                guild_name, interactions.user_name(interaction))
 
 
-class ServerStatusCommandBot(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self._status_cache: dict[int, tuple[datetime, str]] = {}
-
-    async def _build_guild_status(self, guild) -> tuple[str, datetime]:
-        max_members = int(os.environ.get('STATUS_MAX_MEMBERS', '5000'))
-        if guild.member_count and guild.member_count > max_members:
-            logger.warning(
-                f'[BOT][COMMAND][STATUS] Guild "{guild.name}" has {guild.member_count} members, '
-                f'exceeding cap of {max_members}. Skipping status fetch.'
-            )
-            computed_at = datetime.now(timezone.utc)
-            timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
-            return '\n'.join([
-                f'**{guild.name}**',
-                f'- **Erro:** servidor demasiado grande ({guild.member_count} membros, limite {max_members})',
-                f'- **Atualizado em:** {timestamp_str}',
-            ]), computed_at
-
-        total_users = 0
-        total_admins = 0
-        no_role_users = 0
-        role_counts: dict[int, int] = {}
-        try:
-            async for m in guild.fetch_members(limit=None):
-                total_users += 1
-                if m.guild_permissions.administrator:
-                    total_admins += 1
-                if len(m.roles) == 1:
-                    no_role_users += 1
-                for role in m.roles:
-                    if role != guild.default_role:
-                        role_counts[role.id] = role_counts.get(role.id, 0) + 1
-        except discord.Forbidden:
-            logger.warning(f'[BOT][COMMAND][STATUS] Missing permissions to fetch members in guild "{guild.name}"')
-            computed_at = datetime.now(timezone.utc)
-            timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
-            return '\n'.join([
-                f'**{guild.name}**',
-                '- **Erro:** sem permissão para consultar membros',
-                f'- **Atualizado em:** {timestamp_str}',
-            ]), computed_at
-        except discord.HTTPException:
-            logger.exception(f'[BOT][COMMAND][STATUS] Failed to fetch members in guild "{guild.name}"')
-            computed_at = datetime.now(timezone.utc)
-            timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
-            return '\n'.join([
-                f'**{guild.name}**',
-                '- **Erro:** erro ao consultar membros',
-                f'- **Atualizado em:** {timestamp_str}',
-            ]), computed_at
-        except Exception:
-            logger.exception(f'[BOT][COMMAND][STATUS] Unexpected error while fetching members in guild "{guild.name}"')
-            computed_at = datetime.now(timezone.utc)
-            timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
-            return '\n'.join([
-                f'**{guild.name}**',
-                '- **Erro:** erro inesperado ao consultar membros',
-                f'- **Atualizado em:** {timestamp_str}',
-            ]), computed_at
-
-        role_lines = [
-            f'  - {role.name}: {role_counts[role.id]}'
-            for role in sorted(guild.roles, key=lambda r: r.position, reverse=True)
-            if role != guild.default_role and role.id in role_counts
-        ]
-
-        online_count = sum(
-            1 for m in guild.members
-            if m.status != discord.Status.offline
-        )
-
-        computed_at = datetime.now(timezone.utc)
-        timestamp_str = computed_at.strftime('%Y-%m-%d %H:%M:%S UTC')
-
-        lines = [
-            f'**{guild.name}**',
-            f'- **Total de utilizadores:** {total_users}',
-            f'- **Utilizadores online:** {online_count}',
-            f'- **Total de administradores:** {total_admins}',
-            f'- **Utilizadores sem role:** {no_role_users}',
-            '- **Utilizadores por role:**',
-        ] + role_lines + [f'- **Atualizado em:** {timestamp_str}']
-
-        return '\n'.join(lines), computed_at
-
-    async def _get_guild_status(self, guild) -> str:
-        cached = self._status_cache.get(guild.id)
-        if cached:
-            cached_at, text = cached
-            if (datetime.now(timezone.utc) - cached_at).total_seconds() < _STATUS_CACHE_TTL:
-                return text
-
-        text, computed_at = await self._build_guild_status(guild)
-        self._status_cache[guild.id] = (computed_at, text)
-        return text
-
-    @commands.command(name='server-status', help='Mostra estatísticas do servidor (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM'})
-    @commands.dm_only()
-    async def status(self, ctx):
-        logger.debug(f'[BOT][COMMAND][STATUS] User "{ctx.author.name}" requested the server status')
-
-        guilds = admin_guilds(self.bot, ctx.author.id)
-        if not guilds:
-            logger.warning(f'[BOT][COMMAND][STATUS] User "{ctx.author.name}" is not a server admin. Ignoring')
-            return
-
-        for guild in guilds:
-            text = await self._get_guild_status(guild)
-            await send_chunked(ctx.author, text)
-            logger.info(
-                f'[BOT][COMMAND][STATUS] Sent server status for guild "{guild.name}" to admin "{ctx.author.name}"'
-            )
+def _timestamp() -> str:
+    return datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')

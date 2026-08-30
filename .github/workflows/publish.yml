@@ -1,5 +1,11 @@
 name: 'Publish'
 
+# Builds the Azure Functions package and deploys it to the Flex Consumption
+# function app provisioned by infra/ (see .github/workflows/infra.yml).
+#
+# The bot no longer ships as a Docker image: there is no gateway process to keep
+# running, so there is nothing to put in a container. The whole app is the zip
+# produced here.
 
 on:
   workflow_dispatch:
@@ -17,14 +23,14 @@ concurrency:
 
 
 env:
-  IMAGE_NAME: 'discord-bot'
+  PYTHON_VERSION: '3.12'
+  FUNCTION_APP_NAME: 'func-c3-discord-bot-discord-bot'
   RESOURCE_GROUP: 'rg-craft-code-club'
-  CONTAINER_APP_NAME: 'ca-c3-discord-bot-discord-bot'
 
 
 jobs:
   build:
-    name: 'Building Docker Image'
+    name: 'Build Functions package'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,8 +42,8 @@ jobs:
       with:
         persist-credentials: false
 
-    - name: 'Resolve image tag'
-      id: tag
+    - name: 'Resolve version'
+      id: version
       run: |
         if [ "${{ github.event_name }}" == "release" ]; then
           VERSION="${{ github.event.release.tag_name }}"
@@ -46,7 +52,7 @@ jobs:
         fi
 
         if [ -z "$VERSION" ] || [ "$VERSION" == "null-${{ github.run_number }}" ]; then
-          echo "Unable to resolve a release-based image tag. Ensure at least one release exists."
+          echo "Unable to resolve a release-based version. Ensure at least one release exists."
           exit 1
         fi
 
@@ -54,119 +60,51 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
 
-    - name: 'Show image tag'
+    - name: 'Set up Python'
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: 'Install dependencies'
+      run: pip install -r src/requirements.txt
+
+    - name: 'Run tests'
+      run: python -m unittest discover -s tests -v
+
+    - name: 'Stamp the version into the package'
       run: |
-        echo "Image tag: ${{ steps.tag.outputs.version }}"
+        echo "${{ steps.version.outputs.version }}" > src/VERSION
+        echo "Packaging version ${{ steps.version.outputs.version }}"
 
-    - name: 'Set up Docker Buildx'
-      uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
-
-    - name: Build Docker
+    - name: 'Create the deployment package'
       run: |
-        docker build -f ./Dockerfile --build-arg VERSION=${{ steps.tag.outputs.version }} -t ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }} .
+        cd src
+        zip -r ../functions-package.zip . \
+          -x '*.pyc' -x '__pycache__/*' -x '*/__pycache__/*' \
+          -x 'local.settings.json' -x 'local.settings.json.example'
 
-    - name: 'Save Docker Image'
-      run: |
-        docker save -o ${{ env.IMAGE_NAME }}.tar ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
-
-    - name: Upload artifact
+    - name: 'Upload artifact'
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       with:
-        name: ${{ env.IMAGE_NAME }}
-        path: ${{ env.IMAGE_NAME }}.tar
+        name: functions-package
+        path: functions-package.zip
         retention-days: 1
-
-
-
-  publish:
-    name: 'Publish Docker Image to Docker Hub'
-    runs-on: ubuntu-latest
-    needs: build
-    timeout-minutes: 15
-    permissions:
-      actions: read
-
-    steps:
-
-    - name: 'Download artifact'
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-      with:
-        name: ${{ env.IMAGE_NAME }}
-
-    - name: 'Resolve image tag'
-      id: tag
-      run: |
-        if [ "${{ github.event_name }}" == "release" ]; then
-          VERSION="${{ github.event.release.tag_name }}"
-        else
-          VERSION=$(gh release list --repo ${{ github.repository }} --limit 1 --json tagName --jq '.[0].tagName')-${{ github.run_number }}
-        fi
-
-        if [ -z "$VERSION" ] || [ "$VERSION" == "null-${{ github.run_number }}" ]; then
-          echo "Unable to resolve a release-based image tag. Ensure at least one release exists."
-          exit 1
-        fi
-
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-      env:
-        GH_TOKEN: ${{ github.token }}
-
-    - name: 'Show image tag'
-      run: |
-        echo "Image tag: ${{ steps.tag.outputs.version }}"
-
-    - name: 'Set up Docker Buildx'
-      uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
-
-    - name: 'Login to Docker Hub'
-      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Load & Push Docker Image
-      run: |
-        docker load -i ${{ env.IMAGE_NAME }}.tar
-
-    - name: 'Add Docker Image Tags'
-      run: |
-        docker tag ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }} ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
-        docker tag ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }} ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}:latest
-
-    - name: 'Push Docker Image to Docker Hub'
-      run: |
-        docker push --all-tags ${{ secrets.DOCKERHUB_USERNAME  }}/${{ env.IMAGE_NAME }}
 
 
   publish-app:
     name: 'Publish App'
     runs-on: ubuntu-latest
     environment: PROD
-    needs: publish
+    needs: build
     timeout-minutes: 20
+    permissions:
+      actions: read
 
     steps:
-    - name: 'Resolve image tag'
-      id: tag
-      run: |
-        if [ "${{ github.event_name }}" == "release" ]; then
-          VERSION="${{ github.event.release.tag_name }}"
-        else
-          VERSION=$(gh release list --repo ${{ github.repository }} --limit 1 --json tagName --jq '.[0].tagName')-${{ github.run_number }}
-        fi
-
-        if [ -z "$VERSION" ] || [ "$VERSION" == "null-${{ github.run_number }}" ]; then
-          echo "Unable to resolve a release-based image tag. Ensure at least one release exists."
-          exit 1
-        fi
-
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-      env:
-        GH_TOKEN: ${{ github.token }}
-
-    - name: 'Show image tag'
-      run: |
-        echo "Deploying image: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}"
+    - name: 'Download artifact'
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      with:
+        name: functions-package
 
     - name: 'Login to Azure'
       uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3
@@ -178,117 +116,22 @@ jobs:
             "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
             "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
           }
-        enable-AzPSSession: true
 
-    - name: 'Deploy new revision (Blue-Green)'
-      id: containerapp-deploy
-      uses: azure/powershell@f5b8adcfff1904872c7b98d4012d4914d74b1a82 # v3
+    - name: 'Deploy to the function app'
+      uses: Azure/functions-action@c5060b3b8bb1ebbcb531abd00c822ecbaa8ea656 # v1.5.7
       with:
-        inlineScript: |
-          $containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        app-name: ${{ env.FUNCTION_APP_NAME }}
+        package: functions-package.zip
+        # Flex Consumption restores dependencies on the platform from the
+        # requirements.txt inside the package.
+        remote-build: true
 
-          # Replace dots with dashes for Azure revision suffix compliance
-          $revisionSuffix = "${{ steps.tag.outputs.version }}".Replace(".", "-")
-
-          # Check if revision already exists
-          $existingRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" | Where-Object { $_.Name -like "*-$revisionSuffix" }
-
-          if ($existingRevision) {
-            Write-Output "Revision with suffix $revisionSuffix already exists. Activating existing revision."
-            Enable-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" -Name $existingRevision.Name
-          } else {
-            Write-Output "Creating new revision with suffix $revisionSuffix"
-            $containerAppTemplateContainer = $containerApp.TemplateContainer[0]
-            $containerAppTemplateContainer.Image = "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}"
-
-            # Create new revision (Blue-Green: new revision starts alongside old one)
-            Update-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" -TemplateContainer $containerAppTemplateContainer -TemplateRevisionSuffix $revisionSuffix
-
-            Write-Output "New revision created successfully"
-          }
-        azPSVersion: "latest"
-
-    - name: 'Ensure Container App is running'
-      id: containerapp-start
-      uses: azure/powershell@f5b8adcfff1904872c7b98d4012d4914d74b1a82 # v3
-      with:
-        inlineScript: |
-          Write-Output "Checking if Container App is running..."
-          $containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-
-          if ($containerApp.RunningStatus -ne "Running") {
-            Write-Output "Container App is not running (Status: $($containerApp.RunningStatus)). Starting it now..."
-            Start-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-            Write-Output "Container App started successfully"
-          } else {
-            Write-Output "Container App is already running"
-          }
-        azPSVersion: "latest"
-
-    - name: 'Wait for new revision to become healthy'
-      id: containerapp-health-check
-      uses: azure/powershell@f5b8adcfff1904872c7b98d4012d4914d74b1a82 # v3
-      with:
-        inlineScript: |
-          Write-Output "Waiting for NEW revision to become healthy..."
-          $maxAttempts = 30
-          $attempt = 0
-
-          # Get the revision suffix that was just created
-          $revisionSuffix = "${{ steps.tag.outputs.version }}".Replace(".", "-")
-
-          do {
-            $attempt++
-            Write-Output "Health check attempt $attempt of $maxAttempts..."
-
-            # Get the SPECIFIC new revision we just created
-            $newRevision = Get-AzContainerAppRevision -ContainerAppName "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}" | Where-Object { $_.Name -like "*-$revisionSuffix" } | Select-Object -First 1
-
-            if (-not $newRevision) {
-              Write-Output "  New revision not found yet..."
-            } else {
-              Write-Output "  Found revision: $($newRevision.Name)"
-              Write-Output "  Active: $($newRevision.Active)"
-              Write-Output "  Health State: $($newRevision.HealthState)"
-              Write-Output "  Running State: $($newRevision.RunningState)"
-
-              if ($newRevision.HealthState -eq "Healthy" -and ($newRevision.RunningState -eq "Running" -or $newRevision.RunningState -eq "RunningAtMaxScale")) {
-                Write-Output "NEW Container App revision is HEALTHY and in an accepted RUNNING state"
-                Write-Output "  Revision: $($newRevision.Name)"
-                Write-Output "  Health State: $($newRevision.HealthState)"
-                Write-Output "  Running State: $($newRevision.RunningState)"
-                break
-              }
-            }
-
-            if ($attempt -ge $maxAttempts) {
-              # Check if Container App is running and healthy
-              $containerApp = Get-AzContainerApp -Name "${{ env.CONTAINER_APP_NAME }}" -ResourceGroupName "${{ env.RESOURCE_GROUP }}" -SubscriptionId "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-
-              if ($containerApp.RunningStatus -ne "Running") {
-                Write-Error "Container App is not running (Status: $($containerApp.RunningStatus)). Deployment failed."
-                exit 1
-              }
-
-              if (-not $newRevision -or $newRevision.HealthState -ne "Healthy" -or ($newRevision.RunningState -ne "Running" -and $newRevision.RunningState -ne "RunningAtMaxScale")) {
-                Write-Error "New revision failed to become healthy and reach an accepted running state after $maxAttempts attempts"
-                if ($newRevision) {
-                  Write-Output "Final status - Health State: $($newRevision.HealthState), Running State: $($newRevision.RunningState)"
-                }
-                exit 1
-              }
-            }
-
-            Start-Sleep -Seconds 10
-          } while ($true)
-        azPSVersion: "latest"
-
-    - name: 'Verify deployment'
+    - name: 'Verify the deployment'
       run: |
-        az containerapp revision list \
-          --name ${{ env.CONTAINER_APP_NAME }} \
+        az functionapp function list \
+          --name ${{ env.FUNCTION_APP_NAME }} \
           --resource-group ${{ env.RESOURCE_GROUP }} \
-          --query "[].{name:name, active:properties.active, healthState:properties.healthState, createdTime:properties.createdTime}" \
+          --query "[].{name:name, disabled:isDisabled}" \
           --output table
 
     - name: 'Azure logout'
@@ -299,3 +142,31 @@ jobs:
           az logout
           az cache purge
           az account clear
+
+
+  register-commands:
+    name: 'Register slash commands'
+    runs-on: ubuntu-latest
+    environment: PROD
+    needs: publish-app
+    timeout-minutes: 5
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: 'Set up Python'
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    # A bulk overwrite: the command set in src/commands_catalog.py replaces
+    # whatever Discord currently has, so this is safe to re-run on every release.
+    - name: 'Register commands with Discord'
+      env:
+        DISCORD_APPLICATION_ID: ${{ secrets.DISCORD_APPLICATION_ID }}
+        DISCORD_API_TOKEN: ${{ secrets.DISCORD_API_TOKEN }}
+        DISCORD_GUILD_ID: ${{ vars.DISCORD_GUILD_ID }}
+      run: python scripts/register_commands.py

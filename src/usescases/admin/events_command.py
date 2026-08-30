@@ -1,115 +1,118 @@
-import re
-from datetime import datetime
-from discord.ext import commands
-import logging
+"""/events and /event - list upcoming events, or show one event in full."""
 
-from ._helpers import is_server_admin, send_chunked
+import logging
+from datetime import datetime
+
+from discord_api import interactions
+from discord_api.rest import DiscordRest
+from usescases.community_events.community_events_dao import get_community_events_dao
 from utils.timezones import get_brazil_timezone
+
+from ._helpers import is_valid_event_id
+from .permissions import require_admin
 
 logger = logging.getLogger(__name__)
 
 
-class EventsCommandBot(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+async def handle_list(rest: DiscordRest, interaction: dict) -> None:
+    if not await require_admin(rest, interaction, 'events'):
+        return
 
-    @commands.command(name='events', help='Lista os próximos eventos (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM'})
-    @commands.dm_only()
-    async def events(self, ctx):
-        logger.debug(f'[BOT][COMMAND][EVENTS] User "{ctx.author.name}" requested the list of upcoming events')
+    logger.debug('[COMMAND][EVENTS] User "%s" requested the list of upcoming events',
+                 interactions.user_name(interaction))
 
-        if not is_server_admin(self.bot, ctx.author.id):
-            logger.warning(f'[BOT][COMMAND][EVENTS] User "{ctx.author.name}" is not a server admin. Ignoring')
-            return
+    try:
+        dao = get_community_events_dao()
+    except Exception:  # noqa: BLE001 - surfaced to the admin as a friendly message
+        logger.exception('[COMMAND][EVENTS] Failed to initialize community events DAO')
+        await rest.edit_original_response(
+            interaction['token'],
+            content='❌ Não foi possível conectar ao armazenamento de eventos. '
+                    'Verifica a configuração do Azure Storage.')
+        return
 
-        try:
-            from usescases.community_events.community_events_dao import community_events_dao
-        except Exception:
-            logger.exception('[BOT][COMMAND][EVENTS] Failed to initialize community events DAO')
-            await ctx.author.send('❌ Não foi possível conectar ao armazenamento de eventos. Verifica a configuração do Azure Storage.')
-            return
+    brazil_tz = get_brazil_timezone()
+    now = datetime.now(brazil_tz).replace(tzinfo=None)
+    upcoming_events = dao.get_upcoming_events(now)
+    upcoming_events.sort(key=lambda event: event.start_datetime)
 
-        brazil_tz = get_brazil_timezone()
-        now = datetime.now(brazil_tz).replace(tzinfo=None)
-        upcoming_events = community_events_dao.get_upcoming_events(now)
-        upcoming_events.sort(key=lambda event: (event.start_datetime.replace(tzinfo=brazil_tz) if event.start_datetime.tzinfo is None else event.start_datetime.astimezone(brazil_tz)))
+    if not upcoming_events:
+        await rest.edit_original_response(interaction['token'],
+                                          content='📭 Não há eventos futuros cadastrados.')
+        return
 
-        if not upcoming_events:
-            await ctx.author.send('📭 Não há eventos futuros cadastrados.')
-            return
+    lines = ['📅 **Próximos eventos:**', '']
+    for event in upcoming_events:
+        lines.append(f'`{event.id}` — {event.title} — {event.start_datetime.strftime("%Y/%m/%d - %H:%M")}')
 
-        lines = ['📅 **Próximos eventos:**', '']
-        for event in upcoming_events:
-            event_start = event.start_datetime.replace(tzinfo=brazil_tz) if event.start_datetime.tzinfo is None else event.start_datetime.astimezone(brazil_tz)
-            lines.append(f'`{event.id}` — {event.title} — {event_start.strftime("%Y/%m/%d - %H:%M")}')
-
-        await send_chunked(ctx.author, '\n'.join(lines))
-        logger.info(f'[BOT][COMMAND][EVENTS] Sent {len(upcoming_events)} upcoming event(s) to admin "{ctx.author.name}"')
+    await rest.respond_chunked(interaction['token'], '\n'.join(lines))
+    logger.info('[COMMAND][EVENTS] Sent %s upcoming event(s) to admin "%s"',
+                len(upcoming_events), interactions.user_name(interaction))
 
 
-class EventDetailsCommandBot(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+async def handle_details(rest: DiscordRest, interaction: dict) -> None:
+    if not await require_admin(rest, interaction, 'event'):
+        return
 
-    @commands.command(name='event', help='Mostra todos os detalhes de um evento (apenas administradores, via DM)', extras={'admin': True, 'scope': 'DM', 'usage': '<eventId>'})
-    @commands.dm_only()
-    async def event_details(self, ctx, *args):
-        logger.debug(f'[BOT][COMMAND][EVENT] User "{ctx.author.name}" invoked command with args {args}')
+    options = interactions.options(interaction)
+    event_key = (options.get('event_id') or '').strip()
 
-        if not is_server_admin(self.bot, ctx.author.id):
-            logger.warning(f'[BOT][COMMAND][EVENT] User "{ctx.author.name}" is not a server admin. Ignoring')
-            return
+    logger.debug('[COMMAND][EVENT] User "%s" requested event "%s"',
+                 interactions.user_name(interaction), event_key)
 
-        if len(args) != 1:
-            await ctx.author.send('❌ Uso incorreto. Sintaxe: `/event <eventId>`')
-            return
+    if not is_valid_event_id(event_key):
+        logger.warning('[COMMAND][EVENT] Invalid event key "%s" provided by "%s"',
+                       event_key, interactions.user_name(interaction))
+        await rest.edit_original_response(
+            interaction['token'],
+            content=f'❌ Event id inválido: `{event_key}`. Use apenas letras, números, "-" e "_".')
+        return
 
-        event_key = args[0]
+    try:
+        dao = get_community_events_dao()
+    except Exception:  # noqa: BLE001
+        logger.exception('[COMMAND][EVENT] Failed to initialize community events DAO')
+        await rest.edit_original_response(
+            interaction['token'],
+            content='❌ Não foi possível conectar ao armazenamento de eventos. '
+                    'Verifica a configuração do Azure Storage.')
+        return
 
-        if not re.fullmatch(r'[A-Za-z0-9_-]+', event_key):
-            logger.warning(f'[BOT][COMMAND][EVENT] Invalid event key "{event_key}" provided by "{ctx.author.name}"')
-            await ctx.author.send(f'❌ Event id inválido: `{event_key}`. Use apenas letras, números, "-" e "_".')
-            return
+    event = dao.get(event_key)
+    if event is None:
+        logger.warning('[COMMAND][EVENT] Event "%s" not found (requested by "%s")',
+                       event_key, interactions.user_name(interaction))
+        await rest.edit_original_response(interaction['token'],
+                                          content=f'❌ Evento não encontrado: `{event_key}`.')
+        return
 
-        try:
-            from usescases.community_events.community_events_dao import community_events_dao
-        except Exception:
-            logger.exception('[BOT][COMMAND][EVENT] Failed to initialize community events DAO')
-            await ctx.author.send('❌ Não foi possível conectar ao armazenamento de eventos. Verifica a configuração do Azure Storage.')
-            return
+    lines = [
+        f'📋 **Detalhes do evento `{event.id}`:**',
+        '',
+        f'**id:** {event.id}',
+        f'**title:** {event.title}',
+        f'**github_url:** {event.github_url}',
+        f'**description:** {event.description}',
+        f'**start_datetime:** {event.start_datetime.isoformat()}',
+        f'**end_datetime:** {event.end_datetime.isoformat()}',
+        f'**discord_event_id:** {event.discord_event_id}',
+        f'**location:** {event.location}',
+        f'**type:** {event.type}',
+        f'**banner:** {event.banner}',
+        f'**is_live:** {event.is_live}',
+        f'**open_session:** {event.open_session}',
+        f'**session_link:** {event.session_link}',
+        f'**registration_link:** {event.registration_link}',
+        f'**recording_link:** {event.recording_link}',
+        f'**post_link:** {event.post_link}',
+        '**speakers:** (não persistido no storage)',
+        '**tags:** (não persistido no storage)',
+        f'**a_weekly_notify:** {event.a_weekly_notify}',
+        f'**three_days_notify:** {event.three_days_notify}',
+        f'**a_day_notify:** {event.a_day_notify}',
+        f'**a_hour_notify:** {event.a_hour_notify}',
+    ]
 
-        event = community_events_dao.get(event_key)
-        if event is None:
-            logger.warning(f'[BOT][COMMAND][EVENT] Event "{event_key}" not found (requested by "{ctx.author.name}")')
-            await ctx.author.send(f'❌ Evento não encontrado: `{event_key}`.')
-            return
-
-        lines = [
-            f'📋 **Detalhes do evento `{event.id}`:**',
-            '',
-            f'**id:** {event.id}',
-            f'**title:** {event.title}',
-            f'**github_url:** {event.github_url}',
-            f'**description:** {event.description}',
-            f'**start_datetime:** {event.start_datetime.isoformat()}',
-            f'**end_datetime:** {event.end_datetime.isoformat()}',
-            f'**discord_event_id:** {event.discord_event_id}',
-            f'**location:** {event.location}',
-            f'**type:** {event.type}',
-            f'**banner:** {event.banner}',
-            f'**is_live:** {event.is_live}',
-            f'**open_session:** {event.open_session}',
-            f'**session_link:** {event.session_link}',
-            f'**registration_link:** {event.registration_link}',
-            f'**recording_link:** {event.recording_link}',
-            f'**post_link:** {event.post_link}',
-            f'**speakers:** (não persistido no storage)',
-            f'**tags:** (não persistido no storage)',
-            f'**a_weekly_notify:** {event.a_weekly_notify}',
-            f'**three_days_notify:** {event.three_days_notify}',
-            f'**a_day_notify:** {event.a_day_notify}',
-            f'**a_hour_notify:** {event.a_hour_notify}',
-        ]
-
-        await send_chunked(ctx.author, '\n'.join(lines))
-        logger.info(f'[BOT][COMMAND][EVENT-DETAILS] Sent details of event "{event_key}" to admin "{ctx.author.name}"')
+    await rest.respond_chunked(interaction['token'], '\n'.join(lines))
+    logger.info('[COMMAND][EVENT-DETAILS] Sent details of event "%s" to admin "%s"',
+                event_key, interactions.user_name(interaction))

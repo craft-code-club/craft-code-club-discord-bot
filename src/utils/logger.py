@@ -34,21 +34,32 @@ class ColoredFormatter(logging.Formatter):
         return super().format(record)
 
 
-def setup_logging():
-    """Setup colored logging configuration"""
+def resolve_log_level() -> int:
     try:
-        # Get log level from environment, default to INFO
-        log_level = getattr(logging, os.environ.get('LOG_LEVEL', 'INFO').upper())
+        return getattr(logging, os.environ.get('LOG_LEVEL', 'INFO').upper())
     except AttributeError:
-        log_level = logging.INFO
+        return logging.INFO
 
-    # Setup colored logging
+
+def setup_logging():
+    """Apply LOG_LEVEL, and add a colored console handler only when we own the root logger.
+
+    Inside Azure Functions the host installs its own handler and forwards root
+    logger records to the platform, so replacing the handlers (as
+    `logging.basicConfig(handlers=[...])` would) is how user logs go missing.
+    Here the level is always applied and a handler is only added when nothing
+    else has configured one - i.e. when running the code outside the host.
+    """
+    log_level = resolve_log_level()
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+
+    if root_logger.handlers:
+        return
+
     handler = logging.StreamHandler()
-    formatter = ColoredFormatter(
+    handler.setFormatter(ColoredFormatter(
         fmt='%(asctime)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    handler.setFormatter(formatter)
-
-    # Configure root logger
-    logging.basicConfig(level=log_level, handlers=[handler])
+    ))
+    root_logger.addHandler(handler)

@@ -1,6 +1,8 @@
 name: 'Infra'
 
-# Provisions the Azure infrastructure in infra/ with Pulumi (Storage + Container App env + app).
+# Provisions the Azure infrastructure in infra/ with Pulumi
+# (Storage + queue + tables, Log Analytics + Application Insights, and the
+# Flex Consumption function app that runs the bot).
 #
 # NOTE: deployment is intentionally MANUAL for now (workflow_dispatch only). The automatic
 # push trigger below is commented out and will be enabled in a follow-up PR, once the Pulumi
@@ -71,13 +73,13 @@ jobs:
       - name: 'Pulumi up'
         working-directory: infra
         env:
-# Non-secret config — index.js reads these via process.env. Some have defaults (PROJECT_NAME, LOCATION, RESOURCE_GROUP_NAME, LOG_LEVEL); others are required (IMAGE + channel/forum IDs).
+# Non-secret config — index.js reads these via process.env. Some have defaults (PROJECT_NAME, LOCATION, RESOURCE_GROUP_NAME, LOG_LEVEL); others are required (the guild and channel IDs).
 # Sourced from repo/environment "vars", not secrets.
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           LOCATION: ${{ vars.LOCATION }}
           RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
-          IMAGE: ${{ vars.IMAGE }}
           LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          DISCORD_GUILD_ID: ${{ vars.DISCORD_GUILD_ID }}
           COMMUNITY_EVENTS_CHANNEL_ID: ${{ vars.COMMUNITY_EVENTS_CHANNEL_ID }}
           SAY_HI_CHANNEL: ${{ vars.SAY_HI_CHANNEL }}
           LOGS_CHANNEL_ID: ${{ vars.LOGS_CHANNEL_ID }}

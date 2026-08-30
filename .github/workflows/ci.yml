@@ -1,0 +1,47 @@
+name: CI
+
+# Pull-request checks for the Functions app: the package must install, every
+# trigger must index, and the smoke tests must pass.
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - main
+
+
+permissions: {}
+
+
+env:
+  PYTHON_VERSION: '3.12'
+
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install -r src/requirements.txt
+
+      - name: Byte-compile the app
+        run: python -m compileall -q src scripts tests
+
+      - name: Run the smoke tests
+        run: python -m unittest discover -s tests -v

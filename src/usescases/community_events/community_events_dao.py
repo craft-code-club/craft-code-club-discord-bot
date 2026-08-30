@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache
 from typing import Optional
 from azure.data.tables import TableServiceClient
 from datetime import datetime, timedelta
@@ -18,6 +19,9 @@ class CommunityEventsDao:
         TABLE_NAME = "CommunityEvents"
 
         connection_string = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+        if not connection_string:
+            raise RuntimeError('AZURE_STORAGE_CONNECTION_STRING is not set')
+
         connection = TableServiceClient.from_connection_string(connection_string)
         connection.create_table_if_not_exists(TABLE_NAME)
 
@@ -76,36 +80,24 @@ class CommunityEventsDao:
         self.table.upsert_entity(entity = entity)
 
 
-    def update(self, event: CommunityEvent) -> None:
-        event_datetime = event.start_datetime.isoformat()
+    def merge(self, event: CommunityEvent, values: dict) -> None:
+        """Write only `values` onto an existing row.
+
+        `update` and `upsert` write the WHOLE entity, so two writers racing on
+        the same event (the 15-minute reminder timer marking a notification as
+        sent, and the 3-hour sync writing a fresh session link) can silently
+        undo each other. Callers that change one or two fields use this instead.
+        """
         entity = {
             'PartitionKey': event.id,
-            'RowKey': event_datetime,
-            'end_datetime': event.end_datetime.isoformat(),
-            'discord_event_id': event.discord_event_id,
-
-            'title': event.title,
-            'github_url': event.github_url,
-            'description': event.description,
-
-            'location': event.location,
-            'type': event.type,
-            'banner': event.banner,
-
-            'is_live': event.is_live,
-            'open_session': event.open_session,
-            'session_link': event.session_link,
-
-            'registration_link': event.registration_link,
-            'recording_link': event.recording_link,
-            'post_link': event.post_link,
-
-            'a_weekly_notify': event.a_weekly_notify,
-            'three_days_notify': event.three_days_notify,
-            'a_day_notify': event.a_day_notify,
-            'a_hour_notify': event.a_hour_notify
+            'RowKey': event.start_datetime.isoformat(),
         }
-        self.table.update_entity(entity = entity)
+        entity.update(values)
+        # azure-data-tables defaults to UpdateMode.MERGE: absent properties are
+        # left untouched rather than deleted.
+        self.table.update_entity(entity=entity)
+
+
 
     def __to_community_event(self, event: dict) -> CommunityEvent:
         start_datetime = datetime.fromisoformat(event["RowKey"])
@@ -142,5 +134,14 @@ class CommunityEventsDao:
             a_hour_notify = event["a_hour_notify"] if "a_hour_notify" in event else False
         )
 
-# Global instance
-community_events_dao = CommunityEventsDao()
+@lru_cache(maxsize=1)
+def get_community_events_dao() -> CommunityEventsDao:
+    """Build the DAO on first use, and reuse it for the life of the worker.
+
+    This used to be a module-level singleton, which connected to Azure Table
+    Storage at IMPORT time. That is fine in a long-lived container, but in a
+    function app every module is imported while the host indexes triggers, so a
+    transient storage failure would break trigger discovery for the whole app
+    instead of failing the single invocation that needs the table.
+    """
+    return CommunityEventsDao()

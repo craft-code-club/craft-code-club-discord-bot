@@ -1,0 +1,30 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request;Exception"
+      }
+    },
+    "logLevel": {
+      "default": "Information",
+      "Host.Aggregator": "Warning",
+      "Host.Results": "Warning"
+    }
+  },
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[4.*, 5.0.0)"
+  },
+  "extensions": {
+    "queues": {
+      "//": "visibilityTimeout MUST exceed functionTimeout: a message that becomes visible again while its handler is still running is delivered a second time, and commands like /add-role everyone can run for minutes.",
+      "maxPollingInterval": "00:00:02",
+      "visibilityTimeout": "00:11:00",
+      "batchSize": 4,
+      "maxDequeueCount": 3
+    }
+  },
+  "functionTimeout": "00:10:00"
+}

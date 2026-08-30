@@ -5,15 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Discord Bot (debug)",
+            // Starts the Functions host (see the "func: host start" task) and
+            // attaches the Python debugger to it.
+            "name": "Attach to Python Functions",
             "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/main.py",
-            "cwd": "${workspaceFolder}/src",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "envFile": "${workspaceFolder}/.env",
-            "preLaunchTask": "prelaunch"
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 9091
+            },
+            "preLaunchTask": "func: host start"
         }
     ]
 }

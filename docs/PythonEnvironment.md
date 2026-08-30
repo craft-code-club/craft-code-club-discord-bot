@@ -51,6 +51,18 @@ python.exe -m pip install --upgrade pip
 
 ## Install the required packages
 
+The requirements live with the Functions app, in `src/`:
+
 ```bash
-pip install -r requirements.txt
+pip install -r src/requirements.txt
+```
+
+## Azure Functions Core Tools
+
+Running the bot locally needs the [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
+(`func`), plus Azurite for the storage bindings:
+
+```bash
+docker compose up -d azurite
+cd src && func start
 ```

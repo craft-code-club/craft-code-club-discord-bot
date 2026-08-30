@@ -48,13 +48,44 @@
             "problemMatcher": []
         },
         {
-            "label": "prelaunch",
+            // Requires the Azure Functions Core Tools (`func`), and Azurite for
+            // the queue and table bindings.
+            "label": "func: host start",
+            "type": "shell",
+            "command": "func",
+            "args": [
+                "start",
+                "--python",
+                "--port",
+                "7071"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/src",
+                "env": {
+                    "languageWorkers__python__arguments": "-m debugpy --listen 127.0.0.1:9091"
+                }
+            },
             "dependsOn": [
                 "init-env",
                 "azurite: up"
             ],
-            "dependsOrder": "parallel",
-            "problemMatcher": []
+            "dependsOrder": "sequence",
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": "\\b\\B",
+                        "file": 1,
+                        "location": 2,
+                        "message": 3
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*Starting Rpc server.*",
+                    "endsPattern": "^.*Host lock lease acquired.*|^.*Worker process started and initialized.*"
+                }
+            }
         }
     ]
 }
