@@ -1,3 +1,17 @@
+# [1.26.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.25.1...v1.26.0) (2026-09-03)
+
+
+### Bug Fixes
+
+* compute now once in format_to_message and pass to reminder methods ([004d659](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/004d659e41ffa19aeb039b8686a0cfb287de453e))
+* compute now once in format_to_message and pass to reminder methods ([0f66957](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/0f6695751573825c137c58b4b8d3a8fa5614dac4))
+* pass pre-computed reminder_time to format_to_message in task_bot ([580d6ff](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/580d6ff6fb7cdaa566c23dc40c4372cd1033ce3e))
+
+
+### Features
+
+* add days_until_event method and update reminder title logic ([22a947e](https://github.com/craft-code-club/craft-code-club-discord-bot/commit/22a947efea7d297075e72bb436d756799710dd9e))
+
 ## [1.25.1](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.25.0...v1.25.1) (2026-08-21)
 
 # [1.25.0](https://github.com/craft-code-club/craft-code-club-discord-bot/compare/v1.24.2...v1.25.0) (2026-08-12)
