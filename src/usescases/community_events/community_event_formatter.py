@@ -46,10 +46,13 @@ class EventMessageFormatter:
         return event_params
 
     def format_to_message(self, event: CommunityEvent, now: datetime | None = None, reminder_time: ReminderTime | None = None) -> discord.Embed:
+        brazil_tz = get_brazil_timezone()
         if now is None:
-            now = datetime.now(get_brazil_timezone())
+            now = datetime.now(brazil_tz)
         elif now.tzinfo is None:
-            now = now.replace(tzinfo=get_brazil_timezone())
+            now = now.replace(tzinfo=brazil_tz)
+        else:
+            now = now.astimezone(brazil_tz)
         reminder_time = reminder_time or event.reminder_time(now)
         if reminder_time == ReminderTime.A_WEEK:
             days = event.days_until_event(now)
