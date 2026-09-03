@@ -1,7 +1,7 @@
 import discord
 from usescases.community_events.community_event import CommunityEvent, ReminderTime
 from utils.image_service import image_service
-from datetime import timezone
+from datetime import datetime, timezone
 
 from utils.timezones import get_brazil_timezone
 
@@ -45,10 +45,21 @@ class EventMessageFormatter:
 
         return event_params
 
-    def format_to_message(self, event: CommunityEvent) -> discord.Embed:
-        reminder_time = event.reminder_time()
-        reminder_title = self.notification_titles.get(reminder_time) if reminder_time else None
-        reminder_title = reminder_title or "Evento"
+    def format_to_message(self, event: CommunityEvent, now: datetime | None = None, reminder_time: ReminderTime | None = None) -> discord.Embed:
+        brazil_tz = get_brazil_timezone()
+        if now is None:
+            now = datetime.now(brazil_tz)
+        elif now.tzinfo is None:
+            now = now.replace(tzinfo=brazil_tz)
+        else:
+            now = now.astimezone(brazil_tz)
+        reminder_time = reminder_time or event.reminder_time(now)
+        if reminder_time == ReminderTime.A_WEEK:
+            days = event.days_until_event(now)
+            reminder_title = "Evento em 1 semana!" if days == 7 else f"Evento em {days} dias!"
+        else:
+            reminder_title = self.notification_titles.get(reminder_time) if reminder_time else None
+            reminder_title = reminder_title or "Evento"
         safe_title = discord.utils.escape_mentions(event.title)
         safe_description = discord.utils.escape_mentions(event.description)
         event_description = f"***{reminder_title}***\n\n{safe_description}"
